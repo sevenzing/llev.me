@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import '@fontsource/major-mono-display';
-import { ChakraProvider } from '@chakra-ui/react'
+import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import { EmojiFavicon } from "./favicon";
 
 
@@ -23,6 +23,7 @@ export default function RootLayout({
       </head>
       <body>
         <ChakraProvider>
+        <ColorModeScript initialColorMode="dark" />
           {children}
         </ChakraProvider>
       </body>
