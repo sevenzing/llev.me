@@ -60,9 +60,8 @@ body {
 
 .pressableLetter {
   position: absolute;
-  opacity: 0;
+  opacity: 0%;
   cursor: pointer;
-  z-index: 100;
   overflow: hidden;
   -webkit-overflow: visible;
 }
