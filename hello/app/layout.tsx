@@ -3,7 +3,7 @@ import "./globals.css";
 import '@fontsource/major-mono-display';
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import { EmojiFavicon } from "./favicon";
-
+import { Suspense } from 'react'
 
 export const metadata: Metadata = {
   title: "Hello, it's Lev",
@@ -24,7 +24,9 @@ export default function RootLayout({
       <body>
         <ChakraProvider>
         <ColorModeScript initialColorMode="dark" />
+        <Suspense>
           {children}
+        </Suspense>
         </ChakraProvider>
       </body>
     </html>
