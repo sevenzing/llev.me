@@ -17,6 +17,15 @@
   }
 }
 
+/* CSS specific to iOS devices */ 
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 600px) {
+    body {
+        max-height: 85vh;
+    }
+  }  
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -25,10 +34,9 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
-    height: 100%;
-
-    
+    height: 100vh;
 }
+
 
 @layer utilities {
   .text-balance {
@@ -54,10 +62,9 @@ body {
   position: absolute;
   opacity: 0;
   cursor: pointer;
-  height: 2.3rem;
-  width: 2.3rem;
   z-index: 100;
-  margin-top: 1.3rem;
+  overflow: hidden;
+  -webkit-overflow: visible;
 }
 
 .pressableLetter:checked ~ span {
@@ -65,3 +72,9 @@ body {
   text-shadow: 0 0 15px yellow, 0 0 25px yellow;
   animation: glow 1.5s linear infinite;
 }
+
+@media (max-width: 600px) {
+  .pressableLetter:checked ~ span {
+    text-shadow: 0 0 5px yellow, 0 0 7px yellow;
+  }
+}  
