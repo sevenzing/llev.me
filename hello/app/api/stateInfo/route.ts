@@ -114,7 +114,7 @@ const stateAchievementsConfig: Achievement[] = [
             id: 7,
             slug: "refresh",
             title: "REFRESH",
-            description: "press the refress button once",
+            description: "press the refresh button once",
             emoji: "🔄",
             bg: "purple.400",
         }

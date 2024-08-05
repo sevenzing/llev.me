@@ -32,7 +32,7 @@ export const Achievement = (props: AchievementProps) => {
             <Divider/>
             <Flex alignItems="center" flexDir={{ base: 'column', sm: 'row' }}>
                 <Text mx={4} fontSize="xxx-large">{props.emoji}</Text>
-                <Stack margin={{base: "0 0 4px 0", sm: "4px 0 4px 0"}} gap={0} {...textProps}  textAlign={{base: "center", sm: "left"}}>
+                <Stack margin={{base: "0 0 4px 0", sm: "4px 4px 4px 0"}} gap={0} {...textProps}  textAlign={{base: "center", sm: "left"}}>
                     <Heading size="sm">{props.title}</Heading>
                     <Text>{props.description}</Text>
                 </Stack>
