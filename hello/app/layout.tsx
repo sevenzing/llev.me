@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import '@fontsource/major-mono-display';
+import '@fontsource-variable/inter';
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import { EmojiFavicon } from "./favicon";
 import { Suspense } from 'react'

@@ -39,6 +39,7 @@ export const PressableText = (props: PressableProps) => {
           "marginTop": `${props.size / 2 + topOffset}rem`,
           "marginLeft": `${leftOffset}rem`,
           "zIndex": props.zIndex || 100,
+          "cursor": props.disabled ? "revert" : "pointer",
         }} checked={checked} onChange={handleCheckboxChange} className="pressableLetter" type="checkbox" />
         <span style={{ "animationDelay": animationDelay }}>{char}</span>
       </Text>

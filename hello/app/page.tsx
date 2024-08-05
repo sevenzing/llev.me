@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { decodeSearchState, encodeSearchState, isStateEmpty, updateStateWhenCheckboxPressed } from "../utils/state";
 import { IM } from "../components/IM";
 import { randomBitNumber } from "@/utils/random";
+import { Achievements } from "@/components/Achievement";
 
 
 export default function Home() {
@@ -20,6 +21,18 @@ export default function Home() {
     const searchStateRaw = searchParams.get('s');
     const searchState = searchStateRaw ? decodeSearchState(searchStateRaw) : {};
     const [state, setState] = useState(searchState);
+    const [currentStateInfo, setCurrentStateInfo] = useState(undefined as any);
+    const [achStorage, setSetAchStorage] = useState(() => {
+        if (typeof localStorage === 'undefined') {
+            return {}
+        }
+        const localData = localStorage.getItem('achStorage');
+        return localData ? JSON.parse(localData) : {};
+    });
+
+    useEffect(() => {
+        localStorage.setItem('achStorage', JSON.stringify(achStorage));
+    }, [achStorage]);
 
     const createQueryString = useCallback(
         (name: string, value: string) => {
@@ -40,6 +53,19 @@ export default function Home() {
         }
     }, [state]);
 
+    useEffect(() => {
+        if (searchStateRaw) {
+            fetch(`/api/stateInfo?s=${searchStateRaw}`)
+            .then((res) => res.json())
+            .then((data) => {
+                handleStateInfo(data);
+            })
+            .catch((err) => {
+                console.error(err)
+            })
+        }
+    }, [searchStateRaw]);
+
 
     const handleRefreshPressed = () => {
         if (isStateEmpty(state)) {
@@ -51,6 +77,28 @@ export default function Home() {
         } else {
             setState({});
         }
+    }
+
+    const handleStateInfo = (data: any) => {
+        if (data.achievements) {
+            console.log(achStorage, data.achievements);
+            
+            let newAchStorage = {...achStorage};
+            for (const key in data.achievements) {
+                newAchStorage[data.achievements[key].id] = data.achievements[key]
+            }
+            setCurrentStateInfo(data.achievements);
+            setSetAchStorage(newAchStorage);
+        } else {
+            setCurrentStateInfo(undefined);
+        }
+    }
+
+    const onAchievementClose = (id: number) => {
+        let newAchStorage = {...achStorage};
+        delete newAchStorage[id];
+        setSetAchStorage(newAchStorage);
+        setState({});
     }
 
     const onLetterPressed = (id: number, index: number) => {
@@ -70,27 +118,32 @@ export default function Home() {
                     <IconButton size="sm" colorScheme="gray" aria-label="Toggle dark mode" icon={<SunIcon />} onClick={toggleColorMode} />
                 </HStack>
             </Flex>
-            <Flex flexDir="column" justifyContent="center" alignItems="center" gap="20">
-                <Flex fontSize={["4xl", "5xl"]} gap="4" wrap="wrap" justifyContent="center" textAlign="center" textShadow={textShadow}>
-                    <Box mr={["0", "1rem"]}>
-                        <Flex>
-                            <PressableText text="hello " id={1} size={2.3} state={state} onLetterPressed={onLetterPressed} />
-                            <Text as="span" textShadow={noTextShadow}>
-                                <PressableText text="👋" id={2} size={2.5} checkBoxLeftOffset={0.4} state={state} onLetterPressed={onLetterPressed} />
-                            </Text>
-                            <PressableText text=" i'm" id={3} size={2.3} state={state} onLetterPressed={onLetterPressed} />
+            <Flex flexDir="column" alignItems="center" justifyContent="space-evenly" h="100%">
+                <Flex flexDir="column" justifyContent="center" alignItems="center" gap="5">
+                    <Flex fontSize={["4xl", "5xl"]} gap="4" wrap="wrap" justifyContent="center" textAlign="center" textShadow={textShadow}>
+                        <Box mr={["0", "1rem"]}>
+                            <Flex>
+                                <PressableText text="hello " id={1} size={2.3} state={state} onLetterPressed={onLetterPressed} />
+                                <Text as="span" textShadow={noTextShadow}>
+                                    <PressableText text="👋" id={2} size={2.5} checkBoxLeftOffset={0.4} state={state} onLetterPressed={onLetterPressed} />
+                                </Text>
+                                <PressableText text=" i'm" id={3} size={2.3} state={state} onLetterPressed={onLetterPressed} />
+                            </Flex>
+                        </Box>
+                        <Flex fontSize="5xl" flexDir="column" overflow="hidden" h="4rem" alignItems={["center", "flex-start"]} mt={["0.5rem"]}>
+                            <IM text="😼Lev" isFirst bg="orange.100" id={4} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                            <IM text="💻Web3 dev" bg="red.100" id={5} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                            <IM text="😎Hedonist" bg="blue.100" id={6} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                            <IM text="✨Dreamer" bg="green.100" id={7} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
                         </Flex>
-                    </Box>
-                    <Flex fontSize="5xl" flexDir="column" overflow="hidden" h="4rem" alignItems={["center", "flex-start"]} mt={["0.5rem"]}>
-                        <IM text="😼Lev" isFirst bg="orange.100" id={4} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                        <IM text="💻Web3 dev" bg="red.100" id={5} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                        <IM text="😎Hedonist" bg="blue.100" id={6} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                        <IM text="✨Dreamer" bg="green.100" id={7} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                    </Flex>
+                    <Flex wrap="wrap" justifyContent="center">
+                        <Flex><PressableText text="press a letter and " id={8} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
+                        <Flex><PressableText text="customize this site!" id={9} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
                     </Flex>
                 </Flex>
-                <Flex wrap="wrap" justifyContent="center">
-                    <Flex><PressableText text="press a letter and " id={8} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
-                    <Flex><PressableText text="customize this site!" id={9} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
+                <Flex fontFamily="'Inter Variable', sans-serif">
+                    {achStorage && <Achievements onAchievementClose={onAchievementClose} achievements={Object.values(achStorage)}/>}
                 </Flex>
             </Flex>
             <Flex justifyContent="center" alignItems="center" marginBottom="1rem">
@@ -104,3 +157,4 @@ export default function Home() {
         </Flex>
     );
 }
+

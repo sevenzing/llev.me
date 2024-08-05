@@ -1085,6 +1085,11 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.0.tgz#a5417ae8427873f1dd08b70b3574b453e67b5f7f"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
+"@fontsource-variable/inter@^5.0.20":
+  version "5.0.20"
+  resolved "https://registry.yarnpkg.com/@fontsource-variable/inter/-/inter-5.0.20.tgz#d061d4484713f6d417def7ec6de7db4b0a58738f"
+  integrity sha512-dhzG4Zls/tIrf8h0FhTNi8jT/uFwNhdTY2vKe6DYqoXDYOfEcTVZDyh1hKml1rlLT44Y7OoKoGz8w7czDW7twQ==
+
 "@fontsource/major-mono-display@^5.0.20":
   version "5.0.20"
   resolved "https://registry.yarnpkg.com/@fontsource/major-mono-display/-/major-mono-display-5.0.20.tgz#2b488213e0980b27cd8f7caa504294ac0f6b488c"
