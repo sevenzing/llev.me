@@ -14,7 +14,7 @@ export type AchievementProps = {
 
 export const Achievement = (props: AchievementProps) => {
 
-    const shadow = useColorModeValue('0px 0px 6px white', '0px 0px 6px gray');
+    const shadow = useColorModeValue('0', '0px 0px 6px gray');
     const textProps = props.textProps || {};
     return (
         <Card 
@@ -26,7 +26,7 @@ export const Achievement = (props: AchievementProps) => {
             textShadow={shadow} fontSize={10}
         >
             <Flex justifyContent="space-between" alignItems="center">
-                <Text mx={2}>{props.slug}</Text>
+                <Text mx={2}>goal_{props.slug}.txt</Text>
                 <CloseButton size="sm" onClick={() => props.onAchievementClose(props.id)} />
             </Flex>
             <Divider/>

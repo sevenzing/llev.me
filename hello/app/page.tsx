@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Flex, HStack, Text, IconButton, Link, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, HStack, Text, IconButton, Link, useColorMode, useColorModeValue, useToast } from "@chakra-ui/react";
 import { SocialGithub, SocialInstagram, SocialLinkedin } from "@chakra-icons/simple-line-icons";
 import { SunIcon, RepeatIcon } from "@chakra-ui/icons";
 import { useCallback, useEffect, useState } from "react";
@@ -11,10 +11,12 @@ import { decodeSearchState, encodeSearchState, isStateEmpty, updateStateWhenChec
 import { IM } from "../components/IM";
 import { randomBitNumber } from "@/utils/random";
 import { Achievements } from "@/components/Achievement";
+import { AchievementCard } from "./api/stateInfo/route";
 
 
 export default function Home() {
     const { colorMode, toggleColorMode } = useColorMode();
+    const toast = useToast()
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -23,8 +25,8 @@ export default function Home() {
     const [state, setState] = useState(searchState);
     const [currentStateInfo, setCurrentStateInfo] = useState(undefined as any);
     const [achStorage, setSetAchStorage] = useState(() => {
-        if (typeof localStorage === 'undefined') {
-            return {}
+        if (typeof window === 'undefined') {
+            return undefined
         }
         const localData = localStorage.getItem('achStorage');
         return localData ? JSON.parse(localData) : {};
@@ -77,14 +79,35 @@ export default function Home() {
         } else {
             setState({});
         }
+        actionHappend('refresh');
+    }
+
+    const handleChangeColorMode = () => {
+        toggleColorMode();
+        actionHappend('changeColorMode');
+    }
+
+    const handleSocialClick = () => {
+        actionHappend('clickSocial');
+    }
+
+    const actionHappend = (action: string) => {
+        fetch(`/api/stateInfo?a=${action}`)
+            .then((res) => res.json())
+            .then((data) => {
+                handleStateInfo(data);
+            })
+            .catch((err) => {
+                console.error(err)})
     }
 
     const handleStateInfo = (data: any) => {
         if (data.achievements) {
-            console.log(achStorage, data.achievements);
-            
             let newAchStorage = {...achStorage};
             for (const key in data.achievements) {
+                if (!(data.achievements[key].id in achStorage)) {
+                    handleNewAchievement(data.achievements[key]);
+                }
                 newAchStorage[data.achievements[key].id] = data.achievements[key]
             }
             setCurrentStateInfo(data.achievements);
@@ -92,6 +115,17 @@ export default function Home() {
         } else {
             setCurrentStateInfo(undefined);
         }
+    }
+
+    const handleNewAchievement = (achievement: AchievementCard) => {
+        toast({
+            title: `${achievement.title}`,
+            description: "New achievement unlocked!",
+            status: 'success',
+            duration: 8000,
+            isClosable: true,
+            icon: <Text fontSize="x-large">{achievement.emoji}</Text>,
+        })
     }
 
     const onAchievementClose = (id: number) => {
@@ -111,14 +145,14 @@ export default function Home() {
     const noTextShadow = '0 0 0px';
 
     return (
-        <Flex flexDir="column" className="main" h="100%" justifyContent="space-between">
+        <Flex flexDir="column" className="main" h="100%" gap={1}>
             <Flex justifyContent="flex-end" h="16">
                 <HStack spacing="2" mr={["2", "8"]}>
                     <IconButton size="sm" colorScheme="gray" aria-label="Refresh" icon={<RepeatIcon />} onClick={handleRefreshPressed}></IconButton>
-                    <IconButton size="sm" colorScheme="gray" aria-label="Toggle dark mode" icon={<SunIcon />} onClick={toggleColorMode} />
+                    <IconButton size="sm" colorScheme="gray" aria-label="Toggle dark mode" icon={<SunIcon />} onClick={handleChangeColorMode} />
                 </HStack>
             </Flex>
-            <Flex flexDir="column" alignItems="center" justifyContent="space-evenly" h="100%">
+            <Flex flex={1} flexDir="column" alignItems="center" justifyContent="space-evenly" h="100%">
                 <Flex flexDir="column" justifyContent="center" alignItems="center" gap="5">
                     <Flex fontSize={["4xl", "5xl"]} gap="4" wrap="wrap" justifyContent="center" textAlign="center" textShadow={textShadow}>
                         <Box mr={["0", "1rem"]}>
@@ -142,16 +176,16 @@ export default function Home() {
                         <Flex><PressableText text="customize this site!" id={9} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
                     </Flex>
                 </Flex>
-                <Flex fontFamily="'Inter Variable', sans-serif">
+                <Flex fontFamily="'Inter Variable', sans-serif" overflowY="auto" maxH={500}>
                     {achStorage && <Achievements onAchievementClose={onAchievementClose} achievements={Object.values(achStorage)}/>}
                 </Flex>
             </Flex>
             <Flex justifyContent="center" alignItems="center" marginBottom="1rem">
                 <HStack spacing="6">
                     <Text><PressableText text="links:" id={10} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Text>
-                    <Link isExternal href="https://github.com/sevenzing" aria-label="github"><SocialGithub boxSize="20px" /></Link>
-                    <Link isExternal href="https://instagram.com/llevchiks/" aria-label="instagram"><SocialInstagram boxSize="20px" /></Link>
-                    <Link isExternal href="https://linkedin.com/in/lymarenkolev/" aria-label="linkedin"><SocialLinkedin boxSize="20px" /></Link>
+                    <Link isExternal onClick={handleSocialClick} href="https://github.com/sevenzing" aria-label="github"><SocialGithub boxSize="20px" /></Link>
+                    <Link isExternal onClick={handleSocialClick} href="https://instagram.com/llevchiks/" aria-label="instagram"><SocialInstagram boxSize="20px" /></Link>
+                    <Link isExternal onClick={handleSocialClick} href="https://linkedin.com/in/lymarenkolev/" aria-label="linkedin"><SocialLinkedin boxSize="20px" /></Link>
                 </HStack>
             </Flex>
         </Flex>
