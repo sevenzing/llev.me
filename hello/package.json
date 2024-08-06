@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.12.0",
     "@fontsource-variable/inter": "^5.0.20",
     "@fontsource/major-mono-display": "^5.0.20",
+    "@vercel/analytics": "^1.3.1",
     "framer-motion": "^11.3.8",
     "next": "14.2.5",
     "react": "^18",

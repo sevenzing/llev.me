@@ -5,6 +5,7 @@ import '@fontsource-variable/inter';
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import { EmojiFavicon } from "./favicon";
 import { Suspense } from 'react'
+import { Analytics } from "@vercel/analytics/react"
 
 export const metadata: Metadata = {
   title: "Hello, it's Lev",
@@ -24,10 +25,11 @@ export default function RootLayout({
       </head>
       <body>
         <ChakraProvider>
-        <ColorModeScript initialColorMode="dark" />
-        <Suspense>
-          {children}
-        </Suspense>
+          <ColorModeScript initialColorMode="dark" />
+          <Suspense>
+            {children}
+            <Analytics />
+          </Suspense>
         </ChakraProvider>
       </body>
     </html>
