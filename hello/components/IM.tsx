@@ -1,7 +1,7 @@
 import { keyframes } from "@emotion/react";
 import { PressableProps, PressableText } from "./PressableText";
 import { useEffect, useRef, useState } from "react";
-import { Box, Tag } from "@chakra-ui/react";
+import { Box, Center, Flex, Tag } from "@chakra-ui/react";
 
 const moveText = keyframes`
   7% {margin-top: 0;}
@@ -50,8 +50,8 @@ export const IM = (props: IMProps) => {
 
   return (
     <Box animation={props.isFirst ? textAnimation : undefined} ref={ref}>
-      <Tag textColor="gray.800" fontSize="inherit" size="lg" variant="solid" bg={props.bg}>
-        <PressableText {...props} disabled={disabled}/>
+      <Tag justifyContent="center" textColor="gray.800" fontSize="inherit" size="lg" variant="solid" bg={props.bg}>
+          <PressableText {...props} disabled={disabled}/>
       </Tag>
     </Box>
   )

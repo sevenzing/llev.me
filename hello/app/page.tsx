@@ -154,29 +154,25 @@ export default function Home() {
             </Flex>
             <Flex flex={1} flexDir="column" alignItems="center" justifyContent="space-evenly" h="100%">
                 <Flex flexDir="column" justifyContent="center" alignItems="center" gap="5">
-                    <Flex fontSize={["4xl", "5xl"]} gap="4" wrap="wrap" justifyContent="center" textAlign="center" textShadow={textShadow}>
-                        <Box mr={["0", "1rem"]}>
-                            <Flex>
-                                <PressableText text="hello " id={1} size={2.3} state={state} onLetterPressed={onLetterPressed} />
-                                <Text as="span" textShadow={noTextShadow}>
-                                    <PressableText text="👋" id={2} size={2.5} checkBoxLeftOffset={0.4} state={state} onLetterPressed={onLetterPressed} />
-                                </Text>
-                                <PressableText text=" i'm" id={3} size={2.3} state={state} onLetterPressed={onLetterPressed} />
-                            </Flex>
-                        </Box>
-                        <Flex fontSize="5xl" flexDir="column" overflow="hidden" h="4rem" alignItems={["center", "flex-start"]} mt={["0.5rem"]}>
-                            <IM text="😼Lev" isFirst bg="orange.100" id={4} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                            <IM text="💻Web3 dev" bg="red.100" id={5} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                            <IM text="😎Hedonist" bg="blue.100" id={6} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                            <IM text="✨Dreamer" bg="green.100" id={7} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                        </Flex>
+                    <Flex textShadow={textShadow} fontSize={["4xl", "5xl"]}>
+                        <PressableText text="hello " id={1} size={2.3} state={state} onLetterPressed={onLetterPressed} />
+                        <Text as="span" textShadow={noTextShadow}>
+                            <PressableText text="👋" id={2} size={2.5} checkBoxLeftOffset={0.4} state={state} onLetterPressed={onLetterPressed} />
+                        </Text>
+                        <PressableText text=" i'm" id={3} size={2.3} state={state} onLetterPressed={onLetterPressed} />
+                    </Flex>
+                    <Flex fontSize="5xl" flexDir="column" overflow="hidden" h="4rem" alignItems={["center"]} mt={["0.5rem"]}>
+                        <IM text="😼Lev" isFirst bg="orange.100" id={4} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                        <IM text="💻Web3 dev" bg="red.100" id={5} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                        <IM text="😎Hedonist" bg="blue.100" id={6} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                        <IM text="✨Dreamer" bg="green.100" id={7} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
                     </Flex>
                     <Flex wrap="wrap" justifyContent="center">
                         <Flex><PressableText text="press a letter and " id={8} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
                         <Flex><PressableText text="customize this site!" id={9} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
                     </Flex>
                 </Flex>
-                <Flex fontFamily="'Inter Variable', sans-serif" overflowY="auto" maxH={500}>
+                <Flex p={5} fontFamily="'Inter Variable', sans-serif" overflowY="auto" maxH={500}>
                     {achStorage && <Achievements onAchievementClose={onAchievementClose} achievements={Object.values(achStorage)}/>}
                 </Flex>
             </Flex>
