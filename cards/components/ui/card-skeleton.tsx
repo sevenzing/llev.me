@@ -1,6 +1,7 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Flex, Icon, Text, VStack, Color } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { FaArrowsRotate } from "react-icons/fa6";
 
 interface CardSkeletonProps {
   frontChildren: React.ReactNode; // Front side content
@@ -18,7 +19,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
   const [isFlipped, setIsFlipped] = useState(initialFlipped);
 
   const handleCardClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) {
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement || event.target instanceof HTMLAnchorElement) {
       return
     }
     if (backChildren) {
@@ -29,16 +30,15 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
   return (
     <MotionBox
     className="glow"
+    animate={{
+        rotateY: isFlipped ? 180 : 0,
+    }}
+    transition={{ duration: 0.8, ease: "easeInOut" }}
     style={{
         perspective: 1000,
         cursor: backChildren ? "pointer" : "default", // Pointer cursor only if back content exists
         transformStyle: "preserve-3d",
     }}
-    onClick={handleCardClick} // Enable click flip
-    animate={{
-        rotateY: isFlipped ? 180 : 0,
-    }}
-    transition={{ duration: 0.8, ease: "easeInOut" }}
     >
         <MotionBox
         background="white"
@@ -54,7 +54,13 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
         display="flex"
         justifyContent="center"
         alignItems="center"
-        
+        style={{
+            perspective: 1000,
+            cursor: backChildren ? "pointer" : "default", // Pointer cursor only if back content exists
+            transformStyle: "preserve-3d",
+        }}
+        onClick={handleCardClick} // Enable click flip
+        transition={{ duration: 0.8, ease: "easeInOut" }}
         >
         
             {/* Front Side */}
@@ -66,7 +72,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
                 display="flex"
                 justifyContent="center"
             >
-            {frontChildren}
+            <Content>{frontChildren}</Content>
             </Box>
 
             {/* Back Side */}
@@ -80,12 +86,34 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
                 display="flex"
                 justifyContent="center"
             >
-                {backChildren}
+                <Content>{backChildren}</Content>
             </Box>
             )}
         </MotionBox>
     </MotionBox>
   );
 };
+
+
+interface ContentProps {
+    children: React.ReactNode;
+}
+
+
+// addes flip icon to the bottom right of the card
+const Content: React.FC<ContentProps> = ({
+    children
+  }) => {
+    return (
+        <Flex direction="column" justifyContent="space-between" h="100%" w="100%">
+            <Flex height="100%" justifyContent="center">
+                {children}
+            </Flex>
+            <Flex justifyContent="flex-end" mb={4} mx={4}><Icon color="gray.500"><FaArrowsRotate/></Icon></Flex>
+            
+        </Flex>
+    )
+  }
+
 
 export default CardSkeleton;

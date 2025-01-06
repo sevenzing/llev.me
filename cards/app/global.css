@@ -6,13 +6,15 @@
 
 
 .glow {
-    position: relative;
     box-shadow: 0 0 0 1px rgba(0,0,0,.01);
     background: hsl(0, 0%, 100%);
+    padding: 16px 24px;
+    position: relative;
+    border-radius: 8px;
     &::after {
       position: absolute;
       content: "";
-      top: 15px;
+      top: 0;
       left: 0;
       right: 0;
       z-index: -1;
@@ -33,7 +35,7 @@
         #ff5770
       );
       background-size: 200% 200%;
-      animation: animateGlow 1.25s linear infinite;
+      animation: animateGlow 2s linear infinite;
     }
   }
   

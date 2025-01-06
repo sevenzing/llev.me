@@ -9,6 +9,8 @@ import { Card } from "@chakra-ui/react"
 import CardSkeleton from "./card-skeleton"
 
 const PIN_LENGTH = 4
+const MIN_SLEEP_TIME = 2000
+
 
 const LockedCardContent = ({ slug, preview_content, onSuccess }: { slug: string, preview_content?: string, onSuccess: (gift: any) => void }) => {
   const [pin, setPin] = useState<string[]>([])
@@ -19,9 +21,10 @@ const LockedCardContent = ({ slug, preview_content, onSuccess }: { slug: string,
 
   const onSubmit = () => {
     setIsLoading(true)
+    const now = new Date();
     axios.post(`/api/cards/${slug}/get-info`, { code: pinString })
     .then((res) => {
-      onSuccess(res.data)
+      onSuccess(res.data.gift)
     })
     .catch((err) => {
       console.log(err)
@@ -32,7 +35,11 @@ const LockedCardContent = ({ slug, preview_content, onSuccess }: { slug: string,
       }
     })
     .finally(() => {
-      setIsLoading(false)
+      // unlock the card in one second
+      const sleepFor =  Math.max(MIN_SLEEP_TIME, MIN_SLEEP_TIME - (new Date().getTime() - now.getTime()))
+      setTimeout(() => {
+        setIsLoading(false)
+      }, sleepFor)
     })
   }
 
@@ -47,7 +54,7 @@ const LockedCardContent = ({ slug, preview_content, onSuccess }: { slug: string,
         <Field invalid={!!errorText} errorText={errorText} alignItems="center">
           <PinInput value={pin} onValueChange={(e) => setPin(e.value)}/>
         </Field>
-        <Button onClick={onSubmit} type="submit" disabled={disabled}>{isLoading ? 'Loading...' : 'Submit'}</Button>
+        <Button onClick={onSubmit} type="submit" disabled={disabled}>{isLoading ? 'Loading...' : 'Open'}</Button>
       </Stack>
   )
 }

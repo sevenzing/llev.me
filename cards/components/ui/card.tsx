@@ -4,18 +4,29 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import LockedCardContent from './locked-card';
-import { Center, Spinner, Text } from "@chakra-ui/react"
+import { Button, Center, Flex, Heading, Link, Spinner, Text, VStack } from "@chakra-ui/react"
 import { notFound } from 'next/navigation';
 import CardSkeleton from './card-skeleton';
+import { LuExternalLink } from "react-icons/lu"
 
 
 type Gift = {
   title: string;
   description: string;
-  acquire_url: string;
-  background_image: string;
-  shining_color: string;
+  image: string;
+  gift_content: GiftContent;
 };
+
+type GiftContent = {
+  type: 'urls',
+  urls: {
+    url: string;
+    title: string;
+  }[];
+} | {
+  type: 'text',
+  text: string;
+}
 
 type GiftCardProps = {
   slug: string;
@@ -23,24 +34,21 @@ type GiftCardProps = {
   
 
 export default function GiftCard({ slug }: GiftCardProps) {
-    const [isFlipped, setIsFlipped] = useState(false);
-    const [code, setCode] = useState('');
     const [gift, setGift] = useState<Gift | null>(null);
-    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const [getInfo, setGetInfo] = useState<any | null>(null);
-    const exists = getInfo?.exists;
-    const preview_content = getInfo?.preview_content;
+    const [briefInfo, setBriefInfo] = useState<any | null>(null);
+    const exists = briefInfo?.exists;
+    const preview_content = briefInfo?.preview_content;
     const onSuccessCode = (gift: Gift) => {
       setGift(gift)
     }
 
     useEffect(() => {
       axios.get(`/api/cards/${slug}`)
-      .then((res) => {
-        setLoading(false)
-        setGetInfo(res.data)
-      })
+        .then((res) => {
+          setLoading(false)
+          setBriefInfo(res.data)
+        })
     }, [])
 
     if (loading) {
@@ -58,38 +66,42 @@ export default function GiftCard({ slug }: GiftCardProps) {
           <LockedCardContent slug={slug} preview_content={preview_content} onSuccess={onSuccessCode} />
         }
         backChildren={
-          <Center dir="row"><Text>nothing here yet</Text></Center>
+          <Center dir="row"><Text>🔒 nothing here yet 🔒</Text></Center>
         }/>
       )
     }
   
     return (
-      <motion.div
-        className="gift-card"
-        style={{
-          width: '300px',
-          height: '500px',
-          borderRadius: '15px',
-          overflow: 'hidden',
-          perspective: '1000px',
-          border: '2px solid #ccc',
-        }}
-        onClick={() => setIsFlipped(!isFlipped)}
-      >
-        Hello
-        <motion.div
-          animate={{ rotateY: isFlipped ? 180 : 0 }}
-          transition={{ duration: 0.6 }}
-          style={{
-            width: '100%',
-            height: '100%',
-            transformStyle: 'preserve-3d',
-            position: 'relative',
-          }}
-        >
-          World
-        </motion.div>
-      </motion.div>
+      <CardSkeleton frontChildren={
+        <FrontContent gift={gift} />
+      }
+      backChildren={
+        <BackContent gift={gift} />
+      }/>
     );
   }
   
+
+const FrontContent = ({gift}: {gift: Gift}) => {
+  return (
+    <Flex direction='column' alignItems='center' justifyContent='center' mx={4}>
+      <Heading>{gift.title}</Heading>
+      <Text>{gift.description}</Text>
+    </Flex>
+  )
+}
+
+const BackContent = ({gift}: {gift: Gift}) => {
+  if (gift.gift_content.type === 'urls') {
+    return (
+      <VStack justifyContent='center' mx={4}>
+        {gift.gift_content.urls.map((url) => (
+          <Link key={url.url} href={url.url} target="_blank" colorPalette="purple">
+            {url.title}
+            <LuExternalLink />
+          </Link>
+        ))}
+      </VStack>
+    )
+  }
+}
