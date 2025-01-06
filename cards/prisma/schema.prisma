@@ -1,0 +1,24 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Gift {
+  id                 String   @id @default(cuid()) // Unique identifier
+  slug               String   @unique // Used for public URL for the gift
+  secret_code        String   @unique // Small secret code for accessing the gift
+  description        String   // Description of the gift
+  title              String   // Title of the gift
+  acquire_html_content        String @default("")   // URL to acquire the gift
+  background_image   String   // Background image URL
+  shining_color      String   // Color of the shining effect (e.g., hex code)
+  created_at         DateTime @default(now()) // Timestamp for when the gift was created
+  updated_at         DateTime @updatedAt // Automatically updated timestamp
+  requests           Int      @default(0) // Number of requests to the gift
+  incorrect_requests Int @default(0) // Number of incorrect requests to the gift
+  preview_content    String?  // Preview content of the gift
+}
