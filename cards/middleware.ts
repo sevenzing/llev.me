@@ -12,7 +12,9 @@ export function middleware(request: NextRequest) {
     if (clients.size >= MAX_CLIENTS) {
       // Remove the oldest entry to avoid memory leaks
       const oldestKey = clients.keys().next().value;
-      clients.delete(oldestKey);
+      if (oldestKey) {
+        clients.delete(oldestKey);
+      }
     }
     clients.set(key, value);
   };

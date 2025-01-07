@@ -1,20 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import axios from "axios";
 import LockedCardContent from "./locked-card";
 import {
-  Button,
   Center,
   Flex,
   Heading,
-  HeadingProps,
   Image,
   Link,
   Spinner,
   Text,
-  TextProps,
   VStack,
 } from "@chakra-ui/react";
 import { notFound } from "next/navigation";
@@ -62,7 +58,7 @@ export default function GiftCard({ slug }: GiftCardProps) {
       setLoading(false);
       setBriefInfo(res.data);
     });
-  }, []);
+  }, [slug]);
 
   if (loading) {
     return <Spinner />;
@@ -104,9 +100,9 @@ const FrontContent = ({ gift }: { gift: Gift }) => {
   const image = (
     <Image src={gift.image} alt={gift.title} height={150} rounded="1rem" />
   );
-
   const titleSize = (gift.title_size as any) || "3xl";
   const descriptionSize = (gift.description_size as any) || "md";
+
   return (
     <Flex
       direction="column"

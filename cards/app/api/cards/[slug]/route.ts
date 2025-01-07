@@ -1,8 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { getGiftForUser } from "@/repository/gifts";
 import { NextResponse, NextRequest } from "next/server";
-import { getGiftForUser } from "./get-info/route";
-
-const prisma = new PrismaClient();
 
 export async function GET(
   _request: NextRequest,

@@ -1,4 +1,4 @@
-import { Box, Flex, Icon, Text, VStack, Color } from "@chakra-ui/react";
+import { Box, Flex, Icon } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { FaArrowsRotate } from "react-icons/fa6";

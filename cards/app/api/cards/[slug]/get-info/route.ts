@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { userAccessesGiftCorrectly } from "@/repository/gifts";
+import { userAccessesGiftIncorrectly } from "@/repository/gifts";
+import { getGiftForUser } from "@/repository/gifts";
 import { NextResponse, NextRequest } from "next/server";
-
-const MAX_INCORRECT_REQUESTS = 100;
-const prisma = new PrismaClient();
 
 export async function POST(
   request: NextRequest,
@@ -14,6 +13,7 @@ export async function POST(
     slug = (await params).slug;
     code = (await request.json()).code;
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Invalid request" }, { status: 404 });
   }
   if (!slug) {
@@ -34,30 +34,4 @@ export async function POST(
     await userAccessesGiftCorrectly(gift);
     return NextResponse.json({ gift }, { status: 200 });
   }
-}
-
-export async function getGiftForUser(slug: string) {
-  const gift = await prisma.gifts.findFirst({
-    where: {
-      slug: slug,
-      incorrect_requests: {
-        lte: MAX_INCORRECT_REQUESTS,
-      },
-    },
-  });
-  return gift;
-}
-
-async function userAccessesGiftIncorrectly(gift: any) {
-  await prisma.gifts.update({
-    where: { id: gift.id },
-    data: { incorrect_requests: { increment: 1 }, requests: { increment: 1 } },
-  });
-}
-
-async function userAccessesGiftCorrectly(gift: any) {
-  await prisma.gifts.update({
-    where: { id: gift.id },
-    data: { requests: { increment: 1 } },
-  });
 }

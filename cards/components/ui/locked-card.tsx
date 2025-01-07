@@ -5,15 +5,12 @@ import { PinInput } from "@/components/ui/pin-input";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Field } from "@/components/ui/field";
-import { Card } from "@chakra-ui/react";
-import CardSkeleton from "./card-skeleton";
 
 const PIN_LENGTH = 4;
 const MIN_SLEEP_TIME = 2000;
 
 const LockedCardContent = ({
   slug,
-  preview_content,
   onSuccess,
 }: {
   slug: string;

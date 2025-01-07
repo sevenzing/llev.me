@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "@fontsource/roboto";
 import { EmojiFavicon } from "./favicon";
 import Provider from "./provider";
-import Header from "@/components/ui/header";
 import "./global.css";
 
 export const metadata: Metadata = {
@@ -21,10 +20,7 @@ export default function RootLayout({
         <EmojiFavicon text="🎁"></EmojiFavicon>
       </head>
       <body className="main">
-        <Provider>
-          <Header />
-          {children}
-        </Provider>
+        <Provider>{children}</Provider>
       </body>
     </html>
   );
