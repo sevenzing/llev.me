@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import '@fontsource/roboto';
+import "@fontsource/roboto";
 import { EmojiFavicon } from "./favicon";
-import Provider from "./provider"
+import Provider from "./provider";
 import Header from "@/components/ui/header";
 import "./global.css";
-
 
 export const metadata: Metadata = {
   title: "Gift from Lev",
@@ -14,7 +13,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html suppressHydrationWarning>
@@ -28,5 +27,5 @@ export default function RootLayout({
         </Provider>
       </body>
     </html>
-  )
+  );
 }

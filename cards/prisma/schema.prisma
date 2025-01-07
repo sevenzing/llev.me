@@ -7,12 +7,14 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Gift {
+model gifts {
   id                 String   @id @default(cuid()) // Unique identifier
   slug               String   @unique // Used for public URL for the gift
   secret_code        String   @unique // Small secret code for accessing the gift
   description        String   // Description of the gift
   title              String   // Title of the gift
+  title_size         String   @default("3xl") // Size of the title
+  description_size   String   @default("md") // Size of the description
   gift_content       Json     @default("{}")
   image              String?  // Background image URL
   created_at         DateTime @default(now()) // Timestamp for when the gift was created

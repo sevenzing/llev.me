@@ -1,107 +1,151 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import axios from 'axios';
-import LockedCardContent from './locked-card';
-import { Button, Center, Flex, Heading, Link, Spinner, Text, VStack } from "@chakra-ui/react"
-import { notFound } from 'next/navigation';
-import CardSkeleton from './card-skeleton';
-import { LuExternalLink } from "react-icons/lu"
-
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import axios from "axios";
+import LockedCardContent from "./locked-card";
+import {
+  Button,
+  Center,
+  Flex,
+  Heading,
+  HeadingProps,
+  Image,
+  Link,
+  Spinner,
+  Text,
+  TextProps,
+  VStack,
+} from "@chakra-ui/react";
+import { notFound } from "next/navigation";
+import CardSkeleton from "./card-skeleton";
+import { LuExternalLink } from "react-icons/lu";
 
 type Gift = {
   title: string;
+  title_size: string;
   description: string;
+  description_size: string;
   image: string;
   gift_content: GiftContent;
 };
 
-type GiftContent = {
-  type: 'urls',
-  urls: {
-    url: string;
-    title: string;
-  }[];
-} | {
-  type: 'text',
-  text: string;
-}
+type GiftContent =
+  | {
+      type: "urls";
+      urls: {
+        url: string;
+        title: string;
+      }[];
+    }
+  | {
+      type: "text";
+      text: string;
+    };
 
 type GiftCardProps = {
   slug: string;
 };
-  
 
 export default function GiftCard({ slug }: GiftCardProps) {
-    const [gift, setGift] = useState<Gift | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [briefInfo, setBriefInfo] = useState<any | null>(null);
-    const exists = briefInfo?.exists;
-    const preview_content = briefInfo?.preview_content;
-    const onSuccessCode = (gift: Gift) => {
-      setGift(gift)
-    }
+  const [gift, setGift] = useState<Gift | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [briefInfo, setBriefInfo] = useState<any | null>(null);
+  const exists = briefInfo?.exists;
+  const preview_content = briefInfo?.preview_content;
+  const onSuccessCode = (gift: Gift) => {
+    setGift(gift);
+  };
 
-    useEffect(() => {
-      axios.get(`/api/cards/${slug}`)
-        .then((res) => {
-          setLoading(false)
-          setBriefInfo(res.data)
-        })
-    }, [])
+  useEffect(() => {
+    axios.get(`/api/cards/${slug}`).then((res) => {
+      setLoading(false);
+      setBriefInfo(res.data);
+    });
+  }, []);
 
-    if (loading) {
-      return <Spinner />
-    }
+  if (loading) {
+    return <Spinner />;
+  }
 
-    if (!exists) {
-      notFound()
-      return null
-    }
+  if (!exists) {
+    notFound();
+    return null;
+  }
 
-    if (!gift) {
-      return (
-        <CardSkeleton frontChildren={
-          <LockedCardContent slug={slug} preview_content={preview_content} onSuccess={onSuccessCode} />
+  if (!gift) {
+    return (
+      <CardSkeleton
+        frontChildren={
+          <LockedCardContent
+            slug={slug}
+            preview_content={preview_content}
+            onSuccess={onSuccessCode}
+          />
         }
         backChildren={
-          <Center dir="row"><Text>🔒 nothing here yet 🔒</Text></Center>
-        }/>
-      )
-    }
-  
-    return (
-      <CardSkeleton frontChildren={
-        <FrontContent gift={gift} />
-      }
-      backChildren={
-        <BackContent gift={gift} />
-      }/>
+          <Center dir="row">
+            <Text>🔒 nothing here yet 🔒</Text>
+          </Center>
+        }
+      />
     );
   }
-  
 
-const FrontContent = ({gift}: {gift: Gift}) => {
   return (
-    <Flex direction='column' alignItems='center' justifyContent='center' mx={4}>
-      <Heading>{gift.title}</Heading>
-      <Text>{gift.description}</Text>
-    </Flex>
-  )
+    <CardSkeleton
+      frontChildren={<FrontContent gift={gift} />}
+      backChildren={<BackContent gift={gift} />}
+    />
+  );
 }
 
-const BackContent = ({gift}: {gift: Gift}) => {
-  if (gift.gift_content.type === 'urls') {
+const FrontContent = ({ gift }: { gift: Gift }) => {
+  const image = (
+    <Image src={gift.image} alt={gift.title} height={150} rounded="1rem" />
+  );
+
+  const titleSize = (gift.title_size as any) || "3xl";
+  const descriptionSize = (gift.description_size as any) || "md";
+  return (
+    <Flex
+      direction="column"
+      alignItems="center"
+      justifyContent="space-evenly"
+      mx={6}
+      textAlign="center"
+    >
+      <Heading size={titleSize}>{gift.title}</Heading>
+      {image}
+      <Text whiteSpace="pre-wrap" fontSize={descriptionSize}>
+        {gift.description}
+      </Text>
+    </Flex>
+  );
+};
+
+const BackContent = ({ gift }: { gift: Gift }) => {
+  if (gift.gift_content.type === "urls") {
     return (
-      <VStack justifyContent='center' mx={4}>
-        {gift.gift_content.urls.map((url) => (
-          <Link key={url.url} href={url.url} target="_blank" colorPalette="purple">
-            {url.title}
-            <LuExternalLink />
-          </Link>
-        ))}
-      </VStack>
-    )
+      <Flex
+        direction="column"
+        alignItems="center"
+        justifyContent="space-evenly"
+      >
+        <VStack justifyContent="center" mx={4}>
+          {gift.gift_content.urls.map((url) => (
+            <Link
+              key={url.url}
+              href={url.url}
+              target="_blank"
+              colorPalette="purple"
+            >
+              {url.title}
+              <LuExternalLink />
+            </Link>
+          ))}
+        </VStack>
+      </Flex>
+    );
   }
-}
+};
