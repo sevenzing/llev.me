@@ -5,7 +5,7 @@
 .glow {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.01);
   background: hsl(0, 0%, 100%);
-  padding: 16px 24px;
+  padding: 8px;
   position: relative;
   border-radius: 8px;
   &::after {
@@ -17,10 +17,11 @@
     z-index: -1;
     height: 100%;
     width: 100%;
-    transform: scale(0.9) translateZ(0);
-    filter: blur(15px);
+    filter: blur(35px);
+    transform: scale(0.9);
+
     background: linear-gradient(
-      to left,
+      to bottom right,
       #ff5770,
       #e4428d,
       #c42da8,
@@ -32,7 +33,7 @@
       #ff5770
     );
     background-size: 200% 200%;
-    animation: animateGlow 2s linear infinite;
+    /* animation: animateGlow 2s linear infinite; */
   }
 }
 

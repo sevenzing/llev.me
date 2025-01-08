@@ -1,13 +1,17 @@
 "use client";
 
-import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
+import { ChakraProvider, defaultSystem, Theme } from "@chakra-ui/react";
 import { ThemeProvider } from "next-themes";
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <ChakraProvider value={defaultSystem}>
-      <ThemeProvider attribute="class" disableTransitionOnChange>
-        {props.children}
+      <ThemeProvider
+        forcedTheme="light"
+        attribute="class"
+        disableTransitionOnChange
+      >
+        <Theme appearance="light">{props.children}</Theme>
       </ThemeProvider>
     </ChakraProvider>
   );

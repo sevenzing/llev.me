@@ -16,12 +16,17 @@ import {
 import { notFound } from "next/navigation";
 import CardSkeleton from "./card-skeleton";
 import { LuExternalLink } from "react-icons/lu";
+import { AnimatePresence, motion } from "framer-motion";
+
+const ANIMATION_DURATION = 0.8;
 
 type Gift = {
   title: string;
-  title_size: string;
+  title_size: string | null;
+  title_color: string | null;
   description: string;
-  description_size: string;
+  description_size: string | null;
+  description_color: string | null;
   image: string;
   gift_content: GiftContent;
 };
@@ -33,10 +38,12 @@ type GiftContent =
         url: string;
         title: string;
       }[];
+      colorPalette: string | null;
     }
   | {
       type: "text";
       text: string;
+      color: string | null;
     };
 
 type GiftCardProps = {
@@ -69,32 +76,43 @@ export default function GiftCard({ slug }: GiftCardProps) {
     return null;
   }
 
-  if (!gift) {
-    return (
-      <CardSkeleton
-        frontChildren={
-          <LockedCardContent
-            slug={slug}
-            preview_content={preview_content}
-            onSuccess={onSuccessCode}
-          />
-        }
-        backChildren={
-          <Center dir="row">
-            <Text>🔒 nothing here yet 🔒</Text>
-          </Center>
-        }
+  let front = undefined;
+  let back = undefined;
+
+  if (gift) {
+    front = <FrontContent gift={gift} />;
+    back = <BackContent gift={gift} />;
+  } else {
+    front = (
+      <LockedCardContent
+        slug={slug}
+        preview_content={preview_content}
+        onSuccess={onSuccessCode}
       />
+    );
+    back = (
+      <Center dir="row">
+        {" "}
+        <Text>🔒 nothing here yet 🔒</Text>{" "}
+      </Center>
     );
   }
 
   return (
-    <CardSkeleton
-      frontChildren={<FrontContent gift={gift} />}
-      backChildren={<BackContent gift={gift} />}
-    />
+    <AnimatePresence>
+      <motion.div
+        key="card"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: ANIMATION_DURATION }}
+      >
+        <CardSkeleton frontChildren={front} backChildren={back} />
+      </motion.div>
+    </AnimatePresence>
   );
 }
+
+const MotionFlex = motion(Flex);
 
 const FrontContent = ({ gift }: { gift: Gift }) => {
   const image = (
@@ -102,26 +120,41 @@ const FrontContent = ({ gift }: { gift: Gift }) => {
   );
   const titleSize = (gift.title_size as any) || "3xl";
   const descriptionSize = (gift.description_size as any) || "md";
+  const titleColor = (gift.title_color as any) || undefined;
+  const descriptionColor = (gift.description_color as any) || undefined;
 
   return (
-    <Flex
-      direction="column"
-      alignItems="center"
-      justifyContent="space-evenly"
-      mx={6}
-      textAlign="center"
-    >
-      <Heading size={titleSize}>{gift.title}</Heading>
-      {image}
-      <Text whiteSpace="pre-wrap" fontSize={descriptionSize}>
-        {gift.description}
-      </Text>
-    </Flex>
+    <AnimatePresence>
+      <MotionFlex
+        initial={{ y: -10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: ANIMATION_DURATION, ease: "easeInOut" }}
+        direction="column"
+        alignItems="center"
+        justifyContent="space-evenly"
+        mx={6}
+        textAlign="center"
+        height="100%"
+      >
+        <Heading color={titleColor} size={titleSize}>
+          {gift.title}
+        </Heading>
+        {image}
+        <Text
+          whiteSpace="pre-wrap"
+          color={descriptionColor}
+          fontSize={descriptionSize}
+        >
+          {gift.description}
+        </Text>
+      </MotionFlex>
+    </AnimatePresence>
   );
 };
 
 const BackContent = ({ gift }: { gift: Gift }) => {
   if (gift.gift_content.type === "urls") {
+    const colorPalette = (gift.gift_content.colorPalette as any) || undefined;
     return (
       <Flex
         direction="column"
@@ -134,7 +167,7 @@ const BackContent = ({ gift }: { gift: Gift }) => {
               key={url.url}
               href={url.url}
               target="_blank"
-              colorPalette="purple"
+              color={colorPalette}
             >
               {url.title}
               <LuExternalLink />

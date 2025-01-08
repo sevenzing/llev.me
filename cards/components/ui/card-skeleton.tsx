@@ -45,11 +45,12 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
       }}
     >
       <MotionBox
+        filter="none"
         background="white"
         outlineOffset="-10px"
         outline="3px solid #e2e8f0"
-        width="300px"
-        height="450px"
+        width="325px"
+        height="475px"
         borderRadius="1.5rem"
         backgroundColor="white"
         borderWidth="1px"
@@ -104,8 +105,8 @@ interface ContentProps {
 // addes flip icon to the bottom right of the card
 const Content: React.FC<ContentProps> = ({ children }) => {
   return (
-    <Flex direction="column" justifyContent="space-between" h="100%" w="100%">
-      <Flex height="100%" justifyContent="center">
+    <Flex direction="column" h="100%" w="100%">
+      <Flex height="100%" justifyContent="center" alignItems="center">
         {children}
       </Flex>
       <Flex justifyContent="flex-end" mb={4} mx={4}>

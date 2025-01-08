@@ -57,10 +57,15 @@ const LockedCardContent = ({
 
   return (
     <Stack gap={PIN_LENGTH} align="center" justify="center">
-      <Heading size="2xl">This card is locked!</Heading>
+      <Heading size="3xl">This card is locked!</Heading>
       <Text>Enter the secret to unlock it 🔑</Text>
       <Field invalid={!!errorText} errorText={errorText} alignItems="center">
-        <PinInput value={pin} onValueChange={(e) => setPin(e.value)} />
+        <PinInput
+          size="xl"
+          placeholder="•"
+          value={pin}
+          onValueChange={(e) => setPin(e.value)}
+        />
       </Field>
       <Button onClick={onSubmit} type="submit" disabled={disabled}>
         {isLoading ? "Loading..." : "Open"}
