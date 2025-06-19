@@ -61,7 +61,6 @@ const images = {
 images.playerCar.src = "static/green_car.png";
 images.enemyCar.src = "static/red_car.png";
 
-images.playerCar.onload = drawInitialScreen;
 
 function calculateLaneX(lane) {
     return lane * GAME_CONFIG.laneWidth + (GAME_CONFIG.laneWidth - CAR_DIMENSIONS.width) / 2;
@@ -420,3 +419,13 @@ canvas.addEventListener('touchend', handleTouchEnd);
 UI_ELEMENTS.startButton.addEventListener('click', () => startGame(false));
 UI_ELEMENTS.watchButton.addEventListener('click', () => startGame(true));
 UI_ELEMENTS.stopButton.addEventListener('click', endGame);
+
+
+addEventListener('load', () => {
+    init();
+});
+
+function init() {
+    resetGameState();
+    drawInitialScreen();
+}
