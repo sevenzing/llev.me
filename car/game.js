@@ -29,6 +29,9 @@ const GAME_CONFIG = {
     laneCount: 5,
     laneWidth: canvas.width / 5,
     carY: canvas.height - CAR_DIMENSIONS.height - 10,
+    maxLives: 3,
+    invincibilityDuration: 1000, // 1 second in milliseconds
+    blinkInterval: 100, // Blink every 100ms
 };
 
 const UI_ELEMENTS = {
@@ -44,6 +47,7 @@ const gameState = {
     carX: 0,
     targetX: 0,
     score: 0,
+    lives: GAME_CONFIG.maxLives,
     gameSpeed: 4,
     isRunning: false,
     isAutoPlay: false,
@@ -51,6 +55,10 @@ const gameState = {
     frameCount: 0,
     roadLineOffset: 0,
     obstacleFrequency: 90,
+    isInvincible: false,
+    invincibilityStartTime: 0,
+    lastBlinkTime: 0,
+    isVisible: true,
 };
 
 const images = {
@@ -60,7 +68,6 @@ const images = {
 
 images.playerCar.src = "static/green_car.png";
 images.enemyCar.src = "static/red_car.png";
-
 
 function calculateLaneX(lane) {
     return lane * GAME_CONFIG.laneWidth + (GAME_CONFIG.laneWidth - CAR_DIMENSIONS.width) / 2;
@@ -84,7 +91,10 @@ function drawRoadLines() {
 
 function drawPlayerCar() {
     gameState.carX += (gameState.targetX - gameState.carX) * 0.2;
-    ctx.drawImage(images.playerCar, gameState.carX, GAME_CONFIG.carY, CAR_DIMENSIONS.width, CAR_DIMENSIONS.height);
+    
+    if (gameState.isVisible) {
+        ctx.drawImage(images.playerCar, gameState.carX, GAME_CONFIG.carY, CAR_DIMENSIONS.width, CAR_DIMENSIONS.height);
+    }
 }
 
 function drawInitialScreen() {
@@ -94,7 +104,7 @@ function drawInitialScreen() {
 }
 
 function updateScoreDisplay() {
-    UI_ELEMENTS.scoreDisplay.textContent = `Score: ${gameState.score}`;
+    UI_ELEMENTS.scoreDisplay.textContent = `Score: ${gameState.score} | Lives: ${gameState.lives}`;
 }
 
 function createObstacle() {
@@ -143,13 +153,46 @@ function getPlayerCarBounds() {
     };
 }
 
+function updateInvincibility() {
+    if (gameState.isInvincible) {
+        const currentTime = Date.now();
+        const timeSinceInvincibilityStart = currentTime - gameState.invincibilityStartTime;
+        
+        if (timeSinceInvincibilityStart >= GAME_CONFIG.invincibilityDuration) {
+            gameState.isInvincible = false;
+            gameState.isVisible = true;
+        } else {
+            if (currentTime - gameState.lastBlinkTime >= GAME_CONFIG.blinkInterval) {
+                gameState.isVisible = !gameState.isVisible;
+                gameState.lastBlinkTime = currentTime;
+            }
+        }
+    }
+}
+
+function handlePlayerHit() {
+    gameState.lives--;
+    gameState.isInvincible = true;
+    gameState.invincibilityStartTime = Date.now();
+    gameState.lastBlinkTime = Date.now();
+    gameState.isVisible = false;
+    
+    updateScoreDisplay();
+    
+    if (gameState.lives <= 0) {
+        endGame();
+        alert(`💥 Game Over! Final Score: ${gameState.score}`);
+    }
+}
+
 function detectCollisions() {
+    if (gameState.isInvincible) return false;
+    
     const playerCar = getPlayerCarBounds();
     
     for (let obstacle of gameState.obstacles) {
         if (checkCollision(playerCar, obstacle)) {
-            endGame();
-            alert(`💥 Crash! Score: ${gameState.score}`);
+            handlePlayerHit();
             return true;
         }
     }
@@ -280,7 +323,8 @@ function runGameLoop() {
     updateObstacles();
     drawObstacles();
     
-    if (detectCollisions()) return;
+    updateInvincibility();
+    detectCollisions();
     
     gameState.score++;
     updateScoreDisplay();
@@ -314,12 +358,15 @@ function enableControls() {
 
 function resetGameState() {
     gameState.score = 0;
+    gameState.lives = GAME_CONFIG.maxLives;
     gameState.frameCount = 0;
     gameState.obstacles = [];
     gameState.roadLineOffset = 0;
     gameState.currentLane = 2;
     gameState.carX = calculateLaneX(2);
     gameState.targetX = gameState.carX;
+    gameState.isInvincible = false;
+    gameState.isVisible = true;
 }
 
 function getSelectedDifficulty() {
@@ -419,7 +466,6 @@ canvas.addEventListener('touchend', handleTouchEnd);
 UI_ELEMENTS.startButton.addEventListener('click', () => startGame(false));
 UI_ELEMENTS.watchButton.addEventListener('click', () => startGame(true));
 UI_ELEMENTS.stopButton.addEventListener('click', endGame);
-
 
 addEventListener('load', () => {
     init();
