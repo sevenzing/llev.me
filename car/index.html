@@ -8,37 +8,37 @@
 </head>
 <body>
 
-  <h1>🚗 LLev's Car <span class="emoji">💥</span></h1>
-  <div id="scoreDisplay">Score: 0</div>
+  <h1 class="game-title">🚗 LLev's Car <span class="title-emoji">💥</span></h1>
+  <div id="scoreDisplay" class="score-display">Score: 0</div>
 
-  <div class="canvas-container">
-    <canvas id="gameCanvas" width="400" height="500"></canvas>
+  <div class="game-canvas-container">
+    <canvas id="gameCanvas" class="game-canvas" width="400" height="500"></canvas>
   </div>
 
-  <div class="controls">
-    <fieldset class="difficulty-group">
-        <label>
-          <input type="radio" name="difficulty" value="easy" />
-          <span>Easy</span>
+  <div class="game-controls">
+    <fieldset class="difficulty-selector">
+        <label class="difficulty-option">
+          <input type="radio" name="difficulty" value="easy" class="difficulty-radio" />
+          <span class="difficulty-label">Easy</span>
         </label>
-        <label>
-          <input type="radio" name="difficulty" value="normal" checked />
-          <span>Normal</span>
+        <label class="difficulty-option">
+          <input type="radio" name="difficulty" value="normal" checked class="difficulty-radio" />
+          <span class="difficulty-label">Normal</span>
         </label>
-        <label>
-          <input type="radio" name="difficulty" value="hard" />
-          <span>Hard</span>
+        <label class="difficulty-option">
+          <input type="radio" name="difficulty" value="hard" class="difficulty-radio" />
+          <span class="difficulty-label">Hard</span>
         </label>
-        <label>
-          <input type="radio" name="difficulty" value="insane" />
-          <span>Insane</span>
+        <label class="difficulty-option">
+          <input type="radio" name="difficulty" value="insane" class="difficulty-radio" />
+          <span class="difficulty-label">Insane</span>
         </label>
       </fieldset>
 
-    <div class="btn-group">
-      <button id="startBtn">Start</button>
-      <button id="stopBtn" disabled>Stop</button>
-      <button id="watchBtn">Just Watch</button>
+    <div class="button-container">
+      <button id="startBtn" class="game-button start-button">Start</button>
+      <button id="stopBtn" class="game-button stop-button" disabled>Stop</button>
+      <button id="watchBtn" class="game-button watch-button">Just Watch</button>
     </div>
   </div>
 
