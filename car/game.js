@@ -36,6 +36,7 @@ const GAME_CONFIG = {
 
 const UI_ELEMENTS = {
     scoreDisplay: document.getElementById('scoreDisplay'),
+    heartDisplay: document.getElementById('heartDisplay'),
     startButton: document.getElementById('startBtn'),
     stopButton: document.getElementById('stopBtn'),
     watchButton: document.getElementById('watchBtn'),
@@ -64,10 +65,13 @@ const gameState = {
 const images = {
     playerCar: new Image(),
     enemyCar: new Image(),
+    heart: new Image(),
 };
 
 images.playerCar.src = "static/green_car.png";
 images.enemyCar.src = "static/red_car.png";
+images.heart.src = "static/heart.png";
+
 
 function calculateLaneX(lane) {
     return lane * GAME_CONFIG.laneWidth + (GAME_CONFIG.laneWidth - CAR_DIMENSIONS.width) / 2;
@@ -104,7 +108,33 @@ function drawInitialScreen() {
 }
 
 function updateScoreDisplay() {
-    UI_ELEMENTS.scoreDisplay.textContent = `Score: ${gameState.score} | Lives: ${gameState.lives}`;
+    UI_ELEMENTS.scoreDisplay.textContent = `Score: ${gameState.score}`;
+}
+
+function updateHeartDisplay() {
+    const heartIcons = UI_ELEMENTS.heartDisplay.querySelectorAll('.heart-icon');
+    
+    heartIcons.forEach((heart, index) => {
+        if (index < gameState.lives) {
+            heart.classList.remove('empty');
+        } else {
+            heart.classList.add('empty');
+        }
+    });
+}
+
+function animateHeartLoss() {
+    const heartIcons = UI_ELEMENTS.heartDisplay.querySelectorAll('.heart-icon');
+    const lostHeartIndex = gameState.lives; // The heart that was just lost
+    
+    if (lostHeartIndex < heartIcons.length) {
+        const lostHeart = heartIcons[lostHeartIndex];
+        lostHeart.classList.add('lost');
+        
+        setTimeout(() => {
+            lostHeart.classList.remove('lost');
+        }, 500);
+    }
 }
 
 function createObstacle() {
@@ -178,10 +208,11 @@ function handlePlayerHit() {
     gameState.isVisible = false;
     
     updateScoreDisplay();
+    updateHeartDisplay();
+    animateHeartLoss();
     
     if (gameState.lives <= 0) {
         endGame();
-        alert(`💥 Game Over! Final Score: ${gameState.score}`);
     }
 }
 
@@ -393,6 +424,7 @@ function startGame(isAutoPlay = false) {
     
     resetGameState();
     updateScoreDisplay();
+    updateHeartDisplay();
     disableControls();
     runGameLoop();
 }
@@ -473,5 +505,6 @@ addEventListener('load', () => {
 
 function init() {
     resetGameState();
+    updateHeartDisplay();
     drawInitialScreen();
 }
