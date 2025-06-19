@@ -4,7 +4,7 @@
   
   body {
     margin: 0;
-    background: #303030; /* ✅ Updated background */
+    background: #303030;
     color: #fff;
     font-family: 'Segoe UI', sans-serif;
     display: flex;

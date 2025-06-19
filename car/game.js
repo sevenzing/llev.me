@@ -1,327 +1,422 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-
-const difficultyConfig = {
-    "easy": {
-        "speed": 2,
-        "obstacleFrequency": 150,
+const DIFFICULTY_SETTINGS = {
+    easy: {
+        speed: 2,
+        obstacleFrequency: 150,
     },
-    "normal": {
-        "speed": 4,
-        "obstacleFrequency": 90,
+    normal: {
+        speed: 4,
+        obstacleFrequency: 90,
     },
-    "hard": {
-        "speed": 7,
-        "obstacleFrequency": 40,
+    hard: {
+        speed: 7,
+        obstacleFrequency: 40,
     },
-    "insane": {
-        "speed": 10,
-        "obstacleFrequency": 20,
+    insane: {
+        speed: 10,
+        obstacleFrequency: 20,
     },
-}
+};
 
-const carWidth = 40, carHeight = 70, carY = canvas.height - carHeight - 10;
-const laneCount = 5, laneWidth = canvas.width / laneCount;
+const CAR_DIMENSIONS = {
+    width: 40,
+    height: 70,
+};
 
-let currentLane = 2, carX = getLaneX(currentLane), targetX = carX;
-let score = 0, gameSpeed = 4, isRunning = false, isAutoPlay = false;
-let obstacles = [], frameCount = 0, roadLineOffset = 0;
-let obstacleFrequency = 90;
+const GAME_CONFIG = {
+    laneCount: 5,
+    laneWidth: canvas.width / 5,
+    carY: canvas.height - CAR_DIMENSIONS.height - 10,
+};
 
-const scoreDisplay = document.getElementById('scoreDisplay');
-const startBtn     = document.getElementById('startBtn');
-const stopBtn      = document.getElementById('stopBtn');
-const watchBtn     = document.getElementById('watchBtn');
+const UI_ELEMENTS = {
+    scoreDisplay: document.getElementById('scoreDisplay'),
+    startButton: document.getElementById('startBtn'),
+    stopButton: document.getElementById('stopBtn'),
+    watchButton: document.getElementById('watchBtn'),
+    difficultyInputs: document.querySelectorAll('input[name="difficulty"]'),
+};
 
-// Get all difficulty radio buttons
-const difficultyInputs = document.querySelectorAll('input[name="difficulty"]');
+const gameState = {
+    currentLane: 2,
+    carX: 0,
+    targetX: 0,
+    score: 0,
+    gameSpeed: 4,
+    isRunning: false,
+    isAutoPlay: false,
+    obstacles: [],
+    frameCount: 0,
+    roadLineOffset: 0,
+    obstacleFrequency: 90,
+};
 
-const carImg    = new Image();
-carImg.src      = "static/green_car.png";
-const redCarImg = new Image();
-redCarImg.src   = "static/red_car.png";
+const images = {
+    playerCar: new Image(),
+    enemyCar: new Image(),
+};
 
-carImg.onload = drawInitialScreen;
+images.playerCar.src = "static/green_car.png";
+images.enemyCar.src = "static/red_car.png";
 
-function getLaneX(lane) {
-  return lane * laneWidth + (laneWidth - carWidth) / 2;
+images.playerCar.onload = drawInitialScreen;
+
+function calculateLaneX(lane) {
+    return lane * GAME_CONFIG.laneWidth + (GAME_CONFIG.laneWidth - CAR_DIMENSIONS.width) / 2;
 }
 
 function drawRoadLines() {
-  ctx.strokeStyle = '#ccc';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([15,20]);
-  for (let i = 1; i < laneCount; i++) {
-    const x = i * laneWidth;
-    ctx.beginPath();
-    ctx.moveTo(x, -40 + roadLineOffset);
-    ctx.lineTo(x, canvas.height + 40);
-    ctx.stroke();
-  }
-  ctx.setLineDash([]);
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([15, 20]);
+    
+    for (let i = 1; i < GAME_CONFIG.laneCount; i++) {
+        const x = i * GAME_CONFIG.laneWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, -40 + gameState.roadLineOffset);
+        ctx.lineTo(x, canvas.height + 40);
+        ctx.stroke();
+    }
+    
+    ctx.setLineDash([]);
 }
 
-function drawCar() {
-  carX += (targetX - carX) * 0.2;
-  ctx.drawImage(carImg, carX, carY, carWidth, carHeight);
+function drawPlayerCar() {
+    gameState.carX += (gameState.targetX - gameState.carX) * 0.2;
+    ctx.drawImage(images.playerCar, gameState.carX, GAME_CONFIG.carY, CAR_DIMENSIONS.width, CAR_DIMENSIONS.height);
 }
 
 function drawInitialScreen() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawRoadLines();
-  drawCar();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawRoadLines();
+    drawPlayerCar();
 }
 
-function updateScore() {
-  scoreDisplay.textContent = `Score: ${score}`;
+function updateScoreDisplay() {
+    UI_ELEMENTS.scoreDisplay.textContent = `Score: ${gameState.score}`;
 }
 
-function spawnObstacle() {
-  const lane = Math.floor(Math.random()*laneCount);
-  obstacles.push({ lane, x: getLaneX(lane), y: -carHeight, height: carHeight, width: carWidth });
+function createObstacle() {
+    const randomLane = Math.floor(Math.random() * GAME_CONFIG.laneCount);
+    const obstacle = {
+        lane: randomLane,
+        x: calculateLaneX(randomLane),
+        y: -CAR_DIMENSIONS.height,
+        height: CAR_DIMENSIONS.height,
+        width: CAR_DIMENSIONS.width,
+    };
+    gameState.obstacles.push(obstacle);
 }
 
 function updateObstacles() {
-  obstacles.forEach(o => o.y += gameSpeed);
-  obstacles = obstacles.filter(o => o.y < canvas.height);
-  if (++frameCount % obstacleFrequency === 0) spawnObstacle();
+    gameState.obstacles.forEach(obstacle => {
+        obstacle.y += gameState.gameSpeed;
+    });
+    
+    gameState.obstacles = gameState.obstacles.filter(obstacle => obstacle.y < canvas.height);
+    
+    if (++gameState.frameCount % gameState.obstacleFrequency === 0) {
+        createObstacle();
+    }
 }
 
 function drawObstacles() {
-  obstacles.forEach(o => ctx.drawImage(redCarImg, o.x, o.y, o.width, o.height));
+    gameState.obstacles.forEach(obstacle => {
+        ctx.drawImage(images.enemyCar, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+    });
 }
 
-function collides(car, obstacle) {
-    return car.x < obstacle.x+obstacle.width && car.x+car.width>obstacle.x && car.y<obstacle.y+obstacle.height && car.y+car.height>obstacle.y;
+function checkCollision(car, obstacle) {
+    return car.x < obstacle.x + obstacle.width &&
+           car.x + car.width > obstacle.x &&
+           car.y < obstacle.y + obstacle.height &&
+           car.y + car.height > obstacle.y;
 }
 
-function carObject() {
+function getPlayerCarBounds() {
     return {
-        x: carX,
-        y: carY,
-        width: carWidth,
-        height: carHeight,
+        x: gameState.carX,
+        y: GAME_CONFIG.carY,
+        width: CAR_DIMENSIONS.width,
+        height: CAR_DIMENSIONS.height,
     };
 }
 
-function checkCollisions() {
-  for (let obstacle of obstacles) {
-    if (collides(carObject(), obstacle)) {
-      endGame();
-      alert(`💥 Crash! Score: ${score}`);
-      return true;
+function detectCollisions() {
+    const playerCar = getPlayerCarBounds();
+    
+    for (let obstacle of gameState.obstacles) {
+        if (checkCollision(playerCar, obstacle)) {
+            endGame();
+            alert(`💥 Crash! Score: ${gameState.score}`);
+            return true;
+        }
     }
-  }
-  return false;
+    return false;
 }
 
-function getAllUpcoming() {
-    const threshold = 120;
-    const upcoming = obstacles.filter(obstacle => {
-        const newObstacle = {
+function getUpcomingObstacles() {
+    const detectionThreshold = 120;
+    const playerCar = getPlayerCarBounds();
+    
+    return gameState.obstacles.filter(obstacle => {
+        const extendedObstacle = {
             ...obstacle,
-            //y: obstacle.y + threshold / 2,
-            height: obstacle.height + threshold,
-            width: obstacle.width,
+            height: obstacle.height + detectionThreshold,
         };
-        const x = getLaneX(obstacle.lane);
-        const car = {
-            x: x,
-            y: carY,
-            width: carWidth,
-            height: carHeight,
+        
+        const testCar = {
+            x: calculateLaneX(obstacle.lane),
+            y: GAME_CONFIG.carY,
+            width: CAR_DIMENSIONS.width,
+            height: CAR_DIMENSIONS.height,
         };
-        const collision = collides(car, newObstacle);
-        return collision;
+        
+        return checkCollision(testCar, extendedObstacle);
     });
-    return upcoming;
 }
 
-function isLineSafe(lane) {
-    const upcoming = getAllUpcoming();
-    return !upcoming.some(obstacle => obstacle.lane === lane);
+function isLaneSafe(lane) {
+    const upcomingObstacles = getUpcomingObstacles();
+    return !upcomingObstacles.some(obstacle => obstacle.lane === lane);
 }
 
-function moveToLane(lane) {
-    currentLane = lane;
-    targetX = getLaneX(lane);
+function moveCarToLane(lane) {
+    gameState.currentLane = lane;
+    gameState.targetX = calculateLaneX(lane);
 }
 
-function botControl() {
-    const upcoming = getAllUpcoming();
-  
-    // If no threats in current lane, try to move to the center lane if possible
-    if (!upcoming.some(o => o.lane === currentLane)) {
-        if ([0].includes(currentLane)) {
-            const moveTo = currentLane + 1;
-            if (isLineSafe(moveTo)) {
-                console.log("moving to safe lane", moveTo);
-                moveToLane(moveTo);
+function getAdjacentLanes() {
+    const adjacentLanes = [];
+    
+    if (gameState.currentLane > 0) {
+        adjacentLanes.push(gameState.currentLane - 1);
+    }
+    if (gameState.currentLane < GAME_CONFIG.laneCount - 1) {
+        adjacentLanes.push(gameState.currentLane + 1);
+    }
+    
+    return adjacentLanes;
+}
+
+function findSafestLane() {
+    const upcomingObstacles = getUpcomingObstacles();
+    const adjacentLanes = getAdjacentLanes();
+    
+    const safeAdjacentLanes = adjacentLanes.filter(lane => 
+        !upcomingObstacles.some(obstacle => obstacle.lane === lane)
+    );
+    
+    if (safeAdjacentLanes.length > 0) {
+        const centerLane = Math.floor(GAME_CONFIG.laneCount / 2);
+        safeAdjacentLanes.sort((a, b) => Math.abs(a - centerLane) - Math.abs(b - centerLane));
+        return safeAdjacentLanes[0];
+    }
+    
+    const laneSafetyScores = [];
+    
+    for (const lane of adjacentLanes) {
+        const obstaclesInLane = upcomingObstacles.filter(obstacle => obstacle.lane === lane);
+        
+        if (obstaclesInLane.length === 0) {
+            laneSafetyScores.push({ lane, score: Infinity });
+        } else {
+            const closestObstacle = obstaclesInLane.reduce((closest, obstacle) => 
+                obstacle.y < closest.y ? obstacle : closest
+            );
+            const safetyScore = canvas.height - closestObstacle.y;
+            laneSafetyScores.push({ lane, score: safetyScore });
+        }
+    }
+    
+    const currentLaneObstacles = upcomingObstacles.filter(obstacle => obstacle.lane === gameState.currentLane);
+    if (currentLaneObstacles.length > 0) {
+        const closestObstacle = currentLaneObstacles.reduce((closest, obstacle) => 
+            obstacle.y < closest.y ? obstacle : closest
+        );
+        const safetyScore = canvas.height - closestObstacle.y;
+        laneSafetyScores.push({ lane: gameState.currentLane, score: safetyScore });
+    }
+    
+    laneSafetyScores.sort((a, b) => b.score - a.score);
+    return laneSafetyScores[0].lane;
+}
+
+function executeBotMovement() {
+    const upcomingObstacles = getUpcomingObstacles();
+    
+    if (!upcomingObstacles.some(obstacle => obstacle.lane === gameState.currentLane)) {
+        if (gameState.currentLane === 0) {
+            const targetLane = gameState.currentLane + 1;
+            if (isLaneSafe(targetLane)) {
+                moveCarToLane(targetLane);
                 return;
             }
-        } else if ([laneCount - 1].includes(currentLane)) {
-            const moveTo = currentLane - 1;
-            if (isLineSafe(moveTo)) {
-                moveToLane(moveTo);
+        } else if (gameState.currentLane === GAME_CONFIG.laneCount - 1) {
+            const targetLane = gameState.currentLane - 1;
+            if (isLaneSafe(targetLane)) {
+                moveCarToLane(targetLane);
                 return;
             }
         }
         return;
-    };
-  
-    // Only consider adjacent lanes (left and right)
-    const adjacentLanes = [];
-    if (currentLane > 0) adjacentLanes.push(currentLane - 1); // left lane
-    if (currentLane < laneCount - 1) adjacentLanes.push(currentLane + 1); // right lane
-  
-    // Check for completely safe adjacent lanes
-    const safeAdjacentLanes = adjacentLanes.filter(lane => 
-      !upcoming.some(o => o.lane === lane)
-    );
-  
-    // If there are safe adjacent lanes, move to the safest one (closest to center)
-    if (safeAdjacentLanes.length > 0) {
-      const centerLane = Math.floor(laneCount / 2);
-      safeAdjacentLanes.sort((a, b) => Math.abs(a - centerLane) - Math.abs(b - centerLane));
-      const targetLane = safeAdjacentLanes[0];
-      moveToLane(targetLane);
-      return;
     }
-  
-    // If no safe adjacent lanes, find the "safest" option
-    // Calculate safety score for each adjacent lane based on obstacle distance
-    const laneSafetyScores = [];
     
-    for (const lane of adjacentLanes) {
-      const obstaclesInLane = upcoming.filter(o => o.lane === lane);
-      if (obstaclesInLane.length === 0) {
-        // No obstacles in this lane (shouldn't happen here, but just in case)
-        laneSafetyScores.push({ lane, score: Infinity });
-      } else {
-        // Find the closest obstacle in this lane
-        const closestObstacle = obstaclesInLane.reduce((closest, o) => 
-          o.y < closest.y ? o : closest
-        );
-        // Higher score = safer (further away obstacle)
-        const safetyScore = canvas.height - closestObstacle.y;
-        laneSafetyScores.push({ lane, score: safetyScore });
-      }
+    const safestLane = findSafestLane();
+    if (safestLane !== gameState.currentLane) {
+        moveCarToLane(safestLane);
     }
-  
-    // Also consider staying in current lane
-    const currentLaneObstacles = upcoming.filter(o => o.lane === currentLane);
-    if (currentLaneObstacles.length > 0) {
-      const closestObstacle = currentLaneObstacles.reduce((closest, o) => 
-        o.y < closest.y ? o : closest
-      );
-      const safetyScore = canvas.height - closestObstacle.y;
-      laneSafetyScores.push({ lane: currentLane, score: safetyScore });
-    }
-  
-    // Sort by safety score (highest first) and choose the safest option
-    laneSafetyScores.sort((a, b) => b.score - a.score);
-    const safestLane = laneSafetyScores[0].lane;
+}
+
+function runGameLoop() {
+    if (!gameState.isRunning) return;
     
-    // Only move if the safest option is not the current lane
-    if (safestLane !== currentLane) {
-      moveToLane(safestLane);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    gameState.roadLineOffset = (gameState.roadLineOffset + gameState.gameSpeed / 2) % 35;
+    
+    drawRoadLines();
+    drawPlayerCar();
+    updateObstacles();
+    drawObstacles();
+    
+    if (detectCollisions()) return;
+    
+    gameState.score++;
+    updateScoreDisplay();
+    
+    if (gameState.isAutoPlay) {
+        executeBotMovement();
     }
-  }
-
-function gameLoop() {
-  if (!isRunning) return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  roadLineOffset = (roadLineOffset + gameSpeed/2) % 35;
-  drawRoadLines();
-  drawCar();
-  updateObstacles();
-  drawObstacles();
-  if (checkCollisions()) return;
-  score++;
-  updateScore();
-  if (isAutoPlay) botControl();
-  requestAnimationFrame(gameLoop);
+    
+    requestAnimationFrame(runGameLoop);
 }
 
-function disableAllControls() {
-  // Disable all buttons
-  startBtn.disabled = true;
-  watchBtn.disabled = true;
-  stopBtn.disabled = false;
-  
-  // Disable all difficulty radio buttons
-  difficultyInputs.forEach(input => {
-    input.disabled = true;
-  });
+function disableControls() {
+    UI_ELEMENTS.startButton.disabled = true;
+    UI_ELEMENTS.watchButton.disabled = true;
+    UI_ELEMENTS.stopButton.disabled = false;
+    
+    UI_ELEMENTS.difficultyInputs.forEach(input => {
+        input.disabled = true;
+    });
 }
 
-function enableAllControls() {
-  // Enable all buttons
-  startBtn.disabled = false;
-  watchBtn.disabled = false;
-  stopBtn.disabled = true;
-  
-  // Enable all difficulty radio buttons
-  difficultyInputs.forEach(input => {
-    input.disabled = false;
-  });
+function enableControls() {
+    UI_ELEMENTS.startButton.disabled = false;
+    UI_ELEMENTS.watchButton.disabled = false;
+    UI_ELEMENTS.stopButton.disabled = true;
+    
+    UI_ELEMENTS.difficultyInputs.forEach(input => {
+        input.disabled = false;
+    });
 }
 
-function startGame(auto=false) {
-  isRunning = true; isAutoPlay = auto;
-  score = 0; frameCount = 0; obstacles = []; roadLineOffset = 0;
-  currentLane = 2; carX = targetX = getLaneX(2);
-  const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
-  if (!difficultyConfig[difficulty]) {
-    alert("Invalid difficulty level");
-    return;
-  }
-  gameSpeed = difficultyConfig[difficulty].speed;
-  obstacleFrequency = difficultyConfig[difficulty].obstacleFrequency;
-  console.log(difficulty, gameSpeed, obstacleFrequency);
-  updateScore();
-  disableAllControls();
-  gameLoop();
+function resetGameState() {
+    gameState.score = 0;
+    gameState.frameCount = 0;
+    gameState.obstacles = [];
+    gameState.roadLineOffset = 0;
+    gameState.currentLane = 2;
+    gameState.carX = calculateLaneX(2);
+    gameState.targetX = gameState.carX;
+}
+
+function getSelectedDifficulty() {
+    const selectedDifficulty = document.querySelector('input[name="difficulty"]:checked').value;
+    
+    if (!DIFFICULTY_SETTINGS[selectedDifficulty]) {
+        alert("Invalid difficulty level");
+        return null;
+    }
+    
+    return selectedDifficulty;
+}
+
+function startGame(isAutoPlay = false) {
+    const difficulty = getSelectedDifficulty();
+    if (!difficulty) return;
+    
+    gameState.isRunning = true;
+    gameState.isAutoPlay = isAutoPlay;
+    
+    const settings = DIFFICULTY_SETTINGS[difficulty];
+    gameState.gameSpeed = settings.speed;
+    gameState.obstacleFrequency = settings.obstacleFrequency;
+    
+    resetGameState();
+    updateScoreDisplay();
+    disableControls();
+    runGameLoop();
 }
 
 function endGame() {
-  isRunning = false;
-  enableAllControls();
+    gameState.isRunning = false;
+    enableControls();
 }
 
-function moveLeft() {
-  if (!isAutoPlay) {
-    moveToLane(Math.max(0, currentLane-1));
-  }
-}
-function moveRight() {
-  if (!isAutoPlay) {
-    moveToLane(Math.min(laneCount-1, currentLane+1));
-  }
+function moveCarLeft() {
+    if (!gameState.isAutoPlay) {
+        const newLane = Math.max(0, gameState.currentLane - 1);
+        moveCarToLane(newLane);
+    }
 }
 
-// User controls
-document.addEventListener('keydown', e => {
-  if (e.key==='ArrowLeft') moveLeft();
-  if (e.key==='ArrowRight') moveRight();
-});
-canvas.addEventListener('click', e => {
-  if (isAutoPlay) return;
-  const rect = canvas.getBoundingClientRect();
-  const cx = e.clientX - rect.left;
-  (cx < carX+carWidth/2 ? moveLeft : moveRight)();
-});
-let tStart=null;
-canvas.addEventListener('touchstart', e => tStart = e.changedTouches[0].clientX);
-canvas.addEventListener('touchend',   e => {
-  if (isAutoPlay || tStart===null) return;
-  const delta = e.changedTouches[0].clientX - tStart;
-  if (Math.abs(delta)>30) (delta<0?moveLeft:moveRight)();
-  tStart = null;
+function moveCarRight() {
+    if (!gameState.isAutoPlay) {
+        const newLane = Math.min(GAME_CONFIG.laneCount - 1, gameState.currentLane + 1);
+        moveCarToLane(newLane);
+    }
+}
+
+function handleCanvasClick(event) {
+    if (gameState.isAutoPlay) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const carCenterX = gameState.carX + CAR_DIMENSIONS.width / 2;
+    
+    if (clickX < carCenterX) {
+        moveCarLeft();
+    } else {
+        moveCarRight();
+    }
+}
+
+let touchStartX = null;
+
+function handleTouchStart(event) {
+    touchStartX = event.changedTouches[0].clientX;
+}
+
+function handleTouchEnd(event) {
+    if (gameState.isAutoPlay || touchStartX === null) return;
+    
+    const touchEndX = event.changedTouches[0].clientX;
+    const touchDelta = touchEndX - touchStartX;
+    const minSwipeDistance = 30;
+    
+    if (Math.abs(touchDelta) > minSwipeDistance) {
+        if (touchDelta < 0) {
+            moveCarLeft();
+        } else {
+            moveCarRight();
+        }
+    }
+    
+    touchStartX = null;
+}
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft') moveCarLeft();
+    if (event.key === 'ArrowRight') moveCarRight();
 });
 
-// Button hooks
-startBtn .addEventListener('click', () => startGame(false));
-watchBtn .addEventListener('click', () => startGame(true));
-stopBtn  .addEventListener('click', endGame);
+canvas.addEventListener('click', handleCanvasClick);
+canvas.addEventListener('touchstart', handleTouchStart);
+canvas.addEventListener('touchend', handleTouchEnd);
+
+UI_ELEMENTS.startButton.addEventListener('click', () => startGame(false));
+UI_ELEMENTS.watchButton.addEventListener('click', () => startGame(true));
+UI_ELEMENTS.stopButton.addEventListener('click', endGame);
