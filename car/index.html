@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>llev's car 🚗💥</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>🚗 LLev's Car <span class="emoji">💥</span></h1>
+  <div id="scoreDisplay">Score: 0</div>
+
+  <div class="canvas-container">
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+  </div>
+
+  <div class="controls">
+    <fieldset class="difficulty-group">
+        <label>
+          <input type="radio" name="difficulty" value="easy" />
+          <span>Easy</span>
+        </label>
+        <label>
+          <input type="radio" name="difficulty" value="normal" checked />
+          <span>Normal</span>
+        </label>
+        <label>
+          <input type="radio" name="difficulty" value="hard" />
+          <span>Hard</span>
+        </label>
+        <label>
+          <input type="radio" name="difficulty" value="insane" />
+          <span>Insane</span>
+        </label>
+      </fieldset>
+
+    <div class="btn-group">
+      <button id="startBtn">Start</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <button id="watchBtn">Just Watch</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
