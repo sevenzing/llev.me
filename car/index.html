@@ -17,6 +17,23 @@
     <img src="static/heart.png" alt="Heart" class="heart-icon">
   </div>
 
+  <div id="bonusDisplay" class="bonus-display">
+    <div id="speedupBonus" class="active-bonus hidden">
+        <div class="bonus-container">
+            <div class="bonus-icon speedup"></div>
+            <span class="bonus-name">speed</span>
+            <span class="bonus-time">0s</span>
+        </div>
+    </div>
+    <div id="shieldBonus" class="active-bonus hidden">
+        <div class="bonus-container">
+            <img src="static/shield.png" class="bonus-icon shield" />
+            <span class="bonus-name">shield</span>
+            <span class="bonus-time">0s</span>
+        </div>
+    </div>
+  </div>
+
   <div class="game-canvas-container">
     <canvas id="gameCanvas" class="game-canvas" width="400" height="500"></canvas>
   </div>

@@ -1,6 +1,18 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+const images = {
+    playerCar: new Image(),
+    enemyCar: new Image(),
+    heart: new Image(),
+    shield: new Image(),
+};
+
+images.playerCar.src = "static/green_car.png";
+images.enemyCar.src = "static/red_car.png";
+images.heart.src = "static/heart.png";
+images.shield.src = "static/shield.png";
+
 const DIFFICULTY_SETTINGS = {
     easy: {
         speed: 2,
@@ -25,6 +37,27 @@ const CAR_DIMENSIONS = {
     height: 70,
 };
 
+const BONUS_CONFIG = {
+    types: {
+        speedup: {
+            color: '#3399ff',
+            radius: 15,
+            duration: 20000, // 20 seconds
+            speedMultiplier: 2, // 100% speed increase
+            movingSpeed: 0.5,
+        },
+        shield: {
+            color: '#ffcc00', // Kept for fallback/shadow
+            duration: 10000, // 10 seconds
+            image: images.shield,
+            width: 759 * 0.05,
+            height: 836 * 0.05,
+            movingSpeed: 0.5,
+        }
+    },
+    spawnFrequency: 300, // Spawn bonus every 300 frames
+};
+
 const GAME_CONFIG = {
     laneCount: 5,
     laneWidth: canvas.width / 5,
@@ -37,6 +70,9 @@ const GAME_CONFIG = {
 const UI_ELEMENTS = {
     scoreDisplay: document.getElementById('scoreDisplay'),
     heartDisplay: document.getElementById('heartDisplay'),
+    bonusDisplay: document.getElementById('bonusDisplay'),
+    speedupBonus: document.getElementById('speedupBonus'),
+    shieldBonus: document.getElementById('shieldBonus'),
     startButton: document.getElementById('startBtn'),
     stopButton: document.getElementById('stopBtn'),
     watchButton: document.getElementById('watchBtn'),
@@ -50,9 +86,11 @@ const gameState = {
     score: 0,
     lives: GAME_CONFIG.maxLives,
     gameSpeed: 4,
+    baseGameSpeed: 4,
     isRunning: false,
     isAutoPlay: false,
     obstacles: [],
+    bonuses: [],
     frameCount: 0,
     roadLineOffset: 0,
     obstacleFrequency: 90,
@@ -60,17 +98,14 @@ const gameState = {
     invincibilityStartTime: 0,
     lastBlinkTime: 0,
     isVisible: true,
+    activeBonuses: {
+        speedup: null,
+        shield: null,
+    },
+    lastBonusUpdateTime: 0,
+    bonusUpdateInterval: 500, // Update bonus display every 500ms
 };
 
-const images = {
-    playerCar: new Image(),
-    enemyCar: new Image(),
-    heart: new Image(),
-};
-
-images.playerCar.src = "static/green_car.png";
-images.enemyCar.src = "static/red_car.png";
-images.heart.src = "static/heart.png";
 
 
 function calculateLaneX(lane) {
@@ -123,6 +158,28 @@ function updateHeartDisplay() {
     });
 }
 
+function updateBonusDisplay() {
+    // Update speedup bonus
+    const speedupBonus = gameState.activeBonuses.speedup;
+    if (speedupBonus) {
+        const remainingTime = Math.max(0, Math.ceil((speedupBonus.endTime - Date.now()) / 1000));
+        UI_ELEMENTS.speedupBonus.querySelector('.bonus-time').textContent = `${remainingTime}s`;
+        UI_ELEMENTS.speedupBonus.classList.remove('hidden');
+    } else {
+        UI_ELEMENTS.speedupBonus.classList.add('hidden');
+    }
+    
+    // Update shield bonus
+    const shieldBonus = gameState.activeBonuses.shield;
+    if (shieldBonus) {
+        const remainingTime = Math.max(0, Math.ceil((shieldBonus.endTime - Date.now()) / 1000));
+        UI_ELEMENTS.shieldBonus.querySelector('.bonus-time').textContent = `${remainingTime}s`;
+        UI_ELEMENTS.shieldBonus.classList.remove('hidden');
+    } else {
+        UI_ELEMENTS.shieldBonus.classList.add('hidden');
+    }
+}
+
 function animateHeartLoss() {
     const heartIcons = UI_ELEMENTS.heartDisplay.querySelectorAll('.heart-icon');
     const lostHeartIndex = gameState.lives; // The heart that was just lost
@@ -135,6 +192,116 @@ function animateHeartLoss() {
             lostHeart.classList.remove('lost');
         }, 500);
     }
+}
+
+function createBonus() {
+    const bonusTypes = Object.keys(BONUS_CONFIG.types);
+    const randomType = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
+    const randomLane = Math.floor(Math.random() * GAME_CONFIG.laneCount);
+    const config = BONUS_CONFIG.types[randomType];
+
+    const bonus = {
+        type: randomType,
+        lane: randomLane,
+        movingSpeed: config.movingSpeed,
+    };
+
+    if (config.image) {
+        bonus.width = config.width;
+        bonus.height = config.height;
+    } else {
+        bonus.width = config.radius * 2;
+        bonus.height = config.radius * 2;
+    }
+
+    bonus.x = calculateLaneX(randomLane);
+    bonus.y = -bonus.height;
+    
+    gameState.bonuses.push(bonus);
+}
+
+function updateBonuses() {
+    gameState.bonuses.forEach(bonus => {
+        bonus.y += gameState.gameSpeed * bonus.movingSpeed;
+    });
+    
+    gameState.bonuses = gameState.bonuses.filter(bonus => bonus.y < canvas.height);
+    
+    if (gameState.frameCount % BONUS_CONFIG.spawnFrequency === 0) {
+        createBonus();
+    }
+}
+
+function drawBonuses() {
+    gameState.bonuses.forEach(bonus => {
+        const config = BONUS_CONFIG.types[bonus.type];
+        if (config.image) {
+            ctx.drawImage(config.image, bonus.x, bonus.y, bonus.width, bonus.height);
+        } else { // Draw a circle for other bonuses
+            ctx.fillStyle = config.color;
+            ctx.beginPath();
+            const radius = bonus.width / 2;
+            ctx.arc(bonus.x + radius, bonus.y + radius, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Add a subtle glow effect
+            ctx.shadowColor = config.color;
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(bonus.x + radius, bonus.y + radius, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+    });
+}
+
+function checkBonusCollision(car, bonus) {
+    // AABB collision detection
+    return car.x < bonus.x + bonus.width &&
+           car.x + car.width > bonus.x &&
+           car.y < bonus.y + bonus.height &&
+           car.y + car.height > bonus.y;
+}
+
+function collectBonus(bonus) {
+    const bonusType = bonus.type;
+    const bonusConfig = BONUS_CONFIG.types[bonusType];
+    
+    // Remove the bonus from the game
+    gameState.bonuses = gameState.bonuses.filter(b => b !== bonus);
+    
+    // Apply bonus effect
+    if (bonusType === 'speedup') {
+        gameState.activeBonuses.speedup = {
+            endTime: Date.now() + bonusConfig.duration,
+            speedMultiplier: bonusConfig.speedMultiplier,
+        };
+        gameState.gameSpeed = gameState.baseGameSpeed * bonusConfig.speedMultiplier;
+    } else if (bonusType === 'shield') {
+        gameState.activeBonuses.shield = {
+            endTime: Date.now() + bonusConfig.duration,
+        };
+    } else {
+        console.log('Unknown bonus type:', bonusType);
+    }
+    
+    // Immediately update bonus display when bonus is collected
+    updateBonusDisplay();
+}
+
+function updateActiveBonuses() {
+    const currentTime = Date.now();
+    
+    Object.keys(gameState.activeBonuses).forEach(bonusType => {
+        const bonus = gameState.activeBonuses[bonusType];
+        if (bonus && currentTime >= bonus.endTime) {
+            // Bonus expired
+            if (bonusType === 'speedup') {
+                gameState.gameSpeed = gameState.baseGameSpeed;
+            }
+            gameState.activeBonuses[bonusType] = null;
+        }
+    });
 }
 
 function createObstacle() {
@@ -201,7 +368,15 @@ function updateInvincibility() {
 }
 
 function handlePlayerHit() {
-    gameState.lives--;
+    // Check if shield is active
+    if (gameState.activeBonuses.shield) {
+        // Use shield instead of losing life
+        gameState.activeBonuses.shield = null;
+    } else {
+        gameState.lives--;
+        animateHeartLoss();
+    }
+    
     gameState.isInvincible = true;
     gameState.invincibilityStartTime = Date.now();
     gameState.lastBlinkTime = Date.now();
@@ -209,7 +384,6 @@ function handlePlayerHit() {
     
     updateScoreDisplay();
     updateHeartDisplay();
-    animateHeartLoss();
     
     if (gameState.lives <= 0) {
         endGame();
@@ -221,6 +395,14 @@ function detectCollisions() {
     
     const playerCar = getPlayerCarBounds();
     
+    // Check bonus collisions
+    gameState.bonuses.forEach(bonus => {
+        if (checkBonusCollision(playerCar, bonus)) {
+            collectBonus(bonus);
+        }
+    });
+    
+    // Check obstacle collisions
     for (let obstacle of gameState.obstacles) {
         if (checkCollision(playerCar, obstacle)) {
             handlePlayerHit();
@@ -353,12 +535,22 @@ function runGameLoop() {
     drawPlayerCar();
     updateObstacles();
     drawObstacles();
+    updateBonuses();
+    drawBonuses();
     
     updateInvincibility();
+    updateActiveBonuses();
     detectCollisions();
     
     gameState.score++;
     updateScoreDisplay();
+    
+    // Update bonus display every 500ms instead of every frame
+    const currentTime = Date.now();
+    if (currentTime - gameState.lastBonusUpdateTime >= gameState.bonusUpdateInterval) {
+        updateBonusDisplay();
+        gameState.lastBonusUpdateTime = currentTime;
+    }
     
     if (gameState.isAutoPlay) {
         executeBotMovement();
@@ -392,12 +584,18 @@ function resetGameState() {
     gameState.lives = GAME_CONFIG.maxLives;
     gameState.frameCount = 0;
     gameState.obstacles = [];
+    gameState.bonuses = [];
     gameState.roadLineOffset = 0;
     gameState.currentLane = 2;
     gameState.carX = calculateLaneX(2);
     gameState.targetX = gameState.carX;
     gameState.isInvincible = false;
     gameState.isVisible = true;
+    gameState.activeBonuses = {
+        speedup: null,
+        shield: null,
+    };
+    gameState.lastBonusUpdateTime = 0;
 }
 
 function getSelectedDifficulty() {
@@ -419,19 +617,22 @@ function startGame(isAutoPlay = false) {
     gameState.isAutoPlay = isAutoPlay;
     
     const settings = DIFFICULTY_SETTINGS[difficulty];
+    gameState.baseGameSpeed = settings.speed;
     gameState.gameSpeed = settings.speed;
     gameState.obstacleFrequency = settings.obstacleFrequency;
     
     resetGameState();
     updateScoreDisplay();
     updateHeartDisplay();
+    updateBonusDisplay();
     disableControls();
     runGameLoop();
 }
 
 function endGame() {
-    gameState.isRunning = false;
+    gameState.isRunning = false;    
     enableControls();
+    updateBonusDisplay();
 }
 
 function moveCarLeft() {
@@ -506,5 +707,6 @@ addEventListener('load', () => {
 function init() {
     resetGameState();
     updateHeartDisplay();
+    updateBonusDisplay();
     drawInitialScreen();
 }

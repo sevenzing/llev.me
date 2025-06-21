@@ -39,7 +39,7 @@ body {
     display: flex;
     justify-content: center;
     gap: 8px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     padding: 5px 10px;
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 20px;
@@ -74,6 +74,70 @@ body {
         transform: scale(0.8);
         filter: grayscale(100%) brightness(0.3) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     }
+}
+
+/* Bonus display */
+.bonus-display {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    height: 38px; /* Pre-allocate space to avoid layout shift */
+}
+
+.bonus-container {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.active-bonus {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: scale(1);
+}
+
+.active-bonus.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+}
+
+.bonus-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.bonus-icon.speedup {
+    background-color: #3399ff;
+    box-shadow: 0 0 8px rgba(51, 153, 255, 0.6);
+}
+
+.bonus-icon.shield {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.bonus-name {
+    color: #ffffff;
+    flex-grow: 1;
+}
+
+.bonus-time {
+    color: #cccccc;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: right;
 }
 
 /* Game canvas container */
@@ -248,6 +312,17 @@ body {
     .heart-icon {
         width: 25px;
         height: 25px;
+    }
+    
+    .active-bonus {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        gap: 8px;
+    }
+    
+    .bonus-icon {
+        width: 18px;
+        height: 18px;
     }
     
     .difficulty-selector {
