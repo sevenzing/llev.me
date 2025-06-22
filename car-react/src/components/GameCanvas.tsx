@@ -56,8 +56,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // Draw shield over the car if active
       if (gameState.activeBonuses.shield && images.shield) {
         const shieldConfig = BONUSES_CONFIG.items.shield;
-        const shieldX = gameState.carX + (CAR_DIMENSIONS.width - shieldConfig.width) / 2;
-        const shieldY = GAME_CONFIG.carY + 10; // Position it near the top of the car
+        const w = shieldConfig.width * (shieldConfig.spriteOnPlayerScale || 1);
+        const h = shieldConfig.height * (shieldConfig.spriteOnPlayerScale || 1);
+        const shieldX = gameState.carX + CAR_DIMENSIONS.width / 2 - w / 2;
+        const shieldY = GAME_CONFIG.carY + CAR_DIMENSIONS.height / 2 - h / 2;
 
         ctx.save();
         ctx.shadowColor = shieldConfig.glow.color;
@@ -66,8 +68,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           images.shield,
           shieldX,
           shieldY,
-          shieldConfig.width,
-          shieldConfig.height
+          w,
+          h
         );
         ctx.restore();
       }

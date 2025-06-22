@@ -35,19 +35,20 @@ export const CAR_DIMENSIONS = {
 export const BONUSES_CONFIG: BonusesConfig = {
   items: {
     speedup: {
-    duration: 20000, // 20 seconds
-    speedMultiplier: 2, // 100% speed increase
-    movingSpeed: DEFAULT_BONUS_MOVING_SPEED, // Same as game speed
-    width: DEFAULT_WIDTH,
-    height: DEFAULT_WIDTH,
-    glow: {
-      color: '#3399ff',
-      size: 15,
+      duration: 20000, // 20 seconds
+      speedMultiplier: 2, // 100% speed increase
+      movingSpeed: DEFAULT_BONUS_MOVING_SPEED, // Same as game speed
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_WIDTH,
+      glow: {
+        color: '#3399ff',
+        size: 15,
     },
   },
   shield: {
     duration: 10000, // 10 seconds
     movingSpeed: DEFAULT_BONUS_MOVING_SPEED, // Same as game speed
+    spriteOnPlayerScale: 0.6,
     width: DEFAULT_WIDTH,
     height: DEFAULT_WIDTH,
     glow: {

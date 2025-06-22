@@ -24,6 +24,7 @@ export interface BonusConfig {
   movingSpeed: number;
   width: number;
   height: number;
+  spriteOnPlayerScale?: number;
   glow: {
     color: string;
     size: number;
