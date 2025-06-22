@@ -58,6 +58,7 @@ export interface Obstacle {
   movingSpeed: number;
   isFadingOut?: boolean;
   fadeStartTime?: number;
+  rotation?: number;
 }
 
 export interface GameState {
@@ -98,4 +99,4 @@ export interface GameConfig {
   blinkInterval: number;
 }
 
-export type Difficulty = 'easy' | 'normal' | 'hard' | 'insane'; 
+export type Difficulty = 'easy' | 'normal' | 'hard' | 'insane';

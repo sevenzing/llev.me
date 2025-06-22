@@ -100,6 +100,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         let width = obstacle.width;
         let height = obstacle.height;
         let x = obstacle.x;
+        let rotation = obstacle.rotation || 0;
 
         if (obstacle.isFadingOut) {
             const elapsedTime = Date.now() - (obstacle.fadeStartTime || 0);
@@ -109,10 +110,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             width = obstacle.width * (1 - progress);
             height = obstacle.height * (1 - progress);
             x = obstacle.x + (obstacle.width - width) / 2;
+            rotation += progress * Math.PI * 2; // Spin it!
         }
 
         ctx.save();
         ctx.globalAlpha = alpha;
+        
+        // Translate and rotate for spinning effect
+        ctx.translate(x + width / 2, obstacle.y + height / 2);
+        ctx.rotate(rotation);
+        ctx.translate(-(x + width / 2), -(obstacle.y + height / 2));
+
         ctx.drawImage(
           images.enemyCar,
           x,
