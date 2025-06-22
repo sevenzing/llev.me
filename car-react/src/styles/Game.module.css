@@ -1,0 +1,327 @@
+/* Reset and base styles */
+.carGame {
+  margin: 0;
+  background-color: #303030;
+  color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.gameUI {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Typography */
+.gameTitle {
+  font-size: 2rem;
+  color: #00ff00;
+  text-align: center;
+  margin: 0;
+}
+
+.titleEmoji {
+  font-size: 1.2em;
+  vertical-align: middle;
+}
+
+.scoreDisplay {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Heart display */
+.heartDisplay {
+  display: flex;
+  justify-content: center;
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  border: 2px solid rgba(255, 0, 0, 0.3);
+}
+
+.heartIcon {
+  width: 30px;
+  height: 30px;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.heartIcon.empty {
+  filter: grayscale(100%) brightness(0.3) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.heartIcon.lost {
+  animation: heartLost 0.5s ease-out;
+}
+
+@keyframes heartLost {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  50% {
+    transform: scale(1.3);
+    filter: drop-shadow(0 4px 8px rgba(255, 0, 0, 0.5));
+  }
+  100% {
+    transform: scale(0.8);
+    filter: grayscale(100%) brightness(0.3) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+}
+
+/* Bonus display */
+.bonusDisplay {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  height: 38px; /* Pre-allocate space to avoid layout shift */
+}
+
+.bonusContainer {
+  display: flex;
+}
+
+.activeBonus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: scale(1);
+}
+
+.activeBonus.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+}
+
+.bonusIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bonusIcon.speedup {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.bonusIcon.shield {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.bonusTime {
+  color: #cccccc;
+  font-weight: bold;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* Game canvas container */
+.gameCanvasContainer {
+  width: 100%;
+  max-width: 420px;
+  padding: 0 10px;
+  margin-bottom: 20px;
+}
+
+.gameCanvas {
+  width: 100%;
+  background-color: #444444;
+  border: 4px solid #00ff00;
+  border-radius: 12px;
+  display: block;
+  box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2);
+}
+
+/* Game controls section */
+.gameControls {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Difficulty selection */
+.difficultySelector {
+  display: flex;
+  justify-content: center;
+  border: none;
+  padding: 0;
+}
+
+.difficultyOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.difficultyOption:hover {
+  background-color: rgba(0, 255, 0, 0.1);
+}
+
+.difficultyRadio {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.difficultyRadio + .difficultyLabel::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #00ff00;
+  border-radius: 50%;
+  margin-right: 8px;
+  transition: all 0.2s ease;
+}
+
+.difficultyRadio:checked + .difficultyLabel::before {
+  background-color: #00ff00;
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+
+.difficultyRadio:disabled + .difficultyLabel::before {
+  border-color: #666666;
+  background-color: #444444;
+}
+
+.difficultyLabel {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.gameButton {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.gameButton:hover:enabled {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.gameButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.startButton {
+  background-color: #00ff00;
+  color: #000000;
+}
+
+.startButton:hover:enabled {
+  background-color: #00cc00;
+}
+
+.stopButton {
+  background-color: #ff4444;
+  color: #ffffff;
+}
+
+.stopButton:hover:enabled {
+  background-color: #cc3333;
+}
+
+.watchButton {
+  background-color: #4444ff;
+  color: #ffffff;
+}
+
+.watchButton:hover:enabled {
+  background-color: #3333cc;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .carGame {
+    padding: 10px;
+  }
+
+  .gameTitle {
+    font-size: 1.5rem;
+  }
+
+  .heartDisplay {
+    gap: 6px;
+    padding: 4px 8px;
+  }
+
+  .heartIcon {
+    width: 25px;
+    height: 25px;
+  }
+
+  .activeBonus {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+
+  .bonusIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .difficultySelector {
+    gap: 15px;
+  }
+
+  .difficultyOption {
+    padding: 4px 10px;
+    font-size: 0.9rem;
+  }
+
+  .buttonContainer {
+    gap: 8px;
+  }
+
+  .gameButton {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    min-width: 80px;
+  }
+} 
