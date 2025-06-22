@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import type { GameState } from '../types/game';
-import { GAME_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG } from '../constants/gameConstants';
+import { GAME_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, BONUSES_CONFIG } from '../constants/gameConstants';
 import styles from '../styles/Game.module.css';
 
 interface GameCanvasProps {
@@ -52,6 +52,25 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         CAR_DIMENSIONS.width,
         CAR_DIMENSIONS.height
       );
+
+      // Draw shield over the car if active
+      if (gameState.activeBonuses.shield && images.shield) {
+        const shieldConfig = BONUSES_CONFIG.items.shield;
+        const shieldX = gameState.carX + (CAR_DIMENSIONS.width - shieldConfig.width) / 2;
+        const shieldY = GAME_CONFIG.carY + 10; // Position it near the top of the car
+
+        ctx.save();
+        ctx.shadowColor = shieldConfig.glow.color;
+        ctx.shadowBlur = shieldConfig.glow.size;
+        ctx.drawImage(
+          images.shield,
+          shieldX,
+          shieldY,
+          shieldConfig.width,
+          shieldConfig.height
+        );
+        ctx.restore();
+      }
     }
 
     // Draw obstacles

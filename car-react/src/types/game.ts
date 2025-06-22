@@ -38,6 +38,7 @@ export interface Bonus {
   height: number;
   config: BonusConfig;
   image: any;
+  lane: number;
 }
 
 export interface ActiveBonus {

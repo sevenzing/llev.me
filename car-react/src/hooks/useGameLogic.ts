@@ -83,32 +83,77 @@ export const useGameLogic = () => {
     });
   }, [difficulty]);
 
-  const createObstacle = useCallback((): Obstacle => {
-    const lane = Math.floor(Math.random() * GAME_CONFIG.laneCount);
-    const x = calculateLaneX(lane);
-    const speed = OBSTACLE_CONFIG.minSpeed + Math.random() * (OBSTACLE_CONFIG.maxSpeed - OBSTACLE_CONFIG.minSpeed);
+  const createObstacles = useCallback((existingObstacles: Obstacle[]): Obstacle[] => {
+    const numberOfObstaclesToSpawn = (() => {
+      const rand = Math.random();
+      if (rand < 0.7) { // 70% chance for 1 obstacle
+        return 1;
+      } else if (rand < 0.9) { // 20% chance for 2 obstacles
+        return 2;
+      } else { // 10% chance for 3 obstacles
+        return 3;
+      }
+    })();
 
-    return {
-      x,
-      y: -CAR_DIMENSIONS.height,
-      width: CAR_DIMENSIONS.width,
-      height: CAR_DIMENSIONS.height,
-      lane,
-      movingSpeed: speed,
-    };
+    const newObstacles: Obstacle[] = [];
+    const availableLanes = Array.from({ length: GAME_CONFIG.laneCount }, (_, i) => i);
+    
+    for (let i = 0; i < numberOfObstaclesToSpawn && availableLanes.length > 0; i++) {
+        const laneIndex = Math.floor(Math.random() * availableLanes.length);
+        const lane = availableLanes.splice(laneIndex, 1)[0];
+        
+        const lastObstacleInLane = existingObstacles
+            .filter(o => o.lane === lane)
+            .sort((a, b) => b.y - a.y)[0];
+        
+        let maxSpeed = OBSTACLE_CONFIG.maxSpeed;
+        if (lastObstacleInLane && lastObstacleInLane.y < CAR_DIMENSIONS.height * 2) {
+            maxSpeed = lastObstacleInLane.movingSpeed;
+        }
+        
+        const x = calculateLaneX(lane);
+        const speed = OBSTACLE_CONFIG.minSpeed + Math.random() * (maxSpeed - OBSTACLE_CONFIG.minSpeed);
+
+        newObstacles.push({
+            x,
+            y: -CAR_DIMENSIONS.height,
+            width: CAR_DIMENSIONS.width,
+            height: CAR_DIMENSIONS.height,
+            lane,
+            movingSpeed: speed,
+        });
+    }
+
+    return newObstacles;
   }, []);
 
-  const createBonus = useCallback((): Bonus => {
+  const createBonus = useCallback((existingBonuses: Bonus[]): Bonus | null => {
     const types = Object.keys(BONUSES_CONFIG.items) as Array<BonusType>;
     const type = (types[Math.floor(Math.random() * types.length)]);
     const config = BONUSES_CONFIG.items[type];
-    // todo: add more complex logic for choosing the bonus type
-    const lane = Math.floor(Math.random() * GAME_CONFIG.laneCount);
-    const x = calculateLaneX(lane);
     const image = images[type];
+
     if (!image) {
       console.error(`No image found for bonus type: ${type}`);
+      return null;
     }
+
+    const availableLanes = Array.from({ length: GAME_CONFIG.laneCount }, (_, i) => i);
+    existingBonuses.forEach(existingBonus => {
+        if (existingBonus.y < config.height * 2) { 
+            const index = availableLanes.indexOf(existingBonus.lane);
+            if (index > -1) {
+                availableLanes.splice(index, 1);
+            }
+        }
+    });
+
+    if (availableLanes.length === 0) {
+        return null;
+    }
+
+    const lane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
+    const x = calculateLaneX(lane);
 
     return {
       type,
@@ -118,6 +163,7 @@ export const useGameLogic = () => {
       height: config.height,
       config: BONUSES_CONFIG.items[type],
       image,
+      lane,
     };
   }, [images]);
 
@@ -300,8 +346,7 @@ export const useGameLogic = () => {
     lastTimeRef.current = currentTime;
 
     setGameState(prev => {
-      const newState = { ...prev };
-      
+    const newState = { ...prev };
       // Update car position
       newState.carX += (newState.targetX - newState.carX) * 0.2;
       
@@ -313,14 +358,20 @@ export const useGameLogic = () => {
       
       // Create obstacles
       if (newState.frameCount >= newState.nextObstacleSpawn) {
-        newState.obstacles.push(createObstacle());
+        const newObstacles = createObstacles(newState.obstacles);
+        if (newObstacles && newObstacles.length > 0) {
+          newState.obstacles = [...newState.obstacles, ...newObstacles];
+        }
         const newFrequency = newState.obstacleFrequency + (Math.random() * 40 - 20);
         newState.nextObstacleSpawn = newState.frameCount + newFrequency;
       }
       
       // Create bonuses
       if (newState.frameCount >= newState.nextBonusSpawn) {
-        newState.bonuses.push(createBonus());
+        const newBonus = createBonus(newState.bonuses);
+        if (newBonus) {
+          newState.bonuses = [...newState.bonuses, newBonus];
+        }
         const newFrequency = BONUSES_CONFIG.spawnFrequency + (Math.random() * 100 - 50);
         newState.nextBonusSpawn = newState.frameCount + newFrequency;
       }
@@ -358,7 +409,7 @@ export const useGameLogic = () => {
       });
       
       // Update score
-      newState.score++;
+      newState.score += newState.gameSpeed;
       
       // Update active bonuses
       updateActiveBonuses();
@@ -376,7 +427,7 @@ export const useGameLogic = () => {
     });
     
     animationFrameRef.current = requestAnimationFrame(gameLoop);
-  }, [gameState.isRunning, createObstacle, createBonus, checkCollision, checkBonusCollision, collectBonus, handlePlayerHit, updateActiveBonuses, updateInvincibility, endGame]);
+  }, [gameState.isRunning, createObstacles, createBonus, checkCollision, checkBonusCollision, collectBonus, handlePlayerHit, updateActiveBonuses, updateInvincibility, endGame]);
 
   useEffect(() => {
     if (gameState.isRunning) {
