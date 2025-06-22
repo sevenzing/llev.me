@@ -1,13 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { GameState, Difficulty, Obstacle, Bonus, BonusType } from '../types/game';
 import { DIFFICULTY_SETTINGS, GAME_CONFIG, BONUSES_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, OBSTACLE_CONFIG, FADE_OUT_DURATION } from '../constants/gameConstants';
-import { calculateLaneX } from '../utils/cords';
+import { calculateLaneX, calculateLaneXForCar } from '../utils/cords';
 import { createNegativeImage } from '../utils/image';
 
 const initialGameState: GameState = {
   currentLane: 2,
-  targetX: calculateLaneX(2),
-  carX: calculateLaneX(2),
+  targetX: calculateLaneXForCar(2),
+  carX: calculateLaneXForCar(2),
   score: 0,
   lives: GAME_CONFIG.maxLives,
   gameSpeed: 4,
@@ -92,8 +92,8 @@ export const useGameLogic = () => {
       gameSpeed: settings.speed,
       baseGameSpeed: settings.speed,
       obstacleFrequency: settings.obstacleFrequency,
-      targetX: calculateLaneX(2),
-      carX: calculateLaneX(2),
+      targetX: calculateLaneXForCar(2),
+      carX: calculateLaneXForCar(2),
       nextObstacleSpawn: 100,
       nextBonusSpawn: 300,
     });
@@ -148,7 +148,7 @@ export const useGameLogic = () => {
             maxSpeed = lastObstacleInLane.movingSpeed;
         }
         
-        const x = calculateLaneX(lane);
+        const x = calculateLaneX(lane, CAR_DIMENSIONS.width);
         const speed = OBSTACLE_CONFIG.minSpeed + Math.random() * (maxSpeed - OBSTACLE_CONFIG.minSpeed);
 
         newObstacles.push({
@@ -192,7 +192,7 @@ export const useGameLogic = () => {
     }
 
     const lane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
-    const x = calculateLaneX(lane);
+    const x = calculateLaneX(lane, config.width);
 
     return {
       type,
@@ -369,7 +369,7 @@ export const useGameLogic = () => {
       setGameState(prev => ({
         ...prev,
         currentLane: lane,
-        targetX: calculateLaneX(lane),
+        targetX: calculateLaneXForCar(lane),
       }));
     }
   }, [calculateLaneX]);

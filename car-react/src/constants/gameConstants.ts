@@ -19,7 +19,7 @@ export const DIFFICULTY_SETTINGS: Record<Difficulty, DifficultySettings> = {
   },
 };
 
-const DEFAULT_WIDTH = 40;
+const DEFAULT_BONUS_WIDTH = 40;
 const DEFAULT_BONUS_MOVING_SPEED = 0.5;
 
 export const OBSTACLE_CONFIG = {
@@ -28,7 +28,7 @@ export const OBSTACLE_CONFIG = {
 };
 
 export const CAR_DIMENSIONS = {
-  width: DEFAULT_WIDTH,
+  width: 40,
   height: 70,
 };
 
@@ -38,8 +38,8 @@ export const BONUSES_CONFIG: BonusesConfig = {
       duration: 20000, // 20 seconds
       speedMultiplier: 2, // 100% speed increase
       movingSpeed: DEFAULT_BONUS_MOVING_SPEED,
-      width: DEFAULT_WIDTH,
-      height: DEFAULT_WIDTH,
+      width: DEFAULT_BONUS_WIDTH,
+      height: DEFAULT_BONUS_WIDTH,
       glow: {
         color: '#3399ff',
         size: 15,
@@ -49,8 +49,8 @@ export const BONUSES_CONFIG: BonusesConfig = {
     shield: {
       duration: 10000, // 10 seconds
       movingSpeed: DEFAULT_BONUS_MOVING_SPEED,
-      width: DEFAULT_WIDTH,
-      height: DEFAULT_WIDTH,
+      width: DEFAULT_BONUS_WIDTH,
+      height: DEFAULT_BONUS_WIDTH,
       glow: {
         color: '#ffcc00',
         size: 15,
@@ -61,8 +61,8 @@ export const BONUSES_CONFIG: BonusesConfig = {
     vortex: {
       duration: 0, // Instant effect
       movingSpeed: DEFAULT_BONUS_MOVING_SPEED,
-      width: DEFAULT_WIDTH,
-      height: DEFAULT_WIDTH,
+      width: DEFAULT_BONUS_WIDTH,
+      height: DEFAULT_BONUS_WIDTH,
       glow: {
         color: '#8a2be2', // A vortex-like purple
         size: 15,
