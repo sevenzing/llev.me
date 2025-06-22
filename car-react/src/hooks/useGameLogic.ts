@@ -9,6 +9,7 @@ const initialGameState: GameState = {
   targetX: calculateLaneXForCar(2),
   carX: calculateLaneXForCar(2),
   score: 0,
+  publicScore: 0,
   lives: GAME_CONFIG.maxLives,
   gameSpeed: 4,
   baseGameSpeed: 4,
@@ -477,6 +478,7 @@ export const useGameLogic = () => {
       
       // Update score
       newState.score += newState.gameSpeed;
+      newState.publicScore = newState.score / 100;
       
       // Update active bonuses
       updateActiveBonuses();

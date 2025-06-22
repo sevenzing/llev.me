@@ -66,6 +66,7 @@ export interface GameState {
   carX: number;
   targetX: number;
   score: number;
+  publicScore: number;
   lives: number;
   gameSpeed: number;
   baseGameSpeed: number;
