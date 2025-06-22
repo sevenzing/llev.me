@@ -81,14 +81,12 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 10px;
     margin-bottom: 15px;
     height: 38px; /* Pre-allocate space to avoid layout shift */
 }
 
 .bonus-container {
     display: flex;
-    gap: 0.5rem;
 }
 
 .active-bonus {
@@ -119,8 +117,8 @@ body {
 }
 
 .bonus-icon.speedup {
-    background-color: #3399ff;
-    box-shadow: 0 0 8px rgba(51, 153, 255, 0.6);
+    background-color: transparent;
+    box-shadow: none;
 }
 
 .bonus-icon.shield {

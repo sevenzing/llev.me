@@ -6,12 +6,14 @@ const images = {
     enemyCar: new Image(),
     heart: new Image(),
     shield: new Image(),
+    speedup: new Image(),
 };
 
 images.playerCar.src = "static/green_car.png";
 images.enemyCar.src = "static/red_car.png";
 images.heart.src = "static/heart.png";
 images.shield.src = "static/shield.png";
+images.speedup.src = "static/speedup.png";
 
 const DIFFICULTY_SETTINGS = {
     easy: {
@@ -32,27 +34,39 @@ const DIFFICULTY_SETTINGS = {
     },
 };
 
+const DEFAULT_WIDTH = 40;
+
 const CAR_DIMENSIONS = {
-    width: 40,
+    width: DEFAULT_WIDTH,
     height: 70,
 };
+
+
 
 const BONUS_CONFIG = {
     types: {
         speedup: {
-            color: '#3399ff',
-            radius: 15,
             duration: 20000, // 20 seconds
             speedMultiplier: 2, // 100% speed increase
             movingSpeed: 0.5,
+            image: images.speedup,
+            width: DEFAULT_WIDTH,
+            height: DEFAULT_WIDTH,
+            glow: {
+                color: '#3399ff',
+                size: 15,
+            },
         },
         shield: {
-            color: '#ffcc00', // Kept for fallback/shadow
             duration: 10000, // 10 seconds
             image: images.shield,
-            width: 759 * 0.05,
-            height: 836 * 0.05,
+            width: DEFAULT_WIDTH,
+            height: DEFAULT_WIDTH,
             movingSpeed: 0.5,
+            glow: {
+                color: '#ffcc00',
+                size: 15,
+            },
         }
     },
     spawnFrequency: 300, // Spawn bonus every 300 frames
@@ -232,24 +246,33 @@ function updateBonuses() {
     }
 }
 
+function drawBonus(bonus, config, alpha = 1.0) {
+    ctx.globalAlpha = alpha;
+    
+    if (config.image) {
+        ctx.drawImage(config.image, bonus.x, bonus.y, bonus.width, bonus.height);
+    } else if (config.color) {
+        ctx.fillStyle = config.color;
+        ctx.beginPath();
+        const radius = bonus.width / 2;
+        ctx.arc(bonus.x + radius, bonus.y + radius, radius, 0, 2 * Math.PI);
+        ctx.fill();
+    } else {
+        console.log('Cannot draw bonus:', bonus);
+    }
+    
+    ctx.globalAlpha = 1.0;
+}
+
 function drawBonuses() {
     gameState.bonuses.forEach(bonus => {
         const config = BONUS_CONFIG.types[bonus.type];
-        if (config.image) {
-            ctx.drawImage(config.image, bonus.x, bonus.y, bonus.width, bonus.height);
-        } else { // Draw a circle for other bonuses
-            ctx.fillStyle = config.color;
-            ctx.beginPath();
-            const radius = bonus.width / 2;
-            ctx.arc(bonus.x + radius, bonus.y + radius, radius, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Add a subtle glow effect
-            ctx.shadowColor = config.color;
-            ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.arc(bonus.x + radius, bonus.y + radius, radius, 0, 2 * Math.PI);
-            ctx.fill();
+        if (config.glow) {
+            ctx.shadowColor = config.glow.color;
+            ctx.shadowBlur = config.glow.size;
+        }
+        drawBonus(bonus, config);
+        if (config.glow) {
             ctx.shadowBlur = 0;
         }
     });
@@ -533,10 +556,10 @@ function runGameLoop() {
     
     drawRoadLines();
     drawPlayerCar();
-    updateObstacles();
-    drawObstacles();
     updateBonuses();
     drawBonuses();
+    updateObstacles();
+    drawObstacles();
     
     updateInvincibility();
     updateActiveBonuses();
