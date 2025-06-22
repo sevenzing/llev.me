@@ -8,6 +8,16 @@ export interface DifficultySettings {
   obstacleFrequency: number;
 }
 
+export type BonusType = 'speedup' | 'shield';
+
+export interface BonusesConfig {
+  items: {
+    [key in BonusType]: BonusConfig;
+  },
+  spawnFrequency: number;
+  
+}
+
 export interface BonusConfig {
   duration: number;
   speedMultiplier?: number;
@@ -21,16 +31,17 @@ export interface BonusConfig {
 }
 
 export interface Bonus {
-  type: 'speedup' | 'shield';
+  type: BonusType;
   x: number;
   y: number;
   width: number;
   height: number;
   config: BonusConfig;
+  image: any;
 }
 
 export interface ActiveBonus {
-  type: 'speedup' | 'shield';
+  type: BonusType;
   endTime: number;
 }
 
@@ -40,6 +51,7 @@ export interface Obstacle {
   width: number;
   height: number;
   lane: number;
+  movingSpeed: number;
 }
 
 export interface GameState {
@@ -68,6 +80,8 @@ export interface GameState {
   };
   lastBonusUpdateTime: number;
   bonusUpdateInterval: number;
+  nextObstacleSpawn: number;
+  nextBonusSpawn: number;
 }
 
 export interface GameConfig {

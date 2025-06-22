@@ -1,6 +1,6 @@
-import type { DifficultySettings, BonusConfig, GameConfig } from '../types/game';
+import type { DifficultySettings, GameConfig, BonusesConfig, Difficulty } from '../types/game';
 
-export const DIFFICULTY_SETTINGS: Record<string, DifficultySettings> = {
+export const DIFFICULTY_SETTINGS: Record<Difficulty, DifficultySettings> = {
   easy: {
     speed: 2,
     obstacleFrequency: 150,
@@ -19,16 +19,22 @@ export const DIFFICULTY_SETTINGS: Record<string, DifficultySettings> = {
   },
 };
 
-export const DEFAULT_WIDTH = 40;
-export const DEFAULT_BONUS_MOVING_SPEED = 2;
+const DEFAULT_WIDTH = 40;
+const DEFAULT_BONUS_MOVING_SPEED = 0.5;
+
+export const OBSTACLE_CONFIG = {
+  minSpeed: 0.8,
+  maxSpeed: 1.2,
+};
 
 export const CAR_DIMENSIONS = {
   width: DEFAULT_WIDTH,
   height: 70,
 };
 
-export const BONUS_CONFIG: Record<string, BonusConfig> = {
-  speedup: {
+export const BONUSES_CONFIG: BonusesConfig = {
+  items: {
+    speedup: {
     duration: 20000, // 20 seconds
     speedMultiplier: 2, // 100% speed increase
     movingSpeed: DEFAULT_BONUS_MOVING_SPEED, // Same as game speed
@@ -47,11 +53,11 @@ export const BONUS_CONFIG: Record<string, BonusConfig> = {
     glow: {
       color: '#ffcc00',
       size: 15,
+      },
     },
   },
+  spawnFrequency: 300,
 };
-
-export const BONUS_SPAWN_FREQUENCY = 300; // Spawn bonus every 300 frames
 
 export const CANVAS_CONFIG = {
   width: 400,

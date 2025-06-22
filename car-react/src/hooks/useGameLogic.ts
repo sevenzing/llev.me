@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { GameState, Difficulty, Obstacle, Bonus, ActiveBonus } from '../types/game';
-import { DIFFICULTY_SETTINGS, GAME_CONFIG, BONUS_CONFIG, BONUS_SPAWN_FREQUENCY, CAR_DIMENSIONS, DEFAULT_WIDTH, CANVAS_CONFIG } from '../constants/gameConstants';
+import type { GameState, Difficulty, Obstacle, Bonus, BonusType } from '../types/game';
+import { DIFFICULTY_SETTINGS, GAME_CONFIG, BONUSES_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, OBSTACLE_CONFIG } from '../constants/gameConstants';
 import { calculateLaneX } from '../utils/cords';
 
 const initialGameState: GameState = {
@@ -29,6 +29,8 @@ const initialGameState: GameState = {
   },
   lastBonusUpdateTime: 0,
   bonusUpdateInterval: 500,
+  nextObstacleSpawn: 100,
+  nextBonusSpawn: 300,
 };
 
 
@@ -67,8 +69,6 @@ export const useGameLogic = () => {
     });
   }, []);
 
-  
-
   const resetGameState = useCallback(() => {
     const settings = DIFFICULTY_SETTINGS[difficulty];
     setGameState({
@@ -78,36 +78,48 @@ export const useGameLogic = () => {
       obstacleFrequency: settings.obstacleFrequency,
       targetX: calculateLaneX(2),
       carX: calculateLaneX(2),
+      nextObstacleSpawn: 100,
+      nextBonusSpawn: 300,
     });
-  }, [difficulty, calculateLaneX]);
+  }, [difficulty]);
 
-  const createObstacle = useCallback(() => {
+  const createObstacle = useCallback((): Obstacle => {
     const lane = Math.floor(Math.random() * GAME_CONFIG.laneCount);
     const x = calculateLaneX(lane);
+    const speed = OBSTACLE_CONFIG.minSpeed + Math.random() * (OBSTACLE_CONFIG.maxSpeed - OBSTACLE_CONFIG.minSpeed);
+
     return {
       x,
       y: -CAR_DIMENSIONS.height,
       width: CAR_DIMENSIONS.width,
       height: CAR_DIMENSIONS.height,
       lane,
+      movingSpeed: speed,
     };
-  }, [calculateLaneX]);
+  }, []);
 
-  const createBonus = useCallback(() => {
-    const types = Object.keys(BONUS_CONFIG) as Array<keyof typeof BONUS_CONFIG>;
+  const createBonus = useCallback((): Bonus => {
+    const types = Object.keys(BONUSES_CONFIG.items) as Array<BonusType>;
     const type = (types[Math.floor(Math.random() * types.length)]);
+    const config = BONUSES_CONFIG.items[type];
+    // todo: add more complex logic for choosing the bonus type
     const lane = Math.floor(Math.random() * GAME_CONFIG.laneCount);
     const x = calculateLaneX(lane);
-    
+    const image = images[type];
+    if (!image) {
+      console.error(`No image found for bonus type: ${type}`);
+    }
+
     return {
-      type: type as 'speedup' | 'shield',
+      type,
       x,
-      y: -DEFAULT_WIDTH,
-      width: DEFAULT_WIDTH,
-      height: DEFAULT_WIDTH,
-      config: BONUS_CONFIG[type],
+      y: -config.height,
+      width: config.width,
+      height: config.height,
+      config: BONUSES_CONFIG.items[type],
+      image,
     };
-  }, [calculateLaneX]);
+  }, [images]);
 
   const checkCollision = useCallback((car: { x: number; y: number; width: number; height: number }, obstacle: Obstacle) => {
     return (
@@ -275,6 +287,7 @@ export const useGameLogic = () => {
       ...prev,
       isRunning: false,
       isAutoPlay: false,
+      isVisible: true,
     }));
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -299,23 +312,27 @@ export const useGameLogic = () => {
       newState.frameCount++;
       
       // Create obstacles
-      if (newState.frameCount % newState.obstacleFrequency === 0) {
+      if (newState.frameCount >= newState.nextObstacleSpawn) {
         newState.obstacles.push(createObstacle());
+        const newFrequency = newState.obstacleFrequency + (Math.random() * 40 - 20);
+        newState.nextObstacleSpawn = newState.frameCount + newFrequency;
       }
       
       // Create bonuses
-      if (newState.frameCount % BONUS_SPAWN_FREQUENCY === 0) {
+      if (newState.frameCount >= newState.nextBonusSpawn) {
         newState.bonuses.push(createBonus());
+        const newFrequency = BONUSES_CONFIG.spawnFrequency + (Math.random() * 100 - 50);
+        newState.nextBonusSpawn = newState.frameCount + newFrequency;
       }
       
       // Update obstacles with consistent speed
       newState.obstacles = newState.obstacles
-        .map(obstacle => ({ ...obstacle, y: obstacle.y + newState.gameSpeed }))
+        .map(obstacle => ({ ...obstacle, y: obstacle.y + newState.gameSpeed * obstacle.movingSpeed }))
         .filter(obstacle => obstacle.y < CANVAS_CONFIG.height);
       
       // Update bonuses with consistent speed
       newState.bonuses = newState.bonuses
-        .map(bonus => ({ ...bonus, y: bonus.y + bonus.config.movingSpeed }))
+        .map(bonus => ({ ...bonus, y: bonus.y + newState.gameSpeed * bonus.config.movingSpeed }))
         .filter(bonus => bonus.y < CANVAS_CONFIG.height);
       
       // Check collisions

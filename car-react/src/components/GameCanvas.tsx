@@ -69,21 +69,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // Draw bonuses
     gameState.bonuses.forEach(bonus => {
-      const imageKey = bonus.type === 'speedup' ? 'speedup' : 'shield';
-      if (images[imageKey]) {
+      if (bonus.image) {
         // Add glow effect
         ctx.save();
         ctx.shadowColor = bonus.config.glow.color;
         ctx.shadowBlur = bonus.config.glow.size;
         ctx.drawImage(
-          images[imageKey],
+          bonus.image,
           bonus.x,
           bonus.y,
           bonus.width,
           bonus.height
         );
         ctx.restore();
-      }
+      };
     });
 
   }, [gameState, images]);
