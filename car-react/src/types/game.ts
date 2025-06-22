@@ -8,7 +8,7 @@ export interface DifficultySettings {
   obstacleFrequency: number;
 }
 
-export type BonusType = 'speedup' | 'shield';
+export type BonusType = 'speedup' | 'shield' | 'vortex';
 
 export interface BonusesConfig {
   items: {
@@ -56,6 +56,8 @@ export interface Obstacle {
   height: number;
   lane: number;
   movingSpeed: number;
+  isFadingOut?: boolean;
+  fadeStartTime?: number;
 }
 
 export interface GameState {
@@ -79,8 +81,7 @@ export interface GameState {
   lastBlinkTime: number;
   isVisible: boolean;
   activeBonuses: {
-    speedup: ActiveBonus | null;
-    shield: ActiveBonus | null;
+    [key in BonusType]?: ActiveBonus;
   };
   lastBonusUpdateTime: number;
   bonusUpdateInterval: number;

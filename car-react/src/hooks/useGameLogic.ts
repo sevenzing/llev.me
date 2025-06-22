@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { GameState, Difficulty, Obstacle, Bonus, BonusType } from '../types/game';
-import { DIFFICULTY_SETTINGS, GAME_CONFIG, BONUSES_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, OBSTACLE_CONFIG } from '../constants/gameConstants';
+import { DIFFICULTY_SETTINGS, GAME_CONFIG, BONUSES_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, OBSTACLE_CONFIG, FADE_OUT_DURATION } from '../constants/gameConstants';
 import { calculateLaneX } from '../utils/cords';
 import { createNegativeImage } from '../utils/image';
 
@@ -24,10 +24,7 @@ const initialGameState: GameState = {
   invincibilityStartTime: 0,
   lastBlinkTime: 0,
   isVisible: true,
-  activeBonuses: {
-    speedup: null,
-    shield: null,
-  },
+  activeBonuses: {},
   lastBonusUpdateTime: 0,
   bonusUpdateInterval: 500,
   nextObstacleSpawn: 100,
@@ -51,6 +48,7 @@ export const useGameLogic = () => {
       heart: '/static/heart.png',
       shield: '/static/shield.png',
       speedup: '/static/speedup.png',
+      vortex: '/static/vortex.png',
     };
 
     const loadedImages: { [key: string]: HTMLImageElement } = {};
@@ -237,9 +235,28 @@ export const useGameLogic = () => {
         if (bonus.type === 'speedup') {
           newGameSpeed = prev.baseGameSpeed;
         }
-        newActiveBonuses[bonus.type] = null;
+        if (bonus.type === 'vortex') {
+            // Spawn a new wave of obstacles
+            const newObstacles = createObstacles(prev.obstacles);
+            return {
+                ...prev,
+                bonuses: prev.bonuses.filter(b => b !== bonus),
+                obstacles: [...prev.obstacles, ...newObstacles],
+            };
+        }
+        delete newActiveBonuses[bonus.type];
       } else {
         // If a normal bonus is collected, activate it
+        if (bonus.type === 'vortex') {
+            const now = Date.now();
+            const updatedObstacles = prev.obstacles.map(o => ({
+                ...o,
+                isFadingOut: true,
+                fadeStartTime: now,
+            }));
+            return { ...prev, obstacles: updatedObstacles, bonuses: prev.bonuses.filter(b => b !== bonus) };
+        }
+        
         newActiveBonuses[bonus.type] = {
           type: bonus.type,
           endTime: Date.now() + bonus.config.duration,
@@ -265,11 +282,11 @@ export const useGameLogic = () => {
       let gameSpeedChanged = false;
       
       if (newActiveBonuses.speedup && now > newActiveBonuses.speedup.endTime) {
-        newActiveBonuses.speedup = null;
+        delete newActiveBonuses.speedup;
         gameSpeedChanged = true;
       }
       if (newActiveBonuses.shield && now > newActiveBonuses.shield.endTime) {
-        newActiveBonuses.shield = null;
+        delete newActiveBonuses.shield;
       }
 
       // Reset speed when speedup bonus expires
@@ -299,7 +316,7 @@ export const useGameLogic = () => {
       if (prev.activeBonuses.shield) {
         // Remove shield after one hit
         const newActiveBonuses = { ...prev.activeBonuses };
-        newActiveBonuses.shield = null;
+        delete newActiveBonuses.shield;
         
         return {
           ...prev,
@@ -426,7 +443,10 @@ export const useGameLogic = () => {
       // Update obstacles with consistent speed
       newState.obstacles = newState.obstacles
         .map(obstacle => ({ ...obstacle, y: obstacle.y + newState.gameSpeed * obstacle.movingSpeed }))
-        .filter(obstacle => obstacle.y < CANVAS_CONFIG.height);
+        .filter(obstacle => {
+            // Keep obstacles that are not fading or have not finished fading
+            return !obstacle.isFadingOut || (Date.now() - (obstacle.fadeStartTime || 0)) < FADE_OUT_DURATION;
+        });
       
       // Update bonuses with consistent speed
       newState.bonuses = newState.bonuses

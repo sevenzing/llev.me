@@ -1,5 +1,5 @@
 import React from 'react';
-import type { GameState, Difficulty } from '../types/game';
+import type { GameState, Difficulty, ActiveBonus } from '../types/game';
 import { GAME_CONFIG } from '../constants/gameConstants';
 import styles from '../styles/Game.module.css';
 
@@ -20,7 +20,7 @@ export const GameUI: React.FC<GameUIProps> = ({
   onStopGame,
   onWatchGame,
 }) => {
-  const getRemainingTime = (bonus: { endTime: number } | null) => {
+  const getRemainingTime = (bonus: ActiveBonus | undefined) => {
     if (!bonus) return 0;
     return Math.max(0, Math.ceil((bonus.endTime - Date.now()) / 1000));
   };

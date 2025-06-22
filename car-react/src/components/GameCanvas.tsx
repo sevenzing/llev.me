@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import type { GameState } from '../types/game';
-import { GAME_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, BONUSES_CONFIG } from '../constants/gameConstants';
+import { GAME_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, BONUSES_CONFIG, FADE_OUT_DURATION } from '../constants/gameConstants';
 import styles from '../styles/Game.module.css';
 
 interface GameCanvasProps {
@@ -96,13 +96,31 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Draw obstacles
     gameState.obstacles.forEach(obstacle => {
       if (images.enemyCar) {
+        let alpha = 1.0;
+        let width = obstacle.width;
+        let height = obstacle.height;
+        let x = obstacle.x;
+
+        if (obstacle.isFadingOut) {
+            const elapsedTime = Date.now() - (obstacle.fadeStartTime || 0);
+            const progress = Math.min(elapsedTime / FADE_OUT_DURATION, 1);
+            
+            alpha = 1 - progress;
+            width = obstacle.width * (1 - progress);
+            height = obstacle.height * (1 - progress);
+            x = obstacle.x + (obstacle.width - width) / 2;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
         ctx.drawImage(
           images.enemyCar,
-          obstacle.x,
+          x,
           obstacle.y,
-          obstacle.width,
-          obstacle.height
+          width,
+          height
         );
+        ctx.restore();
       }
     });
 

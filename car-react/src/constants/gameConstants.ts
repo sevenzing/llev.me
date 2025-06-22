@@ -58,6 +58,17 @@ export const BONUSES_CONFIG: BonusesConfig = {
       spriteOnPlayerScale: 0.8,
       negativeImage: '/static/shield-negative.png',
     },
+    vortex: {
+      duration: 0, // Instant effect
+      movingSpeed: DEFAULT_BONUS_MOVING_SPEED,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_WIDTH,
+      glow: {
+        color: '#8a2be2', // A vortex-like purple
+        size: 15,
+      },
+      negativeImage: '/static/vortex-negative.png',
+    },
   },
   spawnFrequency: 300,
   isReverseBonusEnabled: true,
@@ -75,4 +86,6 @@ export const GAME_CONFIG: GameConfig = {
   maxLives: 3,
   invincibilityDuration: 1000, // 1 second in milliseconds
   blinkInterval: 100, // Blink every 100ms
-}; 
+};
+
+export const FADE_OUT_DURATION = 300; // 300ms fade-out for cleared obstacles 
