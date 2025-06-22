@@ -75,19 +75,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
     }
 
-    // Draw obstacles
-    gameState.obstacles.forEach(obstacle => {
-      if (images.enemyCar) {
-        ctx.drawImage(
-          images.enemyCar,
-          obstacle.x,
-          obstacle.y,
-          obstacle.width,
-          obstacle.height
-        );
-      }
-    });
-
     // Draw bonuses
     gameState.bonuses.forEach(bonus => {
       if (bonus.image) {
@@ -103,7 +90,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           bonus.height
         );
         ctx.restore();
-      };
+      }
+    });
+
+    // Draw obstacles
+    gameState.obstacles.forEach(obstacle => {
+      if (images.enemyCar) {
+        ctx.drawImage(
+          images.enemyCar,
+          obstacle.x,
+          obstacle.y,
+          obstacle.width,
+          obstacle.height
+        );
+      }
     });
 
   }, [gameState, images]);

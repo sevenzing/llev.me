@@ -37,27 +37,30 @@ export const BONUSES_CONFIG: BonusesConfig = {
     speedup: {
       duration: 20000, // 20 seconds
       speedMultiplier: 2, // 100% speed increase
-      movingSpeed: DEFAULT_BONUS_MOVING_SPEED, // Same as game speed
+      movingSpeed: DEFAULT_BONUS_MOVING_SPEED,
       width: DEFAULT_WIDTH,
       height: DEFAULT_WIDTH,
       glow: {
         color: '#3399ff',
         size: 15,
-    },
-  },
-  shield: {
-    duration: 10000, // 10 seconds
-    movingSpeed: DEFAULT_BONUS_MOVING_SPEED, // Same as game speed
-    spriteOnPlayerScale: 0.6,
-    width: DEFAULT_WIDTH,
-    height: DEFAULT_WIDTH,
-    glow: {
-      color: '#ffcc00',
-      size: 15,
       },
+      negativeImage: '/static/speedup-negative.png',
+    },
+    shield: {
+      duration: 10000, // 10 seconds
+      movingSpeed: DEFAULT_BONUS_MOVING_SPEED,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_WIDTH,
+      glow: {
+        color: '#ffcc00',
+        size: 15,
+      },
+      spriteOnPlayerScale: 0.8,
+      negativeImage: '/static/shield-negative.png',
     },
   },
   spawnFrequency: 300,
+  isReverseBonusEnabled: true,
 };
 
 export const CANVAS_CONFIG = {

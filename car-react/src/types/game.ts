@@ -15,7 +15,7 @@ export interface BonusesConfig {
     [key in BonusType]: BonusConfig;
   },
   spawnFrequency: number;
-  
+  isReverseBonusEnabled?: boolean;
 }
 
 export interface BonusConfig {
@@ -29,6 +29,7 @@ export interface BonusConfig {
     color: string;
     size: number;
   };
+  negativeImage?: any;
 }
 
 export interface Bonus {
@@ -40,6 +41,7 @@ export interface Bonus {
   config: BonusConfig;
   image: any;
   lane: number;
+  isReversed: boolean;
 }
 
 export interface ActiveBonus {

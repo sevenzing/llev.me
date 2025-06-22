@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type { GameState, Difficulty, Obstacle, Bonus, BonusType } from '../types/game';
 import { DIFFICULTY_SETTINGS, GAME_CONFIG, BONUSES_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, OBSTACLE_CONFIG } from '../constants/gameConstants';
 import { calculateLaneX } from '../utils/cords';
+import { createNegativeImage } from '../utils/image';
 
 const initialGameState: GameState = {
   currentLane: 2,
@@ -56,16 +57,33 @@ export const useGameLogic = () => {
     const imageKeys = Object.keys(imageSources);
     let loadedCount = 0;
 
+    const onImageLoad = (img: HTMLImageElement, key: string, isNegative = false) => {
+      loadedImages[key] = img;
+      loadedCount++;
+
+      // If it's a primary bonus image, create its negative version
+      if (!isNegative && BONUSES_CONFIG.isReverseBonusEnabled) {
+        const bonusConfig = BONUSES_CONFIG.items[key as BonusType];
+        if (bonusConfig) {
+          createNegativeImage(img, bonusConfig.width, bonusConfig.height)
+            .then(negativeImg => {
+              onImageLoad(negativeImg, `${key}-negative`, true);
+            });
+        }
+      }
+      
+      // Check if all images (including negatives) are loaded
+      const totalImagesToLoad = imageKeys.length + (BONUSES_CONFIG.isReverseBonusEnabled ? 
+        Object.values(BONUSES_CONFIG.items).length : 0);
+      if (loadedCount === totalImagesToLoad) {
+        setImages(loadedImages);
+      }
+    };
+
     imageKeys.forEach(key => {
       const img = new Image();
       img.src = imageSources[key];
-      img.onload = () => {
-        loadedImages[key] = img;
-        loadedCount++;
-        if (loadedCount === imageKeys.length) {
-          setImages(loadedImages);
-        }
-      };
+      img.onload = () => onImageLoad(img, key);
     });
   }, []);
 
@@ -148,14 +166,16 @@ export const useGameLogic = () => {
     return newObstacles;
   }, []);
 
-  const createBonus = useCallback((existingBonuses: Bonus[]): Bonus | null => {
+  const createBonus = useCallback((existingBonuses: Bonus[], activeBonuses: GameState['activeBonuses']): Bonus | null => {
     const types = Object.keys(BONUSES_CONFIG.items) as Array<BonusType>;
     const type = (types[Math.floor(Math.random() * types.length)]);
     const config = BONUSES_CONFIG.items[type];
-    const image = images[type];
+    const isReversed = BONUSES_CONFIG.isReverseBonusEnabled && !!activeBonuses[type];
+    const imageKey = isReversed ? `${type}-negative` : type;
+    const image = images[imageKey];
 
     if (!image) {
-      console.error(`No image found for bonus type: ${type}`);
+      console.error(`No image found for bonus type: ${imageKey}`);
       return null;
     }
 
@@ -182,9 +202,10 @@ export const useGameLogic = () => {
       y: -config.height,
       width: config.width,
       height: config.height,
-      config: BONUSES_CONFIG.items[type],
+      config,
       image,
       lane,
+      isReversed: isReversed || false,
     };
   }, [images]);
 
@@ -209,25 +230,30 @@ export const useGameLogic = () => {
   const collectBonus = useCallback((bonus: Bonus) => {
     setGameState(prev => {
       const newActiveBonuses = { ...prev.activeBonuses };
-      newActiveBonuses[bonus.type] = {
-        type: bonus.type,
-        endTime: Date.now() + bonus.config.duration,
-      };
+      let newGameSpeed = prev.gameSpeed;
 
-      // Apply speedup effect immediately
-      if (bonus.type === 'speedup' && bonus.config.speedMultiplier) {
-        return {
-          ...prev,
-          bonuses: prev.bonuses.filter(b => b !== bonus),
-          activeBonuses: newActiveBonuses,
-          gameSpeed: prev.baseGameSpeed * bonus.config.speedMultiplier,
+      if (bonus.isReversed) {
+        // If a reversed bonus is collected, end the active bonus effect
+        if (bonus.type === 'speedup') {
+          newGameSpeed = prev.baseGameSpeed;
+        }
+        newActiveBonuses[bonus.type] = null;
+      } else {
+        // If a normal bonus is collected, activate it
+        newActiveBonuses[bonus.type] = {
+          type: bonus.type,
+          endTime: Date.now() + bonus.config.duration,
         };
+        if (bonus.type === 'speedup' && bonus.config.speedMultiplier) {
+          newGameSpeed = prev.baseGameSpeed * bonus.config.speedMultiplier;
+        }
       }
-
+      
       return {
         ...prev,
         bonuses: prev.bonuses.filter(b => b !== bonus),
         activeBonuses: newActiveBonuses,
+        gameSpeed: newGameSpeed,
       };
     });
   }, []);
@@ -389,7 +415,7 @@ export const useGameLogic = () => {
       
       // Create bonuses
       if (newState.frameCount >= newState.nextBonusSpawn) {
-        const newBonus = createBonus(newState.bonuses);
+        const newBonus = createBonus(newState.bonuses, newState.activeBonuses);
         if (newBonus) {
           newState.bonuses = [...newState.bonuses, newBonus];
         }
