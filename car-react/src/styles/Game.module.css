@@ -1,6 +1,3 @@
-h1 {
-  margin: 0;
-}
 
 /* Reset and base styles */
 .carGame {
@@ -11,7 +8,6 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
   min-height: 100vh;
 }
 
@@ -47,8 +43,9 @@ h1 {
 /* Heart display */
 .heartDisplay {
   display: flex;
+  gap: 8px;
   justify-content: center;
-  padding: 5px 7px;
+  padding: 6px 10px;
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 20px;
   border: 2px solid rgba(255, 0, 0, 0.3);
@@ -144,7 +141,7 @@ h1 {
 .gameCanvasContainer {
   width: 100%;
   max-width: 420px;
-  padding: 0 10px;
+  margin-bottom: 15px;
 }
 
 .gameCanvas {
@@ -152,7 +149,6 @@ h1 {
   background-color: #444444;
   border: 4px solid #00ff00;
   border-radius: 12px;
-  display: block;
   box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2);
 }
 
@@ -287,7 +283,7 @@ h1 {
 /* Mobile responsiveness */
 @media (max-width: 480px) {
   .carGame {
-    padding: 10px;
+    padding: 0px 10px;
   }
 
   .gameTitle {

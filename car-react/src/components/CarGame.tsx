@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { GameCanvas } from './GameCanvas';
-import { GameUI } from './GameUI';
+import { GameHeader } from './GameHeader';
+import { GameControls } from './GameControls';
 import { CANVAS_CONFIG } from '../constants/gameConstants';
 import styles from '../styles/Game.module.css';
 
@@ -82,14 +83,7 @@ export const CarGame: React.FC = () => {
         🚗 LLev's Car <span className={styles.titleEmoji}>💥</span>
       </h1>
 
-      <GameUI
-        gameState={gameState}
-        selectedDifficulty={selectedDifficulty}
-        onDifficultyChange={setSelectedDifficulty}
-        onStartGame={() => startGame(false)}
-        onStopGame={endGame}
-        onWatchGame={() => startGame(true)}
-      />
+      <GameHeader gameState={gameState} />
 
       <div className={styles.gameCanvasContainer}>
         <GameCanvas
@@ -99,6 +93,15 @@ export const CarGame: React.FC = () => {
           onTouchStart={handleTouchStart}
         />
       </div>
+
+      <GameControls
+        gameState={gameState}
+        selectedDifficulty={selectedDifficulty}
+        onDifficultyChange={setSelectedDifficulty}
+        onStartGame={() => startGame(false)}
+        onStopGame={endGame}
+        onWatchGame={() => startGame(true)}
+      />
     </div>
   );
 }; 
