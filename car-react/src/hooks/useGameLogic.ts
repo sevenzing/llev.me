@@ -84,23 +84,44 @@ export const useGameLogic = () => {
   }, [difficulty]);
 
   const createObstacles = useCallback((existingObstacles: Obstacle[]): Obstacle[] => {
+    // Determine which lanes are "unsafe" to spawn in
+    const unsafeLanes = new Set<number>();
+    existingObstacles.forEach(obstacle => {
+        // If an obstacle is too close to the top, mark its lane as unsafe
+        if (obstacle.y < CAR_DIMENSIONS.height * 2.5) {
+            unsafeLanes.add(obstacle.lane);
+        }
+    });
+
+    // Filter for lanes that are safe to spawn in
+    const availableLanes = Array.from({ length: GAME_CONFIG.laneCount }, (_, i) => i)
+        .filter(lane => !unsafeLanes.has(lane));
+
+    if (availableLanes.length === 0) {
+        return []; // No safe lanes, so don't spawn any obstacles
+    }
+
     const numberOfObstaclesToSpawn = (() => {
       const rand = Math.random();
-      if (rand < 0.7) { // 70% chance for 1 obstacle
+      // Adjust spawn count based on how many lanes are free
+      const maxSpawns = Math.min(availableLanes.length, 3);
+      
+      if (maxSpawns === 1) return 1;
+
+      if (rand < 0.7) { 
         return 1;
-      } else if (rand < 0.9) { // 20% chance for 2 obstacles
-        return 2;
-      } else { // 10% chance for 3 obstacles
-        return 3;
+      } else if (rand < 0.9) { 
+        return Math.min(2, maxSpawns);
+      } else { 
+        return maxSpawns;
       }
     })();
 
     const newObstacles: Obstacle[] = [];
-    const availableLanes = Array.from({ length: GAME_CONFIG.laneCount }, (_, i) => i);
     
-    for (let i = 0; i < numberOfObstaclesToSpawn && availableLanes.length > 0; i++) {
+    for (let i = 0; i < numberOfObstaclesToSpawn; i++) {
         const laneIndex = Math.floor(Math.random() * availableLanes.length);
-        const lane = availableLanes.splice(laneIndex, 1)[0];
+        const lane = availableLanes.splice(laneIndex, 1)[0]; // Remove to ensure unique lanes per batch
         
         const lastObstacleInLane = existingObstacles
             .filter(o => o.lane === lane)
