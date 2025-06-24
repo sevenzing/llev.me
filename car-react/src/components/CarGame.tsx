@@ -1,10 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { GameCanvas } from './GameCanvas';
 import { GameHeader } from './GameHeader';
 import { GameControls } from './GameControls';
-import { CANVAS_CONFIG } from '../constants/gameConstants';
+import { CANVAS_CONFIG, DEFAULT_EDITOR_CONTENT, DEFAULT_EDITOR_FILE_NAME } from '../constants/gameConstants';
 import styles from '../styles/Game.module.css';
+import MonacoEditor from '@monaco-editor/react';
+
+const MIN_GAME_WIDTH = 450;
+const MIN_CODE_WIDTH = 450;
+const DEFAULT_GAME_WIDTH = 600;
 
 export const CarGame: React.FC = () => {
   const {
@@ -17,6 +22,11 @@ export const CarGame: React.FC = () => {
     endGame,
     images,
   } = useGameLogic();
+
+  const [isCodeOpen, setIsCodeOpen] = useState(false);
+  const [userCode, setUserCode] = useState(DEFAULT_EDITOR_CONTENT);
+  const [gamePaneWidth, setGamePaneWidth] = useState(DEFAULT_GAME_WIDTH);
+  const dragging = useRef(false);
 
   // Handle keyboard controls
   useEffect(() => {
@@ -77,31 +87,115 @@ export const CarGame: React.FC = () => {
     }
   };
 
+  // Drag handlers for resizer
+  useEffect(() => {
+    if (!isCodeOpen) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragging.current) return;
+      const minGame = MIN_GAME_WIDTH;
+      const minCode = MIN_CODE_WIDTH;
+      const total = window.innerWidth;
+      let newGameWidth = e.clientX;
+      if (newGameWidth < minGame) newGameWidth = minGame;
+      if (total - newGameWidth < minCode) newGameWidth = total - minCode;
+      setGamePaneWidth(newGameWidth);
+    };
+    const handleMouseUp = () => { dragging.current = false; };
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isCodeOpen]);
+
+  const startDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    dragging.current = true;
+  };
+
   return (
-    <div className={styles.carGame}>
-      <h1 className={styles.gameTitle}>
-        🚗 LLev's Car <span className={styles.titleEmoji}>💥</span>
-      </h1>
-
-      <GameHeader gameState={gameState} />
-
-      <div className={styles.gameCanvasContainer}>
-        <GameCanvas
-          gameState={gameState}
-          images={images}
-          onClick={handleCanvasClick}
-          onTouchStart={handleTouchStart}
-        />
-      </div>
-
-      <GameControls
-        gameState={gameState}
-        selectedDifficulty={selectedDifficulty}
-        onDifficultyChange={setSelectedDifficulty}
-        onStartGame={() => startGame(false)}
-        onStopGame={endGame}
-        onWatchGame={() => startGame(true)}
-      />
+    <div className={isCodeOpen ? styles.splitContainer : styles.carGame}>
+      {isCodeOpen ? (
+        <>
+          <div
+            className={styles.leftPane}
+            style={{ width: gamePaneWidth, minWidth: MIN_GAME_WIDTH, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          >
+            <h1 className={styles.gameTitle}>
+              🚗 LLev's Car <span className={styles.titleEmoji}>💥</span>
+            </h1>
+            <GameHeader gameState={gameState} />
+            <div className={styles.gameCanvasContainer}>
+              <GameCanvas
+                gameState={gameState}
+                images={images}
+                onClick={handleCanvasClick}
+                onTouchStart={handleTouchStart}
+              />
+            </div>
+            <GameControls
+              gameState={gameState}
+              selectedDifficulty={selectedDifficulty}
+              onDifficultyChange={setSelectedDifficulty}
+              onStartGame={() => startGame(false)}
+              onStopGame={endGame}
+              onCodeItClick={() => setIsCodeOpen((open) => !open)}
+              isCodeOpen={isCodeOpen}
+            />
+          </div>
+          <div
+            className={styles.resizer}
+            onMouseDown={startDrag}
+            style={{ height: '100vh' }}
+          />
+          <div
+            className={styles.rightPane}
+            style={{ minWidth: MIN_CODE_WIDTH }}
+          >
+            <div className={styles.codeTabHeader}>{DEFAULT_EDITOR_FILE_NAME}</div>
+            <MonacoEditor
+              height="350px"
+              defaultLanguage="javascript"
+              theme="vs-dark"
+              value={userCode}
+              onChange={value => setUserCode(value ?? '')}
+              options={{
+                fontSize: 16,
+                minimap: { enabled: false },
+                wordWrap: 'on',
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+              }}
+            />
+            <button className={styles.runCodeButton}>Run</button>
+          </div>
+        </>
+      ) : (
+        <div>
+          <h1 className={styles.gameTitle}>
+            🚗 LLev's Car <span className={styles.titleEmoji}>💥</span>
+          </h1>
+          <GameHeader gameState={gameState} />
+          <div className={styles.gameCanvasContainer}>
+            <GameCanvas
+              gameState={gameState}
+              images={images}
+              onClick={handleCanvasClick}
+              onTouchStart={handleTouchStart}
+            />
+          </div>
+          <GameControls
+            gameState={gameState}
+            selectedDifficulty={selectedDifficulty}
+            onDifficultyChange={setSelectedDifficulty}
+            onStartGame={() => startGame(false)}
+            onStopGame={endGame}
+            onCodeItClick={() => setIsCodeOpen((open) => !open)}
+            isCodeOpen={isCodeOpen}
+          />
+        </div>
+      )}
     </div>
   );
 }; 

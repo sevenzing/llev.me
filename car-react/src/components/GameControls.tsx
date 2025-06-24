@@ -8,7 +8,8 @@ interface GameControlsProps {
   onDifficultyChange: (difficulty: Difficulty) => void;
   onStartGame: () => void;
   onStopGame: () => void;
-  onWatchGame: () => void;
+  onCodeItClick: () => void;
+  isCodeOpen: boolean;
 }
 
 export const GameControls: React.FC<GameControlsProps> = ({
@@ -17,7 +18,8 @@ export const GameControls: React.FC<GameControlsProps> = ({
   onDifficultyChange,
   onStartGame,
   onStopGame,
-  onWatchGame,
+  onCodeItClick,
+  isCodeOpen,
 }) => {
   return (
     <div className={styles.gameControls}>
@@ -56,11 +58,10 @@ export const GameControls: React.FC<GameControlsProps> = ({
           Stop
         </button>
         <button
-          className={`${styles.gameButton} ${styles.watchButton}`}
-          onClick={onWatchGame}
-          disabled={gameState.isRunning}
+          className={`${styles.gameButton} ${styles.codeItButton}`}
+          onClick={onCodeItClick}
         >
-          Just Watch
+          {isCodeOpen ? 'Close code' : 'Code It'}
         </button>
       </div>
     </div>

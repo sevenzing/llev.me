@@ -89,3 +89,15 @@ export const GAME_CONFIG: GameConfig = {
 };
 
 export const FADE_OUT_DURATION = 300; // 300ms fade-out for cleared obstacles 
+
+
+export const DEFAULT_EDITOR_FILE_NAME = '~/personal/car-project/car-logic.js';
+export const DEFAULT_EDITOR_CONTENT = `// Write your car logic here...
+
+// You can use the following variables:
+// - car: the car object
+// - obstacles: the obstacles array
+// - bonuses: the bonuses array
+// - gameState: the game state object
+// - gameConfig: the game config object
+`;
