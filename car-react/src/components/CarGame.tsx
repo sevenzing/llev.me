@@ -12,6 +12,9 @@ const MIN_CODE_WIDTH = 450;
 const DEFAULT_GAME_WIDTH = 600;
 
 export const CarGame: React.FC = () => {
+  const [seed, setSeed] = useState<number>(0);
+  const [isSeedEnabled, setIsSeedEnabled] = useState<boolean>(false);
+
   const {
     gameState,
     selectedDifficulty,
@@ -21,7 +24,7 @@ export const CarGame: React.FC = () => {
     startGame,
     endGame,
     images,
-  } = useGameLogic();
+  } = useGameLogic(seed);
 
   const [isCodeOpen, setIsCodeOpen] = useState(false);
   const [userCode, setUserCode] = useState(DEFAULT_EDITOR_CONTENT);
@@ -114,6 +117,15 @@ export const CarGame: React.FC = () => {
     dragging.current = true;
   };
 
+  // Handle game start with seed logic
+  const handleStartGame = () => {
+    if (!isSeedEnabled) {
+      // Generate random seed when checkbox is unchecked
+      setSeed(Math.floor(Math.random() * (2**32 - 2**31) + 2**31));
+    }
+    startGame(false);
+  };
+
   return (
     <div className={isCodeOpen ? styles.splitContainer : styles.carGame}>
       {isCodeOpen ? (
@@ -138,7 +150,7 @@ export const CarGame: React.FC = () => {
               gameState={gameState}
               selectedDifficulty={selectedDifficulty}
               onDifficultyChange={setSelectedDifficulty}
-              onStartGame={() => startGame(false)}
+              onStartGame={handleStartGame}
               onStopGame={endGame}
               onCodeItClick={() => setIsCodeOpen((open) => !open)}
               isCodeOpen={isCodeOpen}
@@ -147,7 +159,7 @@ export const CarGame: React.FC = () => {
           <div
             className={styles.resizer}
             onMouseDown={startDrag}
-            style={{ height: '100vh' }}
+            style={{ minHeight: '100vh' }}
           />
           <div
             className={styles.rightPane}
@@ -155,7 +167,7 @@ export const CarGame: React.FC = () => {
           >
             <div className={styles.codeTabHeader}>{DEFAULT_EDITOR_FILE_NAME}</div>
             <MonacoEditor
-              height="350px"
+              height="100%"
               defaultLanguage="javascript"
               theme="vs-dark"
               value={userCode}
@@ -168,7 +180,32 @@ export const CarGame: React.FC = () => {
                 automaticLayout: true,
               }}
             />
-            <button className={styles.runCodeButton}>Run</button>
+            {/* Controls section */}
+            <div className={styles.codeEditorControls}>
+              {/* Seed controls */}
+              <div className={styles.seedControls}>
+                <label className={styles.seedLabel}>
+                  <input
+                    type="checkbox"
+                    checked={isSeedEnabled}
+                    onChange={e => setIsSeedEnabled(e.target.checked)}
+                    className={styles.seedCheckbox}
+                  />
+                  Set Seed
+                </label>
+                <input
+                  type="number"
+                  value={seed}
+                  min={0}
+                  max={2**32 - 1}
+                  onChange={e => setSeed(Number(e.target.value) || 0)}
+                  disabled={!isSeedEnabled}
+                  className={styles.seedInput}
+                />
+              </div>
+              {/* Run button */}
+              <button className={styles.runCodeButton}>Run</button>
+            </div>
           </div>
         </>
       ) : (
@@ -189,7 +226,7 @@ export const CarGame: React.FC = () => {
             gameState={gameState}
             selectedDifficulty={selectedDifficulty}
             onDifficultyChange={setSelectedDifficulty}
-            onStartGame={() => startGame(false)}
+            onStartGame={handleStartGame}
             onStopGame={endGame}
             onCodeItClick={() => setIsCodeOpen((open) => !open)}
             isCodeOpen={isCodeOpen}

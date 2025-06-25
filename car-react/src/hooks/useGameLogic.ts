@@ -3,6 +3,7 @@ import type { GameState, Difficulty, Obstacle, Bonus, BonusType } from '../types
 import { DIFFICULTY_SETTINGS, GAME_CONFIG, BONUSES_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, OBSTACLE_CONFIG, FADE_OUT_DURATION } from '../constants/gameConstants';
 import { calculateLaneX, calculateLaneXForCar } from '../utils/cords';
 import { createNegativeImage } from '../utils/image';
+import { mulberry32 } from '../utils/random';
 
 const initialGameState: GameState = {
   currentLane: 2,
@@ -33,13 +34,22 @@ const initialGameState: GameState = {
 };
 
 
-export const useGameLogic = () => {
+export const useGameLogic = (seed?: number) => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('normal');
   const [images, setImages] = useState<{ [key: string]: HTMLImageElement }>({});
   const animationFrameRef = useRef<number | undefined>(undefined);
   const lastTimeRef = useRef<number>(0);
+  const randomRef = useRef<() => number>(() => Math.random());
+
+  const resetRandomGenerator = useCallback(() => {
+    randomRef.current = mulberry32(seed ?? Date.now());
+  }, [seed]);
+
+  useEffect(() => {
+    resetRandomGenerator();
+  }, [resetRandomGenerator]);
 
   // Load images
   useEffect(() => {
@@ -119,7 +129,7 @@ export const useGameLogic = () => {
     }
 
     const numberOfObstaclesToSpawn = (() => {
-      const rand = Math.random();
+      const rand = randomRef.current();
       // Adjust spawn count based on how many lanes are free
       const maxSpawns = Math.min(availableLanes.length, 3);
       
@@ -137,7 +147,7 @@ export const useGameLogic = () => {
     const newObstacles: Obstacle[] = [];
     
     for (let i = 0; i < numberOfObstaclesToSpawn; i++) {
-        const laneIndex = Math.floor(Math.random() * availableLanes.length);
+        const laneIndex = Math.floor(randomRef.current() * availableLanes.length);
         const lane = availableLanes.splice(laneIndex, 1)[0]; // Remove to ensure unique lanes per batch
         
         const lastObstacleInLane = existingObstacles
@@ -150,7 +160,7 @@ export const useGameLogic = () => {
         }
         
         const x = calculateLaneX(lane, CAR_DIMENSIONS.width);
-        const speed = OBSTACLE_CONFIG.minSpeed + Math.random() * (maxSpeed - OBSTACLE_CONFIG.minSpeed);
+        const speed = OBSTACLE_CONFIG.minSpeed + randomRef.current() * (maxSpeed - OBSTACLE_CONFIG.minSpeed);
 
         newObstacles.push({
             x,
@@ -163,11 +173,11 @@ export const useGameLogic = () => {
     }
 
     return newObstacles;
-  }, []);
+  }, [randomRef]);
 
   const createBonus = useCallback((existingBonuses: Bonus[], activeBonuses: GameState['activeBonuses']): Bonus | null => {
     const types = Object.keys(BONUSES_CONFIG.items) as Array<BonusType>;
-    const type = (types[Math.floor(Math.random() * types.length)]);
+    const type = (types[Math.floor(randomRef.current() * types.length)]);
     const config = BONUSES_CONFIG.items[type];
     const isReversed = BONUSES_CONFIG.isReverseBonusEnabled && !!activeBonuses[type];
     const imageKey = isReversed ? `${type}-negative` : type;
@@ -192,7 +202,7 @@ export const useGameLogic = () => {
         return null;
     }
 
-    const lane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
+    const lane = availableLanes[Math.floor(randomRef.current() * availableLanes.length)];
     const x = calculateLaneX(lane, config.width);
 
     return {
@@ -206,7 +216,7 @@ export const useGameLogic = () => {
       lane,
       isReversed: isReversed || false,
     };
-  }, [images]);
+  }, [images, randomRef]);
 
   const checkCollision = useCallback((car: { x: number; y: number; width: number; height: number }, obstacle: Obstacle) => {
     return (
@@ -384,6 +394,9 @@ export const useGameLogic = () => {
   }, [gameState.currentLane, moveCarToLane]);
 
   const startGame = useCallback((isAutoPlay = false) => {
+    // Reset the random generator to ensure deterministic behavior
+    resetRandomGenerator();
+    
     resetGameState();
     setGameState(prev => ({
       ...prev,
@@ -391,7 +404,7 @@ export const useGameLogic = () => {
       isAutoPlay,
     }));
     lastTimeRef.current = performance.now();
-  }, [resetGameState]);
+  }, [resetGameState, resetRandomGenerator]);
 
   const endGame = useCallback(() => {
     setGameState(prev => ({
@@ -427,7 +440,7 @@ export const useGameLogic = () => {
         if (newObstacles && newObstacles.length > 0) {
           newState.obstacles = [...newState.obstacles, ...newObstacles];
         }
-        const newFrequency = newState.obstacleFrequency + (Math.random() * 40 - 20);
+        const newFrequency = newState.obstacleFrequency + (randomRef.current() * 40 - 20);
         newState.nextObstacleSpawn = newState.frameCount + newFrequency;
       }
       
@@ -437,7 +450,7 @@ export const useGameLogic = () => {
         if (newBonus) {
           newState.bonuses = [...newState.bonuses, newBonus];
         }
-        const newFrequency = BONUSES_CONFIG.spawnFrequency + (Math.random() * 100 - 50);
+        const newFrequency = BONUSES_CONFIG.spawnFrequency + (randomRef.current() * 100 - 50);
         newState.nextBonusSpawn = newState.frameCount + newFrequency;
       }
       
