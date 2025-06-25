@@ -188,20 +188,21 @@ export const CarGame: React.FC = () => {
             style={{ minWidth: MIN_CODE_WIDTH }}
           >
             <div className={styles.codeTabHeader}>{DEFAULT_EDITOR_FILE_NAME}</div>
-            <MonacoEditor
-              height="100%"
-              defaultLanguage="typescript"
-              theme="vs-dark"
-              value={userCode}
-              onChange={value => setUserCode(value ?? '')}
-              options={{
-                fontSize: 16,
-                minimap: { enabled: false },
-                wordWrap: 'on',
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-              }}
-            />
+            <div className={styles.codeEditorContainer}>
+              <MonacoEditor
+                defaultLanguage="typescript"
+                theme="vs-dark"
+                value={userCode}
+                onChange={value => setUserCode(value ?? '')}
+                options={{
+                  fontSize: 16,
+                  minimap: { enabled: false },
+                  wordWrap: 'on',
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                }}
+              />
+            </div>
             {/* Controls section */}
             <div className={styles.codeEditorControls}>
               {/* Seed controls */}
@@ -254,16 +255,6 @@ export const CarGame: React.FC = () => {
                 </div>
               </div>
             )}
-            
-
-
-             {/* {codeError && (
-             <div className={styles.errorSection}>
-              <div className={styles.errorHeader}>
-                
-              </div>
-             </div>
-             )} */}
           </div>
         </>
       ) : (

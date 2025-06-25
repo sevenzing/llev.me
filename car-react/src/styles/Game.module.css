@@ -495,6 +495,9 @@
     display: none;
   }
 }
+.codeEditorContainer {
+  height: 75%;
+}
 
 /* Code editor controls */
 .codeEditorControls {
