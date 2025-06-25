@@ -12,8 +12,13 @@ const MIN_CODE_WIDTH = 450;
 const DEFAULT_GAME_WIDTH = 600;
 
 export const CarGame: React.FC = () => {
+  // Add seed state and checkbox state
   const [seed, setSeed] = useState<number>(0);
   const [isSeedEnabled, setIsSeedEnabled] = useState<boolean>(false);
+  const [isCodeOpen, setIsCodeOpen] = useState(false);
+  const [userCode, setUserCode] = useState(DEFAULT_EDITOR_CONTENT);
+  const [gamePaneWidth, setGamePaneWidth] = useState(DEFAULT_GAME_WIDTH);
+  const dragging = useRef(false);
 
   const {
     gameState,
@@ -24,12 +29,7 @@ export const CarGame: React.FC = () => {
     startGame,
     endGame,
     images,
-  } = useGameLogic(seed);
-
-  const [isCodeOpen, setIsCodeOpen] = useState(false);
-  const [userCode, setUserCode] = useState(DEFAULT_EDITOR_CONTENT);
-  const [gamePaneWidth, setGamePaneWidth] = useState(DEFAULT_GAME_WIDTH);
-  const dragging = useRef(false);
+  } = useGameLogic(seed, userCode);
 
   // Handle keyboard controls
   useEffect(() => {
@@ -117,13 +117,33 @@ export const CarGame: React.FC = () => {
     dragging.current = true;
   };
 
-  // Handle game start with seed logic
+  // Handle game start with seed logic (manual mode)
   const handleStartGame = () => {
     if (!isSeedEnabled) {
       // Generate random seed when checkbox is unchecked
       setSeed(Math.floor(Math.random() * (2**32 - 2**31) + 2**31));
     }
-    startGame(false);
+    startGame(false); // false = manual mode
+  };
+
+  // Handle Run button click (auto mode with code execution)
+  const handleRunCode = () => {
+    if (!userCode.trim()) {
+      console.log('Please write some code first!');
+      return;
+    }
+    
+    if (!isSeedEnabled) {
+      // Generate random seed when checkbox is unchecked
+      setSeed(Math.floor(Math.random() * (2**32 - 2**31) + 2**31));
+    }
+    
+    if (gameState.isRunning) {
+      console.log('Game is already running!');
+    } else {
+      console.log('Starting game in auto mode with your code...');
+      startGame(true); // true = auto mode
+    }
   };
 
   return (
@@ -204,7 +224,13 @@ export const CarGame: React.FC = () => {
                 />
               </div>
               {/* Run button */}
-              <button className={styles.runCodeButton}>Run</button>
+              <button 
+                className={styles.runCodeButton} 
+                onClick={handleRunCode}
+                disabled={!userCode.trim()}
+              >
+                {gameState.isRunning && gameState.isAutoPlay ? 'Auto Running' : 'Run Code'}
+              </button>
             </div>
           </div>
         </>

@@ -31,7 +31,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Draw road lines
     ctx.strokeStyle = '#ccc';
     ctx.lineWidth = 2;
-    ctx.setLineDash([15, 20]);
+    ctx.setLineDash([GAME_CONFIG.laneDashLength, GAME_CONFIG.laneDashGap]);
     
     for (let i = 1; i < GAME_CONFIG.laneCount; i++) {
       const x = i * GAME_CONFIG.laneWidth;

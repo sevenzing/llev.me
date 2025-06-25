@@ -463,6 +463,17 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
+.runCodeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.runCodeButton:disabled:hover {
+  background: #00ff00;
+  transform: none;
+  box-shadow: none;
+}
 @media (max-width: 900px) {
   .splitContainer {
     flex-direction: column;

@@ -1,9 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { GameState, Difficulty, Obstacle, Bonus, BonusType } from '../types/game';
-import { DIFFICULTY_SETTINGS, GAME_CONFIG, BONUSES_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, OBSTACLE_CONFIG, FADE_OUT_DURATION } from '../constants/gameConstants';
+import { DIFFICULTY_SETTINGS, GAME_CONFIG, BONUSES_CONFIG, CAR_DIMENSIONS, CANVAS_CONFIG, OBSTACLE_CONFIG, FADE_OUT_DURATION, USER_CODE_CONFIG } from '../constants/gameConstants';
 import { calculateLaneX, calculateLaneXForCar } from '../utils/cords';
 import { createNegativeImage } from '../utils/image';
 import { mulberry32 } from '../utils/random';
+import { codeRunner, createGameContext } from '../utils/codeRunner';
 
 const initialGameState: GameState = {
   currentLane: 2,
@@ -34,7 +35,7 @@ const initialGameState: GameState = {
 };
 
 
-export const useGameLogic = (seed?: number) => {
+export const useGameLogic = (seed?: number, userCode?: string) => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('normal');
@@ -42,6 +43,9 @@ export const useGameLogic = (seed?: number) => {
   const animationFrameRef = useRef<number | undefined>(undefined);
   const lastTimeRef = useRef<number>(0);
   const randomRef = useRef<() => number>(() => Math.random());
+  const gameStateRef = useRef(gameState);
+  const userCodeFrameCounterRef = useRef<number>(0);
+  const autoPlayLoopCounterRef = useRef<number>(0);
 
   const resetRandomGenerator = useCallback(() => {
     randomRef.current = mulberry32(seed ?? Date.now());
@@ -393,9 +397,40 @@ export const useGameLogic = (seed?: number) => {
     moveCarToLane(gameState.currentLane + 1);
   }, [gameState.currentLane, moveCarToLane]);
 
+
+  const executeUserCode = useCallback(() => {
+    if (!userCode || !gameStateRef.current.isAutoPlay) return;
+    console.log('Executing user code, loop counter:', autoPlayLoopCounterRef.current);
+    autoPlayLoopCounterRef.current++;
+    try {
+      const clonedGameState = {...gameStateRef.current};
+      const context = createGameContext(clonedGameState);
+      
+      // Execute code asynchronously
+      codeRunner.executeCode(userCode, context).then(executionResult => {
+        if (executionResult.timedOut) {
+          console.warn(`User code execution timed out after ${executionResult.executionTime}ms`);
+        }
+        
+        if (executionResult.moveDirection === 'left') {
+          moveCarLeft();
+        } else if (executionResult.moveDirection === 'right') {
+          moveCarRight();
+        }
+      }).catch(error => {
+        console.error('Error executing user code:', error);
+      });
+    } catch (error) {
+      console.error('Error setting up user code execution:', error);
+    }
+  }, [userCode, moveCarLeft, moveCarRight]);
+
   const startGame = useCallback((isAutoPlay = false) => {
     // Reset the random generator to ensure deterministic behavior
     resetRandomGenerator();
+    
+    // Reset user code frame counter
+    userCodeFrameCounterRef.current = 0;
     
     resetGameState();
     setGameState(prev => ({
@@ -429,7 +464,8 @@ export const useGameLogic = (seed?: number) => {
       newState.carX += (newState.targetX - newState.carX) * 0.2;
       
       // Update road line offset with smooth movement
-      newState.roadLineOffset = (newState.roadLineOffset + newState.gameSpeed * newState.roadSpeedMultiplier) % 35;
+      const laneSegmentHeight = GAME_CONFIG.laneDashLength + GAME_CONFIG.laneDashGap;
+      newState.roadLineOffset = (newState.roadLineOffset + newState.gameSpeed * newState.roadSpeedMultiplier) % laneSegmentHeight;
       
       // Update frame count
       newState.frameCount++;
@@ -457,9 +493,11 @@ export const useGameLogic = (seed?: number) => {
       // Update obstacles with consistent speed
       newState.obstacles = newState.obstacles
         .map(obstacle => ({ ...obstacle, y: obstacle.y + newState.gameSpeed * obstacle.movingSpeed }))
+        // .filter(obstacle => obstacle.y < CANVAS_CONFIG.height)
         .filter(obstacle => {
             // Keep obstacles that are not fading or have not finished fading
-            return !obstacle.isFadingOut || (Date.now() - (obstacle.fadeStartTime || 0)) < FADE_OUT_DURATION;
+            const isFadingOut = obstacle.isFadingOut && (Date.now() - (obstacle.fadeStartTime || 0)) >= FADE_OUT_DURATION;
+            return !isFadingOut;
         });
       
       // Update bonuses with consistent speed
@@ -505,11 +543,22 @@ export const useGameLogic = (seed?: number) => {
         return newState;
       }
       
+      gameStateRef.current = newState;
       return newState;
     });
+
+     // Execute user code if in auto mode (outside of state update to prevent timing issues)
+     if (userCode && gameStateRef.current.isAutoPlay) {
+        // Only execute user code every N frames to reduce performance impact
+        userCodeFrameCounterRef.current++;
+        if (userCodeFrameCounterRef.current >= USER_CODE_CONFIG.executionFrequency) {
+          userCodeFrameCounterRef.current = 0; // Reset counter
+          executeUserCode();
+        }
+      }
     
     animationFrameRef.current = requestAnimationFrame(gameLoop);
-  }, [gameState.isRunning, createObstacles, createBonus, checkCollision, checkBonusCollision, collectBonus, handlePlayerHit, updateActiveBonuses, updateInvincibility, endGame]);
+  }, [gameState.isRunning, createObstacles, createBonus, checkCollision, checkBonusCollision, collectBonus, handlePlayerHit, updateActiveBonuses, updateInvincibility, endGame, userCode, executeUserCode]);
 
   useEffect(() => {
     if (gameState.isRunning) {

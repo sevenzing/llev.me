@@ -98,6 +98,16 @@ export interface GameConfig {
   maxLives: number;
   invincibilityDuration: number;
   blinkInterval: number;
+  laneDashLength: number;
+  laneDashGap: number;
 }
 
 export type Difficulty = 'easy' | 'normal' | 'hard' | 'insane';
+
+export type MoveDirection = 'left' | 'right' | null;
+
+export interface ExecutionResult {
+  moveDirection: MoveDirection;
+  executionTime: number;
+  timedOut: boolean;
+}
