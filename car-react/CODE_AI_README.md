@@ -1,11 +1,11 @@
 # Car Game AI Code Runner
 
-This car game now supports custom AI logic written in JavaScript! You can write your own `handleNextMove` function to control the car automatically.
+This car game now supports custom AI logic written in **TypeScript**! You can write your own `handleNextMove` function to control the car automatically with full type safety and IntelliSense.
 
 ## How It Works
 
 1. **Open the Code Editor**: Click the "Code It" button to open the code editor
-2. **Write Your Logic**: Implement the `handleNextMove` function
+2. **Write Your Logic**: Implement the `handleNextMove` function with TypeScript
 3. **Set a Seed** (Optional): Use the same seed to get reproducible results
 4. **Run Your Code**: Click "Run Code" to start the game in auto mode with your AI
 5. **Manual Play**: Click "Start" for normal keyboard/mouse gameplay
@@ -15,30 +15,53 @@ This car game now supports custom AI logic written in JavaScript! You can write 
 - **Manual Mode**: Use arrow keys, WASD, or click/touch to control the car manually
 - **Auto Mode**: Your `handleNextMove` function controls the car automatically
 
+## TypeScript Support
+
+The editor now supports TypeScript with:
+- **Full type safety** for all parameters and return values
+- **IntelliSense** and autocomplete
+- **Type definitions** for Player, Obstacle, and Bonus objects
+- **Automatic TypeScript stripping** for runtime execution
+
 ## API Reference
 
-### `handleNextMove(player, obstacles, bonuses)`
+### `handleNextMove(player: Player, obstacles: Obstacle[], bonuses: Bonus[]): MoveDirection`
 
 This function is called every frame and should return the direction to move the car.
 
-**Parameters:**
-- `player`: Object containing car information
-  - `lane`: number (0-4) - Current lane position
-  - `x`, `y`: number - Car coordinates
-  - `width`, `height`: number - Car dimensions
-- `obstacles`: Array of obstacle objects
-  - `lane`: number - Lane position
-  - `x`, `y`: number - Coordinates
-  - `width`, `height`: number - Dimensions
-  - `movingSpeed`: number - Obstacle speed
-- `bonuses`: Array of bonus objects
-  - `lane`: number - Lane position
-  - `x`, `y`: number - Coordinates
-  - `width`, `height`: number - Dimensions
-  - `type`: string - Bonus type ('speedup', 'shield', 'vortex')
-  - `isReversed`: boolean - Whether bonus is negative
+**Type Definitions:**
+```typescript
+interface Player {
+  lane: number;      // Current lane position (0-4)
+  x: number;         // X coordinate
+  y: number;         // Y coordinate
+  width: number;     // Car width
+  height: number;    // Car height
+}
 
-**Returns:** `'left' | 'right' | null`
+interface Obstacle {
+  lane: number;      // Lane position
+  x: number;         // X coordinate
+  y: number;         // Y coordinate
+  width: number;     // Obstacle width
+  height: number;    // Obstacle height
+  movingSpeed: number; // Obstacle speed
+}
+
+interface Bonus {
+  lane: number;      // Lane position
+  x: number;         // X coordinate
+  y: number;         // Y coordinate
+  width: number;     // Bonus width
+  height: number;    // Bonus height
+  type: 'speedup' | 'shield' | 'vortex'; // Bonus type
+  isReversed: boolean; // Whether bonus is negative
+}
+
+type MoveDirection = 'left' | 'right' | null;
+```
+
+**Returns:** `MoveDirection`
 - `'left'`: Move car one lane to the left
 - `'right'`: Move car one lane to the right
 - `null`: Stay in current lane

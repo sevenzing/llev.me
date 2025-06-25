@@ -37,10 +37,15 @@ export interface GameContext {
 
 export type MoveDirection = 'left' | 'right' | null;
 
-export interface ExecutionResult {
+export type ExecutionResult = {
+  result: 'success';
   moveDirection: MoveDirection;
   executionTime: number;
-  timedOut: boolean;
+} | {
+  result: 'error';
+  error: string | null;
+  executionTime: number;
+  isTimeout: boolean;
 }
 
 // Safe wrapper for user code execution
@@ -54,6 +59,18 @@ class SafeCodeRunner {
   // Update timeout dynamically
   public updateTimeout(timeoutMs: number): void {
     this.maxExecutionTime = timeoutMs;
+  }
+
+  // Simple TypeScript stripping for runtime execution
+  private stripTypeScript(code: string): string {
+    // Remove type annotations from function parameters
+    code = code.replace(/(\w+):\s*[^,)]+/g, '$1');
+    // Remove return type annotations
+    code = code.replace(/:\s*[^=]+(?=\s*{)/g, '');
+    // Remove interface and type definitions
+    code = code.replace(/interface\s+\w+\s*{[^}]*}/g, '');
+    code = code.replace(/type\s+\w+\s*=\s*[^;]+;/g, '');
+    return code;
   }
 
   // Create a safe context with only allowed functions
@@ -88,18 +105,18 @@ class SafeCodeRunner {
   private validateReturnValue(result: any): MoveDirection {
     if (result === null || result === undefined) {
       return null;
-    }
-    
-    if (typeof result === 'string') {
+    } else if (typeof result === 'string') {
       const direction = result.toLowerCase().trim();
-      if (direction === 'left' || direction === 'right') {
-        return direction as MoveDirection;
+      if (['left', 'l'].includes(direction)) {
+        return 'left';
+      } else if (['right', 'r'].includes(direction)) {
+        return 'right';
+      } else {
+        throw new Error(`Invalid return value from user code: ${result}`);
       }
+    } else {
+      throw new Error(`Invalid return value from user code: ${result}. Expected 'left', 'right', or null.`);
     }
-    
-    // Invalid return value, return null
-    console.warn('Invalid return value from user code:', result);
-    return null;
   }
 
   // Execute user code safely
@@ -118,14 +135,21 @@ class SafeCodeRunner {
         'console',
         `
         "use strict";
-        ${code}
+        ${this.stripTypeScript(code)}
         
         // Call the user's handleNextMove function
         if (typeof handleNextMove !== 'function') {
-          throw new Error('handleNextMove function is required');
+          throw new Error('handleNextMove function is required. Please define a function named handleNextMove.');
         }
         
-        return handleNextMove(context.player, context.obstacles, context.bonuses);
+        const result = handleNextMove(context.player, context.obstacles, context.bonuses);
+        
+        // Validate return value
+        if (result !== null && result !== 'left' && result !== 'right') {
+          throw new Error('handleNextMove must return "left", "right", or null. Got: ' + JSON.stringify(result));
+        }
+        
+        return result;
         `
       );
 
@@ -148,24 +172,35 @@ class SafeCodeRunner {
       const executionTime = Date.now() - startTime;
       
       return { 
+        result: 'success',
         moveDirection, 
         executionTime, 
-        timedOut: false 
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       const isTimeout = error instanceof Error && error.message === 'Execution timeout';
       
-      if (isTimeout) {
-        console.warn(`User code execution timed out after ${executionTime}ms`);
-      } else {
-        console.error('Error executing user code:', error);
+      // Provide more specific error messages
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof Error) {
+        if (isTimeout) {
+          errorMessage = `Execution timed out after ${executionTime}ms`;
+        } else if (error.message.includes('Unexpected token')) {
+          errorMessage = `Syntax error: ${error.message}. Please check your TypeScript/JavaScript syntax.`;
+        } else if (error.message.includes('is not defined')) {
+          errorMessage = `Reference error: ${error.message}. Make sure all variables are properly declared.`;
+        } else if (error.message.includes('Cannot read property')) {
+          errorMessage = `Property access error: ${error.message}. Check that objects exist before accessing their properties.`;
+        } else {
+          errorMessage = error.message;
+        }
       }
       
       return { 
-        moveDirection: null, 
+        result: 'error',
+        error: errorMessage,
         executionTime, 
-        timedOut: true 
+        isTimeout,
       };
     }
   }

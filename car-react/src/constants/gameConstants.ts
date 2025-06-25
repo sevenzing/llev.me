@@ -99,42 +99,55 @@ export const USER_CODE_CONFIG = {
 
 export const FADE_OUT_DURATION = 300; // 300ms fade-out for cleared obstacles
 
-export const DEFAULT_EDITOR_FILE_NAME = '~/personal/car-project/car-logic.js';
+export const DEFAULT_EDITOR_FILE_NAME = '~/personal/car-project/car-logic.ts';
 
 const DEFAULT_EDITOR_COMMENT = `// Car Game AI Logic
 // Write your handleNextMove function to control the car
+// This is TypeScript - you get full type safety and IntelliSense!
+
+// Type definitions for better development experience
+interface Player {
+  lane: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface Obstacle {
+  lane: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  movingSpeed: number;
+}
+
+interface Bonus {
+  lane: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  type: 'speedup' | 'shield' | 'vortex';
+  isReversed: boolean;
+}
+
+type MoveDirection = 'left' | 'right' | null;
 `;
 
 const DEFAULT_EDITOR_FUNCTION_DOC_COMMENT = `
 /**
  * Determines the next move for the car based on current game state
- * @param {Object} player - The player car object
- *   - lane: number (0-4) - Current lane position
- *   - x: number - X coordinate
- *   - y: number - Y coordinate  
- *   - width: number - Car width
- *   - height: number - Car height
- * @param {Array} obstacles - Array of obstacle objects
- *   - lane: number - Lane position
- *   - x: number - X coordinate
- *   - y: number - Y coordinate
- *   - width: number - Obstacle width
- *   - height: number - Obstacle height
- *   - movingSpeed: number - Obstacle speed
- * @param {Array} bonuses - Array of bonus objects
- *   - lane: number - Lane position
- *   - x: number - X coordinate
- *   - y: number - Y coordinate
- *   - width: number - Bonus width
- *   - height: number - Bonus height
- *   - type: string - Bonus type ('speedup', 'shield', 'vortex')
- *   - isReversed: boolean - Whether bonus is negative
- * @returns {'left' | 'right' | null} - Direction to move, or null to stay
+ * @param player - The player car object
+ * @param obstacles - Array of obstacle objects
+ * @param bonuses - Array of bonus objects
+ * @returns Direction to move, or null to stay
  */
 `;
 
 const DEFAULT_EDITOR_FUNCTION = `
-function handleNextMove(player, obstacles, bonuses) {
+function handleNextMove(player: Player, obstacles: Obstacle[], bonuses: Bonus[]): MoveDirection {
   // Example: Simple avoidance logic
   const currentLane = player.lane;
   

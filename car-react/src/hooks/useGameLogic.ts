@@ -40,6 +40,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('normal');
   const [images, setImages] = useState<{ [key: string]: HTMLImageElement }>({});
+  const [codeError, setCodeError] = useState<string | null>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
   const lastTimeRef = useRef<number>(0);
   const randomRef = useRef<() => number>(() => Math.random());
@@ -400,46 +401,39 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
 
   const executeUserCode = useCallback(() => {
     if (!userCode || !gameStateRef.current.isAutoPlay) return;
-    console.log('Executing user code, loop counter:', autoPlayLoopCounterRef.current);
-    autoPlayLoopCounterRef.current++;
+
     try {
       const clonedGameState = {...gameStateRef.current};
       const context = createGameContext(clonedGameState);
       
       // Execute code asynchronously
       codeRunner.executeCode(userCode, context).then(executionResult => {
-        if (executionResult.timedOut) {
-          console.warn(`User code execution timed out after ${executionResult.executionTime}ms`);
-        }
-        
-        if (executionResult.moveDirection === 'left') {
-          moveCarLeft();
-        } else if (executionResult.moveDirection === 'right') {
-          moveCarRight();
+        if (executionResult.result === 'success') {
+          if (executionResult.moveDirection === 'left') {
+            moveCarLeft();
+          } else if (executionResult.moveDirection === 'right') {
+            moveCarRight();
+          }
+        } else if (executionResult.result === 'error') {
+          if (executionResult.isTimeout) {
+            handleCodeError(`Code execution timed out after ${executionResult.executionTime}ms. Your code took too long to execute. Please optimize your code or reduce complexity.`);
+          } else {
+            handleCodeError(`Code execution failed: ${executionResult.error}`);
+          }
+        } else {
+            console.error('Unknown execution result:', executionResult);
         }
       }).catch(error => {
         console.error('Error executing user code:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        handleCodeError(`Code execution failed: ${errorMessage}`);
       });
     } catch (error) {
-      console.error('Error setting up user code execution:', error);
+        console.error('Error setting up user code execution:', error);
+        handleCodeError(`Failed to set up code execution: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }, [userCode, moveCarLeft, moveCarRight]);
 
-  const startGame = useCallback((isAutoPlay = false) => {
-    // Reset the random generator to ensure deterministic behavior
-    resetRandomGenerator();
-    
-    // Reset user code frame counter
-    userCodeFrameCounterRef.current = 0;
-    
-    resetGameState();
-    setGameState(prev => ({
-      ...prev,
-      isRunning: true,
-      isAutoPlay,
-    }));
-    lastTimeRef.current = performance.now();
-  }, [resetGameState, resetRandomGenerator]);
 
   const endGame = useCallback(() => {
     setGameState(prev => ({
@@ -452,6 +446,41 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       cancelAnimationFrame(animationFrameRef.current);
     }
   }, []);
+
+  const handleCodeError = useCallback((errorMessage: string) => {
+    console.error(errorMessage);
+    setCodeError(errorMessage);
+    setGameState(prev => ({
+        ...prev,
+        lives: Math.max(0, prev.lives - 1),
+    }));
+    endGame();
+  }, [endGame]);
+
+  const clearCodeError = useCallback(() => {
+    setCodeError(null);
+  }, []);
+
+  const startGame = useCallback((isAutoPlay = false) => {
+    // Reset the random generator to ensure deterministic behavior
+    resetRandomGenerator();
+    
+    // Reset user code frame counter
+    userCodeFrameCounterRef.current = 0;
+    
+    // Clear any previous errors
+    setCodeError(null);
+    
+    resetGameState();
+    setGameState(prev => ({
+      ...prev,
+      isRunning: true,
+      isAutoPlay,
+    }));
+    lastTimeRef.current = performance.now();
+  }, [resetGameState, resetRandomGenerator]);
+
+  
 
   const gameLoop = useCallback((currentTime: number) => {
     if (!gameState.isRunning) return;
@@ -557,7 +586,10 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         }
       }
     
-    animationFrameRef.current = requestAnimationFrame(gameLoop);
+    // Only continue the game loop if there's no error
+    if (!codeError) {
+      animationFrameRef.current = requestAnimationFrame(gameLoop);
+    }
   }, [gameState.isRunning, createObstacles, createBonus, checkCollision, checkBonusCollision, collectBonus, handlePlayerHit, updateActiveBonuses, updateInvincibility, endGame, userCode, executeUserCode]);
 
   useEffect(() => {
@@ -586,5 +618,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     startGame,
     endGame,
     images,
+    codeError,
+    clearCodeError,
   };
 }; 

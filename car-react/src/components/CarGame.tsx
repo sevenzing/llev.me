@@ -29,6 +29,8 @@ export const CarGame: React.FC = () => {
     startGame,
     endGame,
     images,
+    codeError,
+    clearCodeError,
   } = useGameLogic(seed, userCode);
 
   // Handle keyboard controls
@@ -188,7 +190,7 @@ export const CarGame: React.FC = () => {
             <div className={styles.codeTabHeader}>{DEFAULT_EDITOR_FILE_NAME}</div>
             <MonacoEditor
               height="100%"
-              defaultLanguage="javascript"
+              defaultLanguage="typescript"
               theme="vs-dark"
               value={userCode}
               onChange={value => setUserCode(value ?? '')}
@@ -232,6 +234,36 @@ export const CarGame: React.FC = () => {
                 {gameState.isRunning && gameState.isAutoPlay ? 'Auto Running' : 'Run Code'}
               </button>
             </div>
+            
+            {/* Error section */}
+            {codeError && (
+              <div className={styles.errorSection}>
+                <div className={styles.errorHeader}>
+                  <span className={styles.errorIcon}>⚠️</span>
+                  <span className={styles.errorTitle}>Code Execution Error</span>
+                  <button 
+                    className={styles.errorCloseButton}
+                    onClick={clearCodeError}
+                    title="Dismiss error"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className={styles.errorContent}>
+                  <div className={styles.errorMessage}>{codeError}</div>
+                </div>
+              </div>
+            )}
+            
+
+
+             {/* {codeError && (
+             <div className={styles.errorSection}>
+              <div className={styles.errorHeader}>
+                
+              </div>
+             </div>
+             )} */}
           </div>
         </>
       ) : (
