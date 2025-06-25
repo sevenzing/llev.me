@@ -1,8 +1,9 @@
 import type { GameState } from "../types/game";
 import { USER_CODE_CONFIG } from "../constants/gameConstants";
+import * as ts from 'typescript';
 
 // Types for the code runner
-export interface GameContext {
+export interface Context {
   player: {
     lane: number;
     x: number;
@@ -61,18 +62,6 @@ class SafeCodeRunner {
     this.maxExecutionTime = timeoutMs;
   }
 
-  // Simple TypeScript stripping for runtime execution
-  private stripTypeScript(code: string): string {
-    // Remove type annotations from function parameters
-    code = code.replace(/(\w+):\s*[^,)]+/g, '$1');
-    // Remove return type annotations
-    code = code.replace(/:\s*[^=]+(?=\s*{)/g, '');
-    // Remove interface and type definitions
-    code = code.replace(/interface\s+\w+\s*{[^}]*}/g, '');
-    code = code.replace(/type\s+\w+\s*=\s*[^;]+;/g, '');
-    return code;
-  }
-
   // Create a safe context with only allowed functions
   private createSafeContext(): any {
     return {
@@ -120,12 +109,14 @@ class SafeCodeRunner {
   }
 
   // Execute user code safely
-  public async executeCode(code: string, context: GameContext): Promise<ExecutionResult> {
+  public async executeCode(code: string, context: Context): Promise<ExecutionResult> {
     const startTime = Date.now();
     
     try {
       // Create a new Function constructor with a safe context
       const safeContext = this.createSafeContext();
+
+      const transpiledCode = transpileTypeScript(code);
       
       // Create the function
       const userFunction = new Function(
@@ -135,14 +126,14 @@ class SafeCodeRunner {
         'console',
         `
         "use strict";
-        ${this.stripTypeScript(code)}
-        
+        ${transpiledCode}
+
         // Call the user's handleNextMove function
         if (typeof handleNextMove !== 'function') {
           throw new Error('handleNextMove function is required. Please define a function named handleNextMove.');
         }
         
-        const result = handleNextMove(context.player, context.obstacles, context.bonuses);
+        const result = handleNextMove(context);
         
         // Validate return value
         if (result !== null && result !== 'left' && result !== 'right') {
@@ -210,7 +201,7 @@ class SafeCodeRunner {
 export const codeRunner = new SafeCodeRunner(); // Will use configurable timeout
 
 // Helper function to create game context from game state
-export function createGameContext(gameState: GameState): GameContext {
+export function createGameContext(gameState: GameState): Context {
   gameState = {...gameState};
   return {
     player: {
@@ -238,10 +229,15 @@ export function createGameContext(gameState: GameState): GameContext {
       isReversed: bonus.isReversed,
     })),
     gameState: {
-      score: gameState.score,
+      score: Math.floor(gameState.publicScore),
       lives: gameState.lives,
       gameSpeed: gameState.gameSpeed,
       frameCount: gameState.frameCount,
     },
   };
+}
+
+function transpileTypeScript(tsCode: string): string {
+  const result = ts.transpileModule(tsCode, { compilerOptions: { module: ts.ModuleKind.ESNext } });
+  return result.outputText;
 } 

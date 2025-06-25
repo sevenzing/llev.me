@@ -101,11 +101,23 @@ export const FADE_OUT_DURATION = 300; // 300ms fade-out for cleared obstacles
 
 export const DEFAULT_EDITOR_FILE_NAME = '~/personal/car-project/car-logic.ts';
 
-const DEFAULT_EDITOR_COMMENT = `// Car Game AI Logic
+export const DEFAULT_EDITOR_CONTENT = `// Car Game AI Logic
 // Write your handleNextMove function to control the car
 // This is TypeScript - you get full type safety and IntelliSense!
 
-// Type definitions for better development experience
+function handleNextMove(context: Context): MoveDirection {
+  // Example: Move left if score is even, right if odd
+  return context.gameState.score % 2 === 0 ? 'left' : 'right';
+}
+
+// Context type:
+interface Context {
+  player: Player;
+  obstacles: Array<Obstacle>;
+  bonuses: Array<Bonus>;
+  gameState: GameState;
+}
+
 interface Player {
   lane: number;
   x: number;
@@ -129,77 +141,16 @@ interface Bonus {
   y: number;
   width: number;
   height: number;
-  type: 'speedup' | 'shield' | 'vortex';
+  type: string;
   isReversed: boolean;
 }
 
+interface GameState {
+  score: number;
+  lives: number;
+  gameSpeed: number;
+  frameCount: number;
+}
 type MoveDirection = 'left' | 'right' | null;
 `;
 
-const DEFAULT_EDITOR_FUNCTION_DOC_COMMENT = `
-/**
- * Determines the next move for the car based on current game state
- * @param player - The player car object
- * @param obstacles - Array of obstacle objects
- * @param bonuses - Array of bonus objects
- * @returns Direction to move, or null to stay
- */
-`;
-
-const DEFAULT_EDITOR_FUNCTION = `
-function handleNextMove(player: Player, obstacles: Obstacle[], bonuses: Bonus[]): MoveDirection {
-  // Example: Simple avoidance logic
-  const currentLane = player.lane;
-  
-  // Find obstacles in current lane that are close
-  const nearbyObstacles = obstacles.filter(obstacle => 
-    obstacle.lane === currentLane && 
-    obstacle.y > player.y - 100 && 
-    obstacle.y < player.y + 50
-  );
-  
-  // If there's an obstacle ahead, try to avoid it
-  if (nearbyObstacles.length > 0) {
-    // Try moving left first
-    if (currentLane > 0) {
-      const leftLaneSafe = !obstacles.some(obstacle => 
-        obstacle.lane === currentLane - 1 && 
-        obstacle.y > player.y - 100 && 
-        obstacle.y < player.y + 50
-      );
-      if (leftLaneSafe) return 'left';
-    }
-    
-    // Try moving right
-    if (currentLane < 4) {
-      const rightLaneSafe = !obstacles.some(obstacle => 
-        obstacle.lane === currentLane + 1 && 
-        obstacle.y > player.y - 100 && 
-        obstacle.y < player.y + 50
-      );
-      if (rightLaneSafe) return 'right';
-    }
-  }
-  
-  // Look for bonuses to collect
-  const nearbyBonuses = bonuses.filter(bonus => 
-    bonus.y > player.y - 50 && 
-    bonus.y < player.y + 100
-  );
-  
-  for (const bonus of nearbyBonuses) {
-    if (bonus.lane < currentLane && currentLane > 0) {
-      return 'left';
-    } else if (bonus.lane > currentLane && currentLane < 4) {
-      return 'right';
-    }
-  }
-  
-  // Stay in current lane
-  return null;
-}
-`
-
-export const DEFAULT_EDITOR_CONTENT = `${DEFAULT_EDITOR_COMMENT}
-${DEFAULT_EDITOR_FUNCTION}
-`;
