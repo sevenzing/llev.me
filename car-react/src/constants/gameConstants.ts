@@ -83,7 +83,7 @@ export const GAME_CONFIG: GameConfig = {
   laneCount: 5,
   laneWidth: CANVAS_CONFIG.width / 5,
   carY: CANVAS_CONFIG.height - CAR_DIMENSIONS.height - 10,
-  maxLives: 3,
+  maxLives: 5,
   invincibilityDuration: 1000, // 1 second in milliseconds
   blinkInterval: 100, // Blink every 100ms
   laneDashLength: 15,
@@ -106,29 +106,22 @@ export const DEFAULT_EDITOR_CONTENT = `// Car Game AI Logic
 // This is TypeScript - you get full type safety and IntelliSense!
 
 function handleNextMove(context: Context): MoveDirection {
-  // Example: Move left if the next obstacle is close
-  // Get current lane and check adjacent lanes
-  const currentLane = context.player.lane;
-  const possibleLanes = [currentLane - 1, currentLane, currentLane + 1]
-    .filter(lane => lane >= 0 && lane < context.gameState.laneCount);
-
-  // Find closest obstacle in each lane
-  const laneCollisions = possibleLanes.map(lane => {
-    const closestObstacle = context.obstacles
-      .filter(o => o.lane === lane)
-      .sort((a, b) => (a.collision.iterationsToCollision - b.collision.iterationsToCollision))[0];
-    return {
-      lane,
-      iterations: closestObstacle?.collision.iterationsToCollision ?? Infinity
-    };
-  });
-
-  // Choose lane with maximum iterations to collision
-  const safestLane = laneCollisions.sort((a, b) => b.iterations - a.iterations)[0].lane;
-  
-  if (safestLane < currentLane) return 'left';
-  if (safestLane > currentLane) return 'right';
-  return null;
+  const { lane } = context.player;
+  const { laneCount } = context.gameState;
+  const safest = [lane, lane - 1, lane + 1, lane - 2, lane + 2, lane - 3, lane + 3, lane - 4, lane + 4]
+    .filter(l => l >= 0 && l < laneCount)
+    .map(l => ({
+      lane: l,
+      iter: Math.min(
+        ...context.obstacles
+          .filter(o => o.lane === l)
+          .map(o => o.collision.iterationsToCollision)
+          .concat(Infinity)
+      )
+    }))
+    .sort((a, b) => b.iter - a.iter)[0].lane;
+  if (safest == lane) return null;
+  return safest < lane ? 'left' : 'right';
 }
 
 // Context type:
