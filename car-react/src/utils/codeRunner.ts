@@ -1,5 +1,5 @@
 import type { GameState } from "../types/game";
-import { USER_CODE_CONFIG } from "../constants/gameConstants";
+import { CAR_DIMENSIONS, GAME_CONFIG, USER_CODE_CONFIG } from "../constants/gameConstants";
 import * as ts from 'typescript';
 
 // Types for the code runner
@@ -18,6 +18,11 @@ export interface Context {
     width: number;
     height: number;
     movingSpeed: number;
+    collision: {
+      pixelsToCollision: number | null;
+      framesToCollision: number | null;
+      iterationsToCollision: number | null;
+    };
   }>;
   bonuses: Array<{
     lane: number;
@@ -27,13 +32,21 @@ export interface Context {
     height: number;
     type: string;
     isReversed: boolean;
+    collision: {
+      pixelsToCollision: number | null;
+      framesToCollision: number | null;
+      iterationsToCollision: number | null;
+    };
   }>;
   gameState: {
     score: number;
     lives: number;
     gameSpeed: number;
     frameCount: number;
+    nextInterationInFrames: number;
+    laneCount: number;
   };
+  userData: Record<string, any>;
 }
 
 export type MoveDirection = 'left' | 'right' | null;
@@ -200,26 +213,55 @@ class SafeCodeRunner {
 // Export a singleton instance
 export const codeRunner = new SafeCodeRunner(); // Will use configurable timeout
 
-// Helper function to create game context from game state
+// Persistent userData object for user code
+let userData: Record<string, any> = {};
+
 export function createGameContext(gameState: GameState): Context {
-  gameState = {...gameState};
+  const carY = gameState.carY;
+  const carHeight = CAR_DIMENSIONS.height;
+  const carWidth = CAR_DIMENSIONS.width;
+  const carLane = gameState.currentLane;
+  const carX = gameState.carX;
+  const gameSpeed = gameState.gameSpeed;
+  const execFreq = gameState.executionFrequency || 1;
+
+  function getCollisionInfo(obj: { y: number; height: number; lane: number; movingSpeed?: number }) {
+    // Only relevant if in the same lane
+    const pixelsToCollision = carY - obj.y - carHeight;
+    // Calculate frames to collision (if in same lane)
+    const speed = (obj.movingSpeed ?? 1) * gameSpeed;
+    const framesToCollision = speed > 0
+      ? Math.max(0, Math.floor(pixelsToCollision / speed))
+      : null;
+    // Calculate iterations to collision
+    const iterationsToCollision = (framesToCollision !== null)
+      ? Math.floor(framesToCollision / execFreq)
+      : null;
+    return {
+      pixelsToCollision,
+      framesToCollision,
+      iterationsToCollision,
+    };
+  }
+
   return {
     player: {
-      lane: gameState.currentLane,
-      x: gameState.carX,
-      y: 0,
-      width: 40,
-      height: 70,
+      lane: carLane,
+      x: carX,
+      y: carY,
+      width: carWidth,
+      height: carHeight,
     },
-    obstacles: gameState.obstacles.map((obstacle: any) => ({
+    obstacles: gameState.obstacles.map((obstacle) => ({
       lane: obstacle.lane,
       x: obstacle.x,
       y: obstacle.y,
       width: obstacle.width,
       height: obstacle.height,
       movingSpeed: obstacle.movingSpeed,
+      collision: getCollisionInfo(obstacle),
     })),
-    bonuses: gameState.bonuses.map((bonus: any) => ({
+    bonuses: gameState.bonuses.map((bonus) => ({
       lane: bonus.lane,
       x: bonus.x,
       y: bonus.y,
@@ -227,14 +269,23 @@ export function createGameContext(gameState: GameState): Context {
       height: bonus.height,
       type: bonus.type,
       isReversed: bonus.isReversed,
+      collision: getCollisionInfo(bonus),
     })),
     gameState: {
       score: Math.floor(gameState.publicScore),
       lives: gameState.lives,
       gameSpeed: gameState.gameSpeed,
       frameCount: gameState.frameCount,
+      nextInterationInFrames: gameState.executionFrequency,
+      laneCount: gameState.laneCount,
     },
+    userData,
   };
+}
+
+// Allow user code to mutate userData
+export function resetUserData() {
+  userData = {};
 }
 
 function transpileTypeScript(tsCode: string): string {

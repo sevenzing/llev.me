@@ -106,8 +106,29 @@ export const DEFAULT_EDITOR_CONTENT = `// Car Game AI Logic
 // This is TypeScript - you get full type safety and IntelliSense!
 
 function handleNextMove(context: Context): MoveDirection {
-  // Example: Move left if score is even, right if odd
-  return context.gameState.score % 2 === 0 ? 'left' : 'right';
+  // Example: Move left if the next obstacle is close
+  // Get current lane and check adjacent lanes
+  const currentLane = context.player.lane;
+  const possibleLanes = [currentLane - 1, currentLane, currentLane + 1]
+    .filter(lane => lane >= 0 && lane < context.gameState.laneCount);
+
+  // Find closest obstacle in each lane
+  const laneCollisions = possibleLanes.map(lane => {
+    const closestObstacle = context.obstacles
+      .filter(o => o.lane === lane)
+      .sort((a, b) => (a.collision.iterationsToCollision - b.collision.iterationsToCollision))[0];
+    return {
+      lane,
+      iterations: closestObstacle?.collision.iterationsToCollision ?? Infinity
+    };
+  });
+
+  // Choose lane with maximum iterations to collision
+  const safestLane = laneCollisions.sort((a, b) => b.iterations - a.iterations)[0].lane;
+  
+  if (safestLane < currentLane) return 'left';
+  if (safestLane > currentLane) return 'right';
+  return null;
 }
 
 // Context type:
@@ -116,6 +137,13 @@ interface Context {
   obstacles: Array<Obstacle>;
   bonuses: Array<Bonus>;
   gameState: GameState;
+  userData: Record<string, any>; // Persistent between iterations
+}
+
+interface CollisionInfo {
+  pixelsToCollision: number;
+  framesToCollision: number;
+  iterationsToCollision: number;
 }
 
 interface Player {
@@ -133,6 +161,7 @@ interface Obstacle {
   width: number;
   height: number;
   movingSpeed: number;
+  collision: CollisionInfo;
 }
 
 interface Bonus {
@@ -143,6 +172,7 @@ interface Bonus {
   height: number;
   type: string;
   isReversed: boolean;
+  collision: CollisionInfo;
 }
 
 interface GameState {
@@ -150,6 +180,8 @@ interface GameState {
   lives: number;
   gameSpeed: number;
   frameCount: number;
+  nextInterationInFrames: number;
+  laneCount: number;
 }
 type MoveDirection = 'left' | 'right' | null;
 `;

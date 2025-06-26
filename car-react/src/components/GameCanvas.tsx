@@ -48,7 +48,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.drawImage(
         images.playerCar,
         gameState.carX,
-        GAME_CONFIG.carY,
+        gameState.carY,
         CAR_DIMENSIONS.width,
         CAR_DIMENSIONS.height
       );

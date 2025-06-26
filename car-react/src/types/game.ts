@@ -64,6 +64,7 @@ export interface Obstacle {
 export interface GameState {
   currentLane: number;
   carX: number;
+  carY: number;
   targetX: number;
   score: number;
   publicScore: number;
@@ -89,6 +90,8 @@ export interface GameState {
   bonusUpdateInterval: number;
   nextObstacleSpawn: number;
   nextBonusSpawn: number;
+  executionFrequency: number;
+  laneCount: number;
 }
 
 export interface GameConfig {

@@ -10,6 +10,7 @@ const initialGameState: GameState = {
   currentLane: 2,
   targetX: calculateLaneXForCar(2),
   carX: calculateLaneXForCar(2),
+  carY: GAME_CONFIG.carY,
   score: 0,
   publicScore: 0,
   lives: GAME_CONFIG.maxLives,
@@ -32,6 +33,8 @@ const initialGameState: GameState = {
   bonusUpdateInterval: 500,
   nextObstacleSpawn: 100,
   nextBonusSpawn: 300,
+  executionFrequency: USER_CODE_CONFIG.executionFrequency,
+  laneCount: GAME_CONFIG.laneCount,
 };
 
 
@@ -46,7 +49,6 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
   const randomRef = useRef<() => number>(() => Math.random());
   const gameStateRef = useRef(gameState);
   const userCodeFrameCounterRef = useRef<number>(0);
-  const autoPlayLoopCounterRef = useRef<number>(0);
 
   const resetRandomGenerator = useCallback(() => {
     randomRef.current = mulberry32(seed ?? Date.now());
@@ -522,7 +524,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       // Update obstacles with consistent speed
       newState.obstacles = newState.obstacles
         .map(obstacle => ({ ...obstacle, y: obstacle.y + newState.gameSpeed * obstacle.movingSpeed }))
-        // .filter(obstacle => obstacle.y < CANVAS_CONFIG.height)
+        .filter(obstacle => obstacle.y < CANVAS_CONFIG.height)
         .filter(obstacle => {
             // Keep obstacles that are not fading or have not finished fading
             const isFadingOut = obstacle.isFadingOut && (Date.now() - (obstacle.fadeStartTime || 0)) >= FADE_OUT_DURATION;
@@ -537,7 +539,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       // Check collisions
       const playerCar = {
         x: newState.carX,
-        y: GAME_CONFIG.carY,
+        y: newState.carY,
         width: CAR_DIMENSIONS.width,
         height: CAR_DIMENSIONS.height,
       };
@@ -580,7 +582,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
      if (userCode && gameStateRef.current.isAutoPlay) {
         // Only execute user code every N frames to reduce performance impact
         userCodeFrameCounterRef.current++;
-        if (userCodeFrameCounterRef.current >= USER_CODE_CONFIG.executionFrequency) {
+        if (userCodeFrameCounterRef.current >= gameStateRef.current.executionFrequency) {
           userCodeFrameCounterRef.current = 0; // Reset counter
           executeUserCode();
         }
