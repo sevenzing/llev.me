@@ -245,8 +245,7 @@
 }
 
 .difficultyRadio:disabled + .difficultyLabel::before {
-  border-color: #666666;
-  background-color: #444444;
+  border-color: #035503;
 }
 
 .difficultyLabel {
@@ -258,22 +257,22 @@
 
 .buttonContainer {
   display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-  justify-content: center;
+  gap: 1rem;
   align-items: center;
+  width: 100%;
+  justify-content: center;
 }
 
+
 .gameButton {
-  padding: 12px 24px;
+  padding: 12px;
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 100px;
   box-sizing: border-box;
+  height: 100%;
+  width: 100%;
 }
 
 .gameButton:hover:enabled {
@@ -299,6 +298,19 @@
   border-color: #00cc00;
 }
 
+.runCodeButton {
+  background: #00ff00;
+  color: #232323;
+  font-weight: bold;
+  border: none;
+  transition: all 0.2s ease;
+}
+.runCodeButton:hover {
+  background: #00cc00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
 .stopButton {
   background-color: #b44;
   color: #fff;
@@ -320,18 +332,10 @@
 }
 
 .codeItButton {
-  /* Inherit .gameButton styles */
   background-color: #2222ff;
   color: #fff;
   border: 2px solid #2222ff;
-  font-weight: bold;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-size: 1rem;
-  min-width: 100px;
-  box-sizing: border-box;
   transition: background 0.2s, color 0.2s, border 0.2s;
-  margin: 0;
 }
 
 .codeItButton:hover:enabled {
@@ -386,7 +390,6 @@
   .gameButton {
     padding: 10px 20px;
     font-size: 0.9rem;
-    min-width: 80px;
   }
 }
 
@@ -444,36 +447,7 @@
   margin-bottom: 16px;
   resize: vertical;
 }
-.runCodeButton {
-  background: #00ff00;
-  color: #232323;
-  font-weight: bold;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 32px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  align-self: flex-end;
-  min-width: 100px;
-  box-sizing: border-box;
-}
-.runCodeButton:hover {
-  background: #00cc00;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-.runCodeButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-.runCodeButton:disabled:hover {
-  background: #00ff00;
-  transform: none;
-  box-shadow: none;
-}
+
 @media (max-width: 900px) {
   .splitContainer {
     flex-direction: column;
@@ -506,8 +480,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: flex-end;
-  gap: 12px;
+  align-items: flex-start;
 }
 
 .seedControls {

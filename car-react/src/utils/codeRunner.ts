@@ -1,5 +1,5 @@
 import type { GameState } from "../types/game";
-import { CAR_DIMENSIONS, GAME_CONFIG, USER_CODE_CONFIG } from "../constants/gameConstants";
+import { CAR_DIMENSIONS, USER_CODE_CONFIG } from "../constants/gameConstants";
 import * as ts from 'typescript';
 
 // Types for the code runner

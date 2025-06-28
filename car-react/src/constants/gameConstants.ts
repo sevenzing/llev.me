@@ -83,7 +83,7 @@ export const GAME_CONFIG: GameConfig = {
   laneCount: 5,
   laneWidth: CANVAS_CONFIG.width / 5,
   carY: CANVAS_CONFIG.height - CAR_DIMENSIONS.height - 10,
-  maxLives: 5,
+  maxLives: 3,
   invincibilityDuration: 1000, // 1 second in milliseconds
   blinkInterval: 100, // Blink every 100ms
   laneDashLength: 15,

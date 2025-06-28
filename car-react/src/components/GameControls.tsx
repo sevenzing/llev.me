@@ -7,6 +7,7 @@ interface GameControlsProps {
   selectedDifficulty: Difficulty;
   onDifficultyChange: (difficulty: Difficulty) => void;
   onStartGame: () => void;
+  onRunCode: () => void;
   onStopGame: () => void;
   onCodeItClick: () => void;
   isCodeOpen: boolean;
@@ -17,6 +18,7 @@ export const GameControls: React.FC<GameControlsProps> = ({
   selectedDifficulty,
   onDifficultyChange,
   onStartGame,
+  onRunCode,
   onStopGame,
   onCodeItClick,
   isCodeOpen,
@@ -48,20 +50,29 @@ export const GameControls: React.FC<GameControlsProps> = ({
           onClick={onStartGame}
           disabled={gameState.isRunning}
         >
-          Start
+          GO!!
         </button>
+        
+        <button
+          className={`${styles.gameButton} ${styles.runCodeButton}`}
+          onClick={onRunCode}
+          disabled={gameState.isRunning}
+        >
+          AUTO
+        </button>
+
         <button
           className={`${styles.gameButton} ${styles.stopButton}`}
           onClick={onStopGame}
           disabled={!gameState.isRunning}
         >
-          Stop
+          STOP
         </button>
         <button
           className={`${styles.gameButton} ${styles.codeItButton}`}
           onClick={onCodeItClick}
         >
-          {isCodeOpen ? 'Close code' : 'Code It'}
+          {isCodeOpen ? 'CLOSE' : 'CODE'}
         </button>
       </div>
     </div>

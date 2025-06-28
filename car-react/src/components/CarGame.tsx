@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { GameCanvas } from './GameCanvas';
 import { GameHeader } from './GameHeader';
-import { GameControls } from './GameControls';
+import { GameAllControls } from './GameAllControls';
 import { CANVAS_CONFIG, DEFAULT_EDITOR_CONTENT, DEFAULT_EDITOR_FILE_NAME } from '../constants/gameConstants';
 import styles from '../styles/Game.module.css';
 import MonacoEditor from '@monaco-editor/react';
@@ -139,7 +139,7 @@ export const CarGame: React.FC = () => {
       // Generate random seed when checkbox is unchecked
       setSeed(Math.floor(Math.random() * (2**32 - 2**31) + 2**31));
     }
-    
+
     if (gameState.isRunning) {
       console.log('Game is already running!');
     } else {
@@ -168,15 +168,6 @@ export const CarGame: React.FC = () => {
                 onTouchStart={handleTouchStart}
               />
             </div>
-            <GameControls
-              gameState={gameState}
-              selectedDifficulty={selectedDifficulty}
-              onDifficultyChange={setSelectedDifficulty}
-              onStartGame={handleStartGame}
-              onStopGame={endGame}
-              onCodeItClick={() => setIsCodeOpen((open) => !open)}
-              isCodeOpen={isCodeOpen}
-            />
           </div>
           <div
             className={styles.resizer}
@@ -188,54 +179,35 @@ export const CarGame: React.FC = () => {
             style={{ minWidth: MIN_CODE_WIDTH }}
           >
             <div className={styles.codeTabHeader}>{DEFAULT_EDITOR_FILE_NAME}</div>
-            <div className={styles.codeEditorContainer}>
-              <MonacoEditor
-                defaultLanguage="typescript"
-                theme="vs-dark"
-                value={userCode}
-                onChange={value => setUserCode(value ?? '')}
-                options={{
-                  fontSize: 16,
-                  minimap: { enabled: false },
-                  wordWrap: 'on',
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                }}
-              />
-            </div>
-            {/* Controls section */}
-            <div className={styles.codeEditorControls}>
-              {/* Seed controls */}
-              <div className={styles.seedControls}>
-                <label className={styles.seedLabel}>
-                  <input
-                    type="checkbox"
-                    checked={isSeedEnabled}
-                    onChange={e => setIsSeedEnabled(e.target.checked)}
-                    className={styles.seedCheckbox}
-                  />
-                  Set Seed
-                </label>
-                <input
-                  type="number"
-                  value={seed}
-                  min={0}
-                  max={2**32 - 1}
-                  onChange={e => setSeed(Number(e.target.value) || 0)}
-                  disabled={!isSeedEnabled}
-                  className={styles.seedInput}
-                />
-              </div>
-              {/* Run button */}
-              <button 
-                className={styles.runCodeButton} 
-                onClick={handleRunCode}
-                disabled={!userCode.trim()}
-              >
-                {gameState.isRunning && gameState.isAutoPlay ? 'Auto Running' : 'Run Code'}
-              </button>
-            </div>
-            
+            <MonacoEditor
+              height="100%"
+              defaultLanguage="typescript"
+              theme="vs-dark"
+              value={userCode}
+              onChange={value => setUserCode(value ?? '')}
+              options={{
+                fontSize: 16,
+                minimap: { enabled: false },
+                wordWrap: 'on',
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+              }}
+            />
+            <GameAllControls
+              gameState={gameState}
+              selectedDifficulty={selectedDifficulty}
+              setSelectedDifficulty={setSelectedDifficulty}
+              handleStartGame={handleStartGame}
+              endGame={endGame}
+              isCodeOpen={isCodeOpen}
+              setIsCodeOpen={setIsCodeOpen}
+              isSeedEnabled={isSeedEnabled}
+              setIsSeedEnabled={setIsSeedEnabled}
+              seed={seed}
+              setSeed={setSeed}
+              userCode={userCode}
+              handleRunCode={handleRunCode}
+            />
             {/* Error section */}
             {codeError && (
               <div className={styles.errorSection}>
@@ -271,14 +243,20 @@ export const CarGame: React.FC = () => {
               onTouchStart={handleTouchStart}
             />
           </div>
-          <GameControls
+          <GameAllControls
             gameState={gameState}
             selectedDifficulty={selectedDifficulty}
-            onDifficultyChange={setSelectedDifficulty}
-            onStartGame={handleStartGame}
-            onStopGame={endGame}
-            onCodeItClick={() => setIsCodeOpen((open) => !open)}
+            setSelectedDifficulty={setSelectedDifficulty}
+            handleStartGame={handleStartGame}
+            endGame={endGame}
             isCodeOpen={isCodeOpen}
+            setIsCodeOpen={setIsCodeOpen}
+            isSeedEnabled={isSeedEnabled}
+            setIsSeedEnabled={setIsSeedEnabled}
+            seed={seed}
+            setSeed={setSeed}
+            userCode={userCode}
+            handleRunCode={handleRunCode}
           />
         </div>
       )}
