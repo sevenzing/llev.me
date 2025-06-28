@@ -107,9 +107,10 @@ export const DEFAULT_EDITOR_CONTENT = `// Car Game AI Logic
 
 function handleNextMove(context: Context): MoveDirection {
   const { lane } = context.player;
-  const { laneCount } = context.gameState;
-  const safest = [lane, lane - 1, lane + 1, lane - 2, lane + 2, lane - 3, lane + 3, lane - 4, lane + 4]
-    .filter(l => l >= 0 && l < laneCount)
+  const offsets = [0, -1, 1, -2, 2, -3, 3, -4, 4];
+  const safest = offsets
+    .map(offset => lane + offset)
+    .filter(l => l >= 0 && l < 5)
     .map(l => ({
       lane: l,
       iter: Math.min(
@@ -165,6 +166,7 @@ interface Bonus {
   height: number;
   type: string;
   isReversed: boolean;
+  movingSpeed: number;
   collision: CollisionInfo;
 }
 

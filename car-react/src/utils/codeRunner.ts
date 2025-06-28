@@ -32,6 +32,7 @@ export interface Context {
     height: number;
     type: string;
     isReversed: boolean;
+    movingSpeed: number;
     collision: {
       pixelsToCollision: number | null;
       framesToCollision: number | null;
@@ -232,19 +233,19 @@ export function createGameContext(gameState: GameState): Context {
   const carLane = gameState.currentLane;
   const carX = gameState.carX;
   const gameSpeed = gameState.gameSpeed;
-  const execFreq = gameState.executionFrequency || 1;
+  const execFreq = gameState.executionFrequency;
 
   function getCollisionInfo(obj: {
     y: number;
     height: number;
     lane: number;
-    movingSpeed?: number;
+    movingSpeed: number;
   }) {
     // Only relevant if in the same lane
-    const pixelsToCollision = carY - obj.y - carHeight;
+    const pixelsToCollision = Math.max(0, carY - obj.y - carHeight);
     // Calculate frames to collision (if in same lane)
-    const speed = (obj.movingSpeed ?? 1) * gameSpeed;
-    const framesToCollision = speed > 0 ? Math.max(0, Math.floor(pixelsToCollision / speed)) : null;
+    const speed = obj.movingSpeed * gameSpeed;
+    const framesToCollision = speed > 0 ? Math.floor(pixelsToCollision / speed) : null;
     // Calculate iterations to collision
     const iterationsToCollision =
       framesToCollision !== null ? Math.floor(framesToCollision / execFreq) : null;
@@ -269,7 +270,7 @@ export function createGameContext(gameState: GameState): Context {
       y: obstacle.y,
       width: obstacle.width,
       height: obstacle.height,
-      movingSpeed: obstacle.movingSpeed,
+      movingSpeed: obstacle.movingSpeed * gameState.gameSpeed,
       collision: getCollisionInfo(obstacle),
     })),
     bonuses: gameState.bonuses.map((bonus) => ({
@@ -280,6 +281,7 @@ export function createGameContext(gameState: GameState): Context {
       height: bonus.height,
       type: bonus.type,
       isReversed: bonus.isReversed,
+      movingSpeed: bonus.config.movingSpeed * gameState.gameSpeed,
       collision: getCollisionInfo(bonus),
     })),
     gameState: {

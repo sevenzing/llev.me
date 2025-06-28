@@ -239,7 +239,8 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         config,
         image,
         lane,
-        isReversed: isReversed || false,
+        isReversed: isReversed,
+        movingSpeed: config.movingSpeed,
       };
     },
     [images, randomRef]
