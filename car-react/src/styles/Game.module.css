@@ -1,3 +1,8 @@
+:root {
+  --primary-color: #3af07c;
+  --primary-color-hover: #2bbf61;
+}
+
 /* Reset and base styles */
 .carGame {
   margin: 0;
@@ -43,7 +48,7 @@
 /* Typography */
 .gameTitle {
   font-size: 2rem;
-  color: #00ff00;
+  color: var(--primary-color);
   text-align: center;
   margin-bottom: 20px;
   margin-top: 20px;
@@ -180,7 +185,7 @@
 .gameCanvas {
   width: 100%;
   background-color: #444444;
-  border: 4px solid #00ff00;
+  border: 4px solid var(--primary-color);
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2);
 }
@@ -219,7 +224,7 @@
 }
 
 .difficultyOption:hover {
-  background-color: rgba(0, 255, 0, 0.1);
+  background-color: rgba(58, 240, 124, 0.12);
 }
 
 .difficultyRadio {
@@ -233,15 +238,15 @@
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid #00ff00;
+  border: 2px solid var(--primary-color);
   border-radius: 50%;
   margin-right: 8px;
   transition: all 0.2s ease;
 }
 
 .difficultyRadio:checked + .difficultyLabel::before {
-  background-color: #00ff00;
-  box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+  background-color: var(--primary-color);
+  box-shadow: 0 0 8px rgba(58, 240, 124, 0.5);
 }
 
 .difficultyRadio:disabled + .difficultyLabel::before {
@@ -288,25 +293,25 @@
 }
 
 .startButton {
-  background-color: #00ff00;
+  background-color: var(--primary-color);
   color: #000000;
-  border: 2px solid #00ff00;
+  border: 2px solid var(--primary-color);
 }
 
 .startButton:hover:enabled {
-  background-color: #00cc00;
-  border-color: #00cc00;
+  background-color: var(--primary-color-hover);
+  border-color: var(--primary-color-hover);
 }
 
 .runCodeButton {
-  background: #00ff00;
+  background: var(--primary-color);
   color: #232323;
   font-weight: bold;
   border: none;
   transition: all 0.2s ease;
 }
 .runCodeButton:hover {
-  background: #00cc00;
+  background: var(--primary-color-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
