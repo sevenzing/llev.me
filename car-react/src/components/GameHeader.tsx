@@ -11,21 +11,45 @@ export const GameHeader: React.FC<GameHeaderProps> = ({ gameState }) => {
   return (
     <div className={styles.gameHeader}>
       {/* Score Display - stays at top */}
-      
+
       {/* Health and Bonuses positioned above canvas */}
       <div className={styles.canvasUI}>
         {/* Bonuses on the left */}
         <div className={styles.bonusDisplay}>
-          <div className={`${styles.activeBonus} ${gameState.activeBonuses.speedup ? '' : styles.hidden}`}>
+          <div
+            className={`${styles.activeBonus} ${gameState.activeBonuses.speedup ? '' : styles.hidden}`}
+          >
             <div className={styles.bonusContainer}>
-              <img src="/static/speedup.png" className={`${styles.bonusIcon} ${styles.speedup}`} alt="Speedup" />
-              <span className={styles.bonusTime}>{Math.max(0, Math.ceil(((gameState.activeBonuses.speedup?.endTime || 0) - Date.now()) / 1000))}s</span>
+              <img
+                src="/static/speedup.png"
+                className={`${styles.bonusIcon} ${styles.speedup}`}
+                alt="Speedup"
+              />
+              <span className={styles.bonusTime}>
+                {Math.max(
+                  0,
+                  Math.ceil(((gameState.activeBonuses.speedup?.endTime || 0) - Date.now()) / 1000)
+                )}
+                s
+              </span>
             </div>
           </div>
-          <div className={`${styles.activeBonus} ${gameState.activeBonuses.shield ? '' : styles.hidden}`}>
+          <div
+            className={`${styles.activeBonus} ${gameState.activeBonuses.shield ? '' : styles.hidden}`}
+          >
             <div className={styles.bonusContainer}>
-              <img src="/static/shield.png" className={`${styles.bonusIcon} ${styles.shield}`} alt="Shield" />
-              <span className={styles.bonusTime}>{Math.max(0, Math.ceil(((gameState.activeBonuses.shield?.endTime || 0) - Date.now()) / 1000))}s</span>
+              <img
+                src="/static/shield.png"
+                className={`${styles.bonusIcon} ${styles.shield}`}
+                alt="Shield"
+              />
+              <span className={styles.bonusTime}>
+                {Math.max(
+                  0,
+                  Math.ceil(((gameState.activeBonuses.shield?.endTime || 0) - Date.now()) / 1000)
+                )}
+                s
+              </span>
             </div>
           </div>
         </div>
@@ -44,9 +68,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({ gameState }) => {
             ))}
           </div>
         </div>
-
-        
       </div>
     </div>
   );
-}; 
+};

@@ -33,40 +33,38 @@ export const GameAllControls: React.FC<GameAllControlsProps> = ({
   setSeed,
   userCode,
   handleRunCode,
-}) =>  {
-
-
-  const codeItControls = <div className={styles.seedControls}>
-  <label className={styles.seedLabel}>
-    <input
-      type="checkbox"
-      checked={isSeedEnabled}
-      onChange={e => setIsSeedEnabled(e.target.checked)}
-      className={styles.seedCheckbox}
-    />
-    Set Seed
-  </label>
-  <input
-    type="number"
-    value={seed}
-    min={0}
-    max={2**32 - 1}
-    onChange={e => setSeed(Number(e.target.value) || 0)}
-    disabled={!isSeedEnabled}
-    className={styles.seedInput}
-  />
-</div>
-{/* Run button */}
-<button 
-  className={styles.runCodeButton} 
-  onClick={handleRunCode}
-  disabled={!userCode.trim()}
->
-  {gameState.isRunning && gameState.isAutoPlay ? 'Auto Running' : 'Run Code'}
-</button>;
+}) => {
+  const codeItControls = (
+    <div className={styles.seedControls}>
+      <label className={styles.seedLabel}>
+        <input
+          type="checkbox"
+          checked={isSeedEnabled}
+          onChange={(e) => setIsSeedEnabled(e.target.checked)}
+          className={styles.seedCheckbox}
+        />
+        Set Seed
+      </label>
+      <input
+        type="number"
+        value={seed}
+        min={0}
+        max={2 ** 32 - 1}
+        onChange={(e) => setSeed(Number(e.target.value) || 0)}
+        disabled={!isSeedEnabled}
+        className={styles.seedInput}
+      />
+    </div>
+  );
+  {
+    /* Run button */
+  }
+  <button className={styles.runCodeButton} onClick={handleRunCode} disabled={!userCode.trim()}>
+    {gameState.isRunning && gameState.isAutoPlay ? 'Auto Running' : 'Run Code'}
+  </button>;
   return (
     <div className={styles.codeEditorControls}>
-      { isCodeOpen && codeItControls }
+      {isCodeOpen && codeItControls}
       <GameControls
         gameState={gameState}
         selectedDifficulty={selectedDifficulty}
@@ -77,6 +75,6 @@ export const GameAllControls: React.FC<GameAllControlsProps> = ({
         onCodeItClick={() => setIsCodeOpen((open: boolean) => !open)}
         isCodeOpen={isCodeOpen}
       />
-  </div>
-  ); 
+    </div>
+  );
 };

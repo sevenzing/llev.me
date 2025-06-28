@@ -3,7 +3,11 @@ import { useGameLogic } from '../hooks/useGameLogic';
 import { GameCanvas } from './GameCanvas';
 import { GameHeader } from './GameHeader';
 import { GameAllControls } from './GameAllControls';
-import { CANVAS_CONFIG, DEFAULT_EDITOR_CONTENT, DEFAULT_EDITOR_FILE_NAME } from '../constants/gameConstants';
+import {
+  CANVAS_CONFIG,
+  DEFAULT_EDITOR_CONTENT,
+  DEFAULT_EDITOR_FILE_NAME,
+} from '../constants/gameConstants';
 import styles from '../styles/Game.module.css';
 import MonacoEditor from '@monaco-editor/react';
 
@@ -105,7 +109,9 @@ export const CarGame: React.FC = () => {
       if (total - newGameWidth < minCode) newGameWidth = total - minCode;
       setGamePaneWidth(newGameWidth);
     };
-    const handleMouseUp = () => { dragging.current = false; };
+    const handleMouseUp = () => {
+      dragging.current = false;
+    };
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     return () => {
@@ -123,7 +129,7 @@ export const CarGame: React.FC = () => {
   const handleStartGame = () => {
     if (!isSeedEnabled) {
       // Generate random seed when checkbox is unchecked
-      setSeed(Math.floor(Math.random() * (2**32 - 2**31) + 2**31));
+      setSeed(Math.floor(Math.random() * (2 ** 32 - 2 ** 31) + 2 ** 31));
     }
     startGame(false); // false = manual mode
   };
@@ -134,10 +140,10 @@ export const CarGame: React.FC = () => {
       console.log('Please write some code first!');
       return;
     }
-    
+
     if (!isSeedEnabled) {
       // Generate random seed when checkbox is unchecked
-      setSeed(Math.floor(Math.random() * (2**32 - 2**31) + 2**31));
+      setSeed(Math.floor(Math.random() * (2 ** 32 - 2 ** 31) + 2 ** 31));
     }
 
     if (gameState.isRunning) {
@@ -148,43 +154,48 @@ export const CarGame: React.FC = () => {
     }
   };
 
+  const gameHeaderPlusCanvas = (
+    <>
+      <h1 className={styles.gameTitle}>
+        🚗 LLev's Car <span className={styles.titleEmoji}>💥</span>
+      </h1>
+      <GameHeader gameState={gameState} />
+      <div className={styles.gameCanvasContainer}>
+        <GameCanvas
+          gameState={gameState}
+          images={images}
+          onClick={handleCanvasClick}
+          onTouchStart={handleTouchStart}
+        />
+      </div>
+    </>
+  );
+
   return (
     <div className={isCodeOpen ? styles.splitContainer : styles.carGame}>
       {isCodeOpen ? (
         <>
           <div
             className={styles.leftPane}
-            style={{ width: gamePaneWidth, minWidth: MIN_GAME_WIDTH, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+            style={{
+              width: gamePaneWidth,
+              minWidth: MIN_GAME_WIDTH,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
           >
-            <h1 className={styles.gameTitle}>
-              🚗 LLev's Car <span className={styles.titleEmoji}>💥</span>
-            </h1>
-            <GameHeader gameState={gameState} />
-            <div className={styles.gameCanvasContainer}>
-              <GameCanvas
-                gameState={gameState}
-                images={images}
-                onClick={handleCanvasClick}
-                onTouchStart={handleTouchStart}
-              />
-            </div>
+            {gameHeaderPlusCanvas}
           </div>
-          <div
-            className={styles.resizer}
-            onMouseDown={startDrag}
-            style={{ minHeight: '100vh' }}
-          />
-          <div
-            className={styles.rightPane}
-            style={{ minWidth: MIN_CODE_WIDTH }}
-          >
+          <div className={styles.resizer} onMouseDown={startDrag} style={{ minHeight: '100vh' }} />
+          <div className={styles.rightPane} style={{ minWidth: MIN_CODE_WIDTH }}>
             <div className={styles.codeTabHeader}>{DEFAULT_EDITOR_FILE_NAME}</div>
             <MonacoEditor
               height="100%"
               defaultLanguage="typescript"
               theme="vs-dark"
               value={userCode}
-              onChange={value => setUserCode(value ?? '')}
+              onChange={(value) => setUserCode(value ?? '')}
               options={{
                 fontSize: 16,
                 minimap: { enabled: false },
@@ -214,7 +225,7 @@ export const CarGame: React.FC = () => {
                 <div className={styles.errorHeader}>
                   <span className={styles.errorIcon}>⚠️</span>
                   <span className={styles.errorTitle}>Code Execution Error</span>
-                  <button 
+                  <button
                     className={styles.errorCloseButton}
                     onClick={clearCodeError}
                     title="Dismiss error"
@@ -231,18 +242,7 @@ export const CarGame: React.FC = () => {
         </>
       ) : (
         <div>
-          <h1 className={styles.gameTitle}>
-            🚗 LLev's Car <span className={styles.titleEmoji}>💥</span>
-          </h1>
-          <GameHeader gameState={gameState} />
-          <div className={styles.gameCanvasContainer}>
-            <GameCanvas
-              gameState={gameState}
-              images={images}
-              onClick={handleCanvasClick}
-              onTouchStart={handleTouchStart}
-            />
-          </div>
+          {gameHeaderPlusCanvas}
           <GameAllControls
             gameState={gameState}
             selectedDifficulty={selectedDifficulty}
@@ -262,4 +262,4 @@ export const CarGame: React.FC = () => {
       )}
     </div>
   );
-}; 
+};

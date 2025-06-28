@@ -13,7 +13,7 @@ export type BonusType = 'speedup' | 'shield' | 'vortex';
 export interface BonusesConfig {
   items: {
     [key in BonusType]: BonusConfig;
-  },
+  };
   spawnFrequency: number;
   isReverseBonusEnabled?: boolean;
 }
@@ -29,7 +29,7 @@ export interface BonusConfig {
     color: string;
     size: number;
   };
-  negativeImage?: any;
+  isReversable: boolean;
 }
 
 export interface Bonus {

@@ -44,7 +44,7 @@ export const BONUSES_CONFIG: BonusesConfig = {
         color: '#3399ff',
         size: 15,
       },
-      negativeImage: '/static/speedup-negative.png',
+      isReversable: true,
     },
     shield: {
       duration: 10000, // 10 seconds
@@ -56,7 +56,7 @@ export const BONUSES_CONFIG: BonusesConfig = {
         size: 15,
       },
       spriteOnPlayerScale: 0.8,
-      negativeImage: '/static/shield-negative.png',
+      isReversable: true,
     },
     vortex: {
       duration: 0, // Instant effect
@@ -67,7 +67,7 @@ export const BONUSES_CONFIG: BonusesConfig = {
         color: '#8a2be2', // A vortex-like purple
         size: 15,
       },
-      negativeImage: '/static/vortex-negative.png',
+      isReversable: false,
     },
   },
   spawnFrequency: 300,
@@ -178,4 +178,3 @@ interface GameState {
 }
 type MoveDirection = 'left' | 'right' | null;
 `;
-

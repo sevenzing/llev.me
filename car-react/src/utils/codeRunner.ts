@@ -1,5 +1,5 @@
-import type { GameState } from "../types/game";
-import { CAR_DIMENSIONS, USER_CODE_CONFIG } from "../constants/gameConstants";
+import type { GameState } from '../types/game';
+import { CAR_DIMENSIONS, USER_CODE_CONFIG } from '../constants/gameConstants';
 import * as ts from 'typescript';
 
 // Types for the code runner
@@ -51,16 +51,18 @@ export interface Context {
 
 export type MoveDirection = 'left' | 'right' | null;
 
-export type ExecutionResult = {
-  result: 'success';
-  moveDirection: MoveDirection;
-  executionTime: number;
-} | {
-  result: 'error';
-  error: string | null;
-  executionTime: number;
-  isTimeout: boolean;
-}
+export type ExecutionResult =
+  | {
+      result: 'success';
+      moveDirection: MoveDirection;
+      executionTime: number;
+    }
+  | {
+      result: 'error';
+      error: string | null;
+      executionTime: number;
+      isTimeout: boolean;
+    };
 
 // Safe wrapper for user code execution
 class SafeCodeRunner {
@@ -117,20 +119,22 @@ class SafeCodeRunner {
         throw new Error(`Invalid return value from user code: ${result}`);
       }
     } else {
-      throw new Error(`Invalid return value from user code: ${result}. Expected 'left', 'right', or null.`);
+      throw new Error(
+        `Invalid return value from user code: ${result}. Expected 'left', 'right', or null.`
+      );
     }
   }
 
   // Execute user code safely
   public async executeCode(code: string, context: Context): Promise<ExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       // Create a new Function constructor with a safe context
       const safeContext = this.createSafeContext();
 
       const transpiledCode = transpileTypeScript(code);
-      
+
       // Create the function
       const userFunction = new Function(
         'context',
@@ -160,7 +164,12 @@ class SafeCodeRunner {
       // Execute the function with timeout protection
       const executionPromise = new Promise<MoveDirection>((resolve, reject) => {
         try {
-          const result = userFunction(context, safeContext.Math, safeContext.Array, safeContext.console);
+          const result = userFunction(
+            context,
+            safeContext.Math,
+            safeContext.Array,
+            safeContext.console
+          );
           resolve(this.validateReturnValue(result));
         } catch (error) {
           reject(error);
@@ -174,16 +183,16 @@ class SafeCodeRunner {
       // Race between execution and timeout
       const moveDirection = await Promise.race([executionPromise, timeoutPromise]);
       const executionTime = Date.now() - startTime;
-      
-      return { 
+
+      return {
         result: 'success',
-        moveDirection, 
-        executionTime, 
+        moveDirection,
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       const isTimeout = error instanceof Error && error.message === 'Execution timeout';
-      
+
       // Provide more specific error messages
       let errorMessage = 'Unknown error occurred';
       if (error instanceof Error) {
@@ -199,11 +208,11 @@ class SafeCodeRunner {
           errorMessage = error.message;
         }
       }
-      
-      return { 
+
+      return {
         result: 'error',
         error: errorMessage,
-        executionTime, 
+        executionTime,
         isTimeout,
       };
     }
@@ -225,18 +234,20 @@ export function createGameContext(gameState: GameState): Context {
   const gameSpeed = gameState.gameSpeed;
   const execFreq = gameState.executionFrequency || 1;
 
-  function getCollisionInfo(obj: { y: number; height: number; lane: number; movingSpeed?: number }) {
+  function getCollisionInfo(obj: {
+    y: number;
+    height: number;
+    lane: number;
+    movingSpeed?: number;
+  }) {
     // Only relevant if in the same lane
     const pixelsToCollision = carY - obj.y - carHeight;
     // Calculate frames to collision (if in same lane)
     const speed = (obj.movingSpeed ?? 1) * gameSpeed;
-    const framesToCollision = speed > 0
-      ? Math.max(0, Math.floor(pixelsToCollision / speed))
-      : null;
+    const framesToCollision = speed > 0 ? Math.max(0, Math.floor(pixelsToCollision / speed)) : null;
     // Calculate iterations to collision
-    const iterationsToCollision = (framesToCollision !== null)
-      ? Math.floor(framesToCollision / execFreq)
-      : null;
+    const iterationsToCollision =
+      framesToCollision !== null ? Math.floor(framesToCollision / execFreq) : null;
     return {
       pixelsToCollision,
       framesToCollision,
@@ -291,4 +302,4 @@ export function resetUserData() {
 function transpileTypeScript(tsCode: string): string {
   const result = ts.transpileModule(tsCode, { compilerOptions: { module: ts.ModuleKind.ESNext } });
   return result.outputText;
-} 
+}

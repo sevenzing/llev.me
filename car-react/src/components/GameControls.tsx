@@ -52,7 +52,7 @@ export const GameControls: React.FC<GameControlsProps> = ({
         >
           GO!!
         </button>
-        
+
         <button
           className={`${styles.gameButton} ${styles.runCodeButton}`}
           onClick={onRunCode}
@@ -68,13 +68,10 @@ export const GameControls: React.FC<GameControlsProps> = ({
         >
           STOP
         </button>
-        <button
-          className={`${styles.gameButton} ${styles.codeItButton}`}
-          onClick={onCodeItClick}
-        >
+        <button className={`${styles.gameButton} ${styles.codeItButton}`} onClick={onCodeItClick}>
           {isCodeOpen ? 'CLOSE' : 'CODE'}
         </button>
       </div>
     </div>
   );
-}; 
+};
