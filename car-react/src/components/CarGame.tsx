@@ -9,6 +9,7 @@ import {
   DEFAULT_EDITOR_FILE_NAME,
 } from '../constants/gameConstants';
 import styles from '../styles/Game.module.css';
+import errorStyles from '../styles/ErrorSection.module.css';
 import MonacoEditor from '@monaco-editor/react';
 
 const MIN_GAME_WIDTH = 450;
@@ -221,20 +222,20 @@ export const CarGame: React.FC = () => {
             />
             {/* Error section */}
             {codeError && (
-              <div className={styles.errorSection}>
-                <div className={styles.errorHeader}>
-                  <span className={styles.errorIcon}>⚠️</span>
-                  <span className={styles.errorTitle}>Code Execution Error</span>
+              <div className={errorStyles.errorSection}>
+                <div className={errorStyles.errorHeader}>
+                  <span className={errorStyles.errorIcon}>⚠️</span>
+                  <span className={errorStyles.errorTitle}>Code Execution Error</span>
                   <button
-                    className={styles.errorCloseButton}
+                    className={errorStyles.errorCloseButton}
                     onClick={clearCodeError}
                     title="Dismiss error"
                   >
                     ✕
                   </button>
                 </div>
-                <div className={styles.errorContent}>
-                  <div className={styles.errorMessage}>{codeError}</div>
+                <div className={errorStyles.errorContent}>
+                  <div className={errorStyles.errorMessage}>{codeError}</div>
                 </div>
               </div>
             )}

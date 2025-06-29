@@ -1,7 +1,7 @@
 import React from 'react';
 import type { GameState } from '../types/game';
 import { GAME_CONFIG } from '../constants/gameConstants';
-import styles from '../styles/Game.module.css';
+import styles from '../styles/GameHeader.module.css';
 
 interface GameHeaderProps {
   gameState: GameState;

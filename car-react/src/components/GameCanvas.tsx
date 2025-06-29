@@ -7,7 +7,7 @@ import {
   BONUSES_CONFIG,
   FADE_OUT_DURATION,
 } from '../constants/gameConstants';
-import styles from '../styles/Game.module.css';
+import styles from '../styles/GameCanvas.module.css';
 
 interface GameCanvasProps {
   gameState: GameState;

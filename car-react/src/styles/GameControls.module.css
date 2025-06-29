@@ -1,0 +1,169 @@
+.gameControls {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.difficultySelector {
+  display: flex;
+  justify-content: center;
+  border: none;
+  padding: 0;
+}
+
+.difficultyOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.difficultyOption:hover {
+  background-color: rgba(58, 240, 124, 0.12);
+}
+
+.difficultyRadio {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.difficultyRadio + .difficultyLabel::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  margin-right: 8px;
+  transition: all 0.2s ease;
+}
+
+.difficultyRadio:checked + .difficultyLabel::before {
+  background-color: var(--primary-color);
+  box-shadow: 0 0 8px rgba(58, 240, 124, 0.5);
+}
+
+.difficultyRadio:disabled + .difficultyLabel::before {
+  border-color: #035503;
+}
+
+.difficultyLabel {
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.gameButton {
+  padding: 12px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+}
+
+.gameButton:hover:enabled {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.gameButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.startButton {
+  background-color: var(--primary-color);
+  color: #000000;
+  border: 2px solid var(--primary-color);
+}
+
+.startButton:hover:enabled {
+  background-color: var(--primary-color-hover);
+  border-color: var(--primary-color-hover);
+}
+
+.stopButton {
+  background-color: #b44;
+  color: #fff;
+  border: 2px solid #b44;
+}
+
+.stopButton:hover:enabled {
+  background-color: #a33;
+  border-color: #a33;
+}
+
+.watchButton {
+  background-color: #4444ff;
+  color: #ffffff;
+}
+
+.watchButton:hover:enabled {
+  background-color: #3333cc;
+}
+
+.codeItButton {
+  background-color: #2222ff;
+  color: #fff;
+  border: 2px solid #2222ff;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+
+.codeItButton:hover:enabled {
+  background-color: #3333cc;
+  border-color: #3333cc;
+  color: #fff;
+}
+
+.runCodeButton {
+  background: var(--primary-color);
+  color: #232323;
+  font-weight: bold;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.runCodeButton:hover {
+  background: var(--primary-color-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.runCodeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.runCodeButton:disabled:hover {
+  background: var(--primary-color);
+  transform: none;
+  box-shadow: none;
+} 
