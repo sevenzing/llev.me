@@ -1,7 +1,7 @@
 import React from 'react';
 import { GameControls } from './GameControls';
 import type { GameState, Difficulty } from '../types/game';
-import styles from '../styles/Game.module.css';
+import styles from '../styles/GameControls.module.css';
 
 interface GameAllControlsProps {
   gameState: GameState;

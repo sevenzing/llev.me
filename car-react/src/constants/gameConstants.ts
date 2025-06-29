@@ -109,9 +109,7 @@ export const DEFAULT_EDITOR_CONTENT = `// Car Game AI Logic
 function handleNextMove(context: Context): MoveDirection {
   const { lane } = context.player;
   const { laneCount } = context.gameState;
-  const offsets = Array.from({ length: laneCount }, (_, i) =>
-    i === 0 ? 0 : (i % 2 === 1 ? -Math.ceil(i / 2) : Math.ceil(i / 2))
-  );
+  const offsets = [0, -1, 1, 2, -2, -3, 3, -4, 4];
   const lanesWithIter = offsets
     .map(offset => lane + offset)
     .filter(l => l >= 0 && l < laneCount)
@@ -124,27 +122,9 @@ function handleNextMove(context: Context): MoveDirection {
           .concat(Infinity)
       )
     }));
-
-  const isSafePath = (from: number, to: number) => {
-    if (from === to) return true;
-    const step = Math.sign(to - from);
-    for (let l = from + step; l !== to + step; l += step) {
-      const laneIter = lanesWithIter.find(x => x.lane === l)?.iter ?? Infinity;
-      if (laneIter <= 2) return false;
-    }
-    return true;
-  };
-
-  const filtered = lanesWithIter.filter(lw =>
-    lw.iter > 1 && isSafePath(lane, lw.lane)
-  );
-
-  const safest = filtered.length
-    ? filtered.reduce((max, curr) => (curr.iter > max.iter ? curr : max)).lane
-    : lane;
-
+  const safest = lanesWithIter.reduce((max, curr) => (curr.iter > max.iter ? curr : max)).lane;
   if (safest === lane) return null;
-  return safest < lane ? 'left' : 'right';
+  return safest < lane ? 'left' : 'right'; // Return the direction to move the car
 }
 
 // Context type:

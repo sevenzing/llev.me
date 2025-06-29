@@ -13,7 +13,7 @@ import MonacoEditor from '@monaco-editor/react';
 import { errorToast } from './ErrorToast';
 
 const MIN_GAME_WIDTH = 450;
-const MIN_CODE_WIDTH = 450;
+const MIN_CODE_WIDTH = 530;
 const DEFAULT_GAME_WIDTH = 600;
 
 export const CarGame: React.FC = () => {
