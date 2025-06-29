@@ -70,16 +70,6 @@
   font-weight: 600;
 }
 
-/* Heart display */
-.heartDisplay {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  padding: 6px 10px;
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 20px;
-  border: 2px solid rgba(255, 0, 0, 0.3);
-}
 
 .heartIcon {
   width: 30px;
@@ -275,7 +265,6 @@
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-sizing: border-box;
   height: 100%;
   width: 100%;
 }
@@ -362,16 +351,6 @@
     font-size: 1.5rem;
   }
 
-  .heartDisplay {
-    gap: 6px;
-    padding: 4px 8px;
-  }
-
-  .heartIcon {
-    width: 25px;
-    height: 25px;
-  }
-
   .activeBonus {
     padding: 4px 8px;
     font-size: 0.9rem;
@@ -408,18 +387,17 @@
   width: 100vw;
   background: #303030;
 }
+
 .leftPane {
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-sizing: border-box;
 }
 .rightPane {
   flex: 1 1 0;
   background: #232323;
   border-left: 2px solid #222;
   padding: 24px 24px 0 24px;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: stretch;

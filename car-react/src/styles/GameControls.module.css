@@ -11,7 +11,6 @@
   display: flex;
   justify-content: center;
   border: none;
-  padding: 0;
 }
 
 .difficultyOption {
@@ -80,7 +79,6 @@
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-sizing: border-box;
   height: 100%;
   width: 100%;
 }
@@ -100,7 +98,6 @@
 .startButton {
   background-color: var(--primary-color);
   color: #000000;
-  border: 2px solid var(--primary-color);
 }
 
 .startButton:hover:enabled {
@@ -111,7 +108,6 @@
 .stopButton {
   background-color: #b44;
   color: #fff;
-  border: 2px solid #b44;
 }
 
 .stopButton:hover:enabled {
@@ -131,7 +127,6 @@
 .codeItButton {
   background-color: #2222ff;
   color: #fff;
-  border: 2px solid #2222ff;
   transition: background 0.2s, color 0.2s, border 0.2s;
 }
 
@@ -166,4 +161,43 @@
   background: var(--primary-color);
   transform: none;
   box-shadow: none;
+}
+
+@media (max-width: 600px) {
+  .codeItButton {
+    display: none;
+  }
+  .buttonContainer {
+    align-items: stretch;
+    width: 100%;
+  }
+  .gameButton {
+    width: 100%;
+    font-size: 1rem;
+    padding: 12px 0;
+    min-width: 0;
+  }
+  .difficultySelector {
+    gap: 6px;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .difficultyOption {
+    font-size: 0.95rem;
+    padding: 4px 8px;
+    flex: 1 1 40%;
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 400px) {
+  .gameButton {
+    font-size: 0.95rem;
+    padding: 10px 0;
+  }
+  .difficultyOption {
+    font-size: 0.9rem;
+    padding: 3px 4px;
+    min-width: 60px;
+  }
 } 

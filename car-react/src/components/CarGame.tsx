@@ -9,8 +9,8 @@ import {
   DEFAULT_EDITOR_FILE_NAME,
 } from '../constants/gameConstants';
 import styles from '../styles/Game.module.css';
-import errorStyles from '../styles/ErrorSection.module.css';
 import MonacoEditor from '@monaco-editor/react';
+import { errorToast } from './ErrorToast';
 
 const MIN_GAME_WIDTH = 450;
 const MIN_CODE_WIDTH = 450;
@@ -35,7 +35,6 @@ export const CarGame: React.FC = () => {
     endGame,
     images,
     codeError,
-    clearCodeError,
   } = useGameLogic(seed, userCode);
 
   // Handle keyboard controls
@@ -172,6 +171,13 @@ export const CarGame: React.FC = () => {
     </>
   );
 
+  // Show toast when codeError changes
+  React.useEffect(() => {
+    if (codeError) {
+      errorToast('Runtime error', codeError);
+    }
+  }, [codeError]);
+
   return (
     <div className={isCodeOpen ? styles.splitContainer : styles.carGame}>
       {isCodeOpen ? (
@@ -220,29 +226,10 @@ export const CarGame: React.FC = () => {
               userCode={userCode}
               handleRunCode={handleRunCode}
             />
-            {/* Error section */}
-            {codeError && (
-              <div className={errorStyles.errorSection}>
-                <div className={errorStyles.errorHeader}>
-                  <span className={errorStyles.errorIcon}>⚠️</span>
-                  <span className={errorStyles.errorTitle}>Code Execution Error</span>
-                  <button
-                    className={errorStyles.errorCloseButton}
-                    onClick={clearCodeError}
-                    title="Dismiss error"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className={errorStyles.errorContent}>
-                  <div className={errorStyles.errorMessage}>{codeError}</div>
-                </div>
-              </div>
-            )}
           </div>
         </>
       ) : (
-        <div>
+        <>
           {gameHeaderPlusCanvas}
           <GameAllControls
             gameState={gameState}
@@ -259,7 +246,7 @@ export const CarGame: React.FC = () => {
             userCode={userCode}
             handleRunCode={handleRunCode}
           />
-        </div>
+        </>
       )}
     </div>
   );

@@ -13,7 +13,6 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 420px;
   padding: 0 10px;
   margin-bottom: 5px;
 }
@@ -21,7 +20,7 @@
 .scoreAndLivesDisplay {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .scoreDisplay {
@@ -31,7 +30,7 @@
 
 .heartDisplay {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   justify-content: flex-end;
   padding: 6px 10px;
   background-color: rgba(0, 0, 0, 0.3);

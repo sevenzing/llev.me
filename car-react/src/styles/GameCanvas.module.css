@@ -1,13 +1,11 @@
 .gameCanvasContainer {
   width: 100%;
-  max-width: 420px;
-  margin-bottom: 15px;
+  margin-bottom: 30px;
 }
 
 .gameCanvas {
   width: 100%;
   background-color: #444444;
-  border: 4px solid var(--primary-color);
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2);
+  box-shadow: 0 0px 0px 4px var(--primary-color);
 } 
