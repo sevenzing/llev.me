@@ -35,6 +35,7 @@ const initialGameState: GameState = {
   obstacleFrequency: 90,
   isInvincible: false,
   invincibilityStartTime: 0,
+  invincibilityDuration: GAME_CONFIG.invincibilityDuration,
   lastBlinkTime: 0,
   isVisible: true,
   activeBonuses: {},
@@ -400,7 +401,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           ...prev,
           activeBonuses: newActiveBonuses,
           isInvincible: true,
-          invincibilityStartTime: Date.now(),
+          invincibilityStartTime: prev.frameCount,
         };
       }
 
@@ -409,7 +410,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         ...prev,
         lives: prev.lives - 1,
         isInvincible: true,
-        invincibilityStartTime: Date.now(),
+        invincibilityStartTime: prev.frameCount,
       };
     });
   }, []);
@@ -418,10 +419,9 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     setGameState((prev) => {
       if (!prev.isInvincible) return prev;
 
-      const now = Date.now();
-      const timeSinceInvincibility = now - prev.invincibilityStartTime;
-
-      if (timeSinceInvincibility >= GAME_CONFIG.invincibilityDuration) {
+      const timeSinceInvincibility = prev.frameCount - prev.invincibilityStartTime;
+      console.log('timeSinceInvincibility', timeSinceInvincibility, prev.invincibilityDuration);
+      if (timeSinceInvincibility >= prev.invincibilityDuration) {
         return {
           ...prev,
           isInvincible: false,
@@ -430,11 +430,11 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       }
 
       // Blink effect
-      if (now - prev.lastBlinkTime >= GAME_CONFIG.blinkInterval) {
+      if (prev.frameCount - prev.lastBlinkTime >= GAME_CONFIG.blinkInterval) {
         return {
           ...prev,
           isVisible: !prev.isVisible,
-          lastBlinkTime: now,
+          lastBlinkTime: prev.frameCount,
         };
       }
 
@@ -644,9 +644,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       // Execute user code if in auto mode (outside of state update to prevent timing issues)
       if (userCode && gameStateRef.current.isAutoPlay) {
         // Only execute user code every N frames to reduce performance impact
-        userCodeFrameCounterRef.current++;
-        if (userCodeFrameCounterRef.current >= gameStateRef.current.executionFrequency) {
-          userCodeFrameCounterRef.current = 0; // Reset counter
+        if (gameStateRef.current.frameCount % gameStateRef.current.executionFrequency == 0) {
           executeUserCode();
         }
       }

@@ -10,6 +10,11 @@ export interface Context {
     y: number;
     width: number;
     height: number;
+    invincibility: {
+      isActive: boolean;
+      framesLeft: number;
+      itersLeft: number;
+    };
   };
   obstacles: Array<{
     lane: number;
@@ -21,7 +26,7 @@ export interface Context {
     collision: {
       pixelsToCollision: number | null;
       framesToCollision: number | null;
-      iterationsToCollision: number | null;
+      itersToCollision: number | null;
     };
   }>;
   bonuses: Array<{
@@ -36,7 +41,7 @@ export interface Context {
     collision: {
       pixelsToCollision: number | null;
       framesToCollision: number | null;
-      iterationsToCollision: number | null;
+      itersToCollision: number | null;
     };
   }>;
   gameState: {
@@ -82,21 +87,9 @@ class SafeCodeRunner {
   private createSafeContext(): any {
     return {
       // Math functions (safe subset)
-      Math: {
-        abs: Math.abs,
-        min: Math.min,
-        max: Math.max,
-        floor: Math.floor,
-        ceil: Math.ceil,
-        round: Math.round,
-        sqrt: Math.sqrt,
-        pow: Math.pow,
-        PI: Math.PI,
-      },
+      Math: Math,
       // Array methods (safe subset)
-      Array: {
-        isArray: Array.isArray,
-      },
+      Array: Array,
       // Console for debugging (optional, can be removed for production)
       console: {
         log: console.log,
@@ -235,26 +228,31 @@ export function createGameContext(gameState: GameState): Context {
   const gameSpeed = gameState.gameSpeed;
   const execFreq = gameState.executionFrequency;
 
-  function getCollisionInfo(obj: {
-    y: number;
-    height: number;
-    lane: number;
-    movingSpeed: number;
-  }) {
+  function getCollisionInfo(obj: { y: number; height: number; lane: number; movingSpeed: number }) {
     // Only relevant if in the same lane
     const pixelsToCollision = Math.max(0, carY - obj.y - carHeight);
     // Calculate frames to collision (if in same lane)
     const speed = obj.movingSpeed * gameSpeed;
     const framesToCollision = speed > 0 ? Math.floor(pixelsToCollision / speed) : null;
     // Calculate iterations to collision
-    const iterationsToCollision =
+    const itersToCollision =
       framesToCollision !== null ? Math.floor(framesToCollision / execFreq) : null;
     return {
       pixelsToCollision,
       framesToCollision,
-      iterationsToCollision,
+      itersToCollision,
     };
   }
+
+  const timeSinceInvincibility = gameState.frameCount - gameState.invincibilityStartTime;
+  const untilInvincibilityEnds = gameState.invincibilityDuration - timeSinceInvincibility;
+
+  const framesLeft = gameState.isInvincible ? untilInvincibilityEnds : 0;
+  const invincibility = {
+    isActive: gameState.isInvincible,
+    framesLeft,
+    itersLeft: framesLeft / execFreq,
+  };
 
   return {
     player: {
@@ -263,6 +261,7 @@ export function createGameContext(gameState: GameState): Context {
       y: carY,
       width: carWidth,
       height: carHeight,
+      invincibility,
     },
     obstacles: gameState.obstacles.map((obstacle) => ({
       lane: obstacle.lane,

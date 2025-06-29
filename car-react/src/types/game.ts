@@ -82,6 +82,7 @@ export interface GameState {
   obstacleFrequency: number;
   isInvincible: boolean;
   invincibilityStartTime: number;
+  invincibilityDuration: number;
   lastBlinkTime: number;
   isVisible: boolean;
   activeBonuses: {

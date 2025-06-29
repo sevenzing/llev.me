@@ -84,14 +84,14 @@ export const GAME_CONFIG: GameConfig = {
   laneWidth: CANVAS_CONFIG.width / 5,
   carY: CANVAS_CONFIG.height - CAR_DIMENSIONS.height - 10,
   maxLives: 3,
-  invincibilityDuration: 1000, // 1 second in milliseconds
-  blinkInterval: 100, // Blink every 100ms
+  invincibilityDuration: 200, // 1 second in milliseconds
+  blinkInterval: 15,
   laneDashLength: 15,
   laneDashGap: 20,
 };
 
 export const USER_CODE_CONFIG = {
-  executionFrequency: 25, // Execute user code every 10 frames (instead of every frame)
+  executionFrequency: 25, // Execute user code every 25 frames (instead of every frame)
   // Increase this number to reduce CPU usage but make AI less responsive
   // Decrease this number to make AI more responsive but use more CPU
   maxExecutionTime: 100, // Maximum execution time in milliseconds
@@ -105,23 +105,45 @@ export const DEFAULT_EDITOR_CONTENT = `// Car Game AI Logic
 // Write your handleNextMove function to control the car
 // This is TypeScript - you get full type safety and IntelliSense!
 
+
 function handleNextMove(context: Context): MoveDirection {
   const { lane } = context.player;
-  const offsets = [0, -1, 1, -2, 2, -3, 3, -4, 4];
-  const safest = offsets
+  const { laneCount } = context.gameState;
+  const offsets = Array.from({ length: laneCount }, (_, i) =>
+    i === 0 ? 0 : (i % 2 === 1 ? -Math.ceil(i / 2) : Math.ceil(i / 2))
+  );
+  const lanesWithIter = offsets
     .map(offset => lane + offset)
-    .filter(l => l >= 0 && l < 5)
+    .filter(l => l >= 0 && l < laneCount)
     .map(l => ({
       lane: l,
       iter: Math.min(
         ...context.obstacles
           .filter(o => o.lane === l)
-          .map(o => o.collision.iterationsToCollision)
+          .map(o => o.collision.itersToCollision)
           .concat(Infinity)
       )
-    }))
-    .sort((a, b) => b.iter - a.iter)[0].lane;
-  if (safest == lane) return null;
+    }));
+
+  const isSafePath = (from: number, to: number) => {
+    if (from === to) return true;
+    const step = Math.sign(to - from);
+    for (let l = from + step; l !== to + step; l += step) {
+      const laneIter = lanesWithIter.find(x => x.lane === l)?.iter ?? Infinity;
+      if (laneIter <= 2) return false;
+    }
+    return true;
+  };
+
+  const filtered = lanesWithIter.filter(lw =>
+    lw.iter > 1 && isSafePath(lane, lw.lane)
+  );
+
+  const safest = filtered.length
+    ? filtered.reduce((max, curr) => (curr.iter > max.iter ? curr : max)).lane
+    : lane;
+
+  if (safest === lane) return null;
   return safest < lane ? 'left' : 'right';
 }
 
@@ -137,7 +159,7 @@ interface Context {
 interface CollisionInfo {
   pixelsToCollision: number;
   framesToCollision: number;
-  iterationsToCollision: number;
+  itersToCollision: number;
 }
 
 interface Player {
@@ -146,6 +168,11 @@ interface Player {
   y: number;
   width: number;
   height: number;
+  invincibility: {
+    isActive: boolean;
+    framesLeft: number;
+    itersLeft: number;
+  };
 }
 
 interface Obstacle {
