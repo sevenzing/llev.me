@@ -96,17 +96,17 @@
 }
 
 .gameButton {
-  padding: 12px;
-  border: none;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
   height: 100%;
   width: 100%;
-  color: #fff
+  color: #fff;
+  border-radius: var(--radius);
+  cursor: pointer;
 }
 
-.gameButton:hover:enabled {
+.gameButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
@@ -116,6 +116,7 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  transform: none;
 }
 
 .startButton {
@@ -144,7 +145,6 @@
 
 .codeItButton {
   background-color: #2222ff;
-  transition: background 0.2s, color 0.2s, border 0.2s;
 }
 
 .codeItButton:hover:enabled {
@@ -158,9 +158,7 @@
   transition: all 0.2s ease;
 }
 
-.runCodeButton:hover {
-  background: var(--secondary-color-hover);
-  transform: translateY(-2px);
+.runCodeButton:hover:enabled {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -214,4 +212,4 @@
     padding: 3px 4px;
     min-width: 60px;
   }
-} 
+}

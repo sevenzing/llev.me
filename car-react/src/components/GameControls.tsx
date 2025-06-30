@@ -1,6 +1,7 @@
 import React from 'react';
 import type { GameState, Difficulty } from '../types/game';
 import styles from '../styles/GameControls.module.css';
+import { MovingBorderButton } from './ui/moving-border';
 
 interface GameControlsProps {
   gameState: GameState;
@@ -50,16 +51,18 @@ export const GameControls: React.FC<GameControlsProps> = ({
           onClick={onStartGame}
           disabled={gameState.isRunning}
         >
-          GO!!
+          PLAY
         </button>
 
-        <button
-          className={`${styles.gameButton} ${styles.runCodeButton}`}
+        <MovingBorderButton
+          className={`${styles.gameButton} ${styles.runCodeButton} p-3`}
           onClick={onRunCode}
           disabled={gameState.isRunning}
+          as={'button'}
+          borderRadius="var(--radius)"
         >
           AUTO
-        </button>
+        </MovingBorderButton>
 
         <button
           className={`${styles.gameButton} ${styles.stopButton}`}
