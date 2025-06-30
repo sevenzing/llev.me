@@ -1,7 +1,7 @@
-import React from 'react';
-import type { GameState, Difficulty } from '../types/game';
-import styles from '../styles/GameControls.module.css';
-import { MovingBorderButton } from './ui/moving-border';
+import React from "react";
+import type { GameState, Difficulty } from "../types/game";
+import styles from "../styles/GameControls.module.css";
+import { MovingBorderButton } from "./ui/moving-border";
 
 interface GameControlsProps {
   gameState: GameState;
@@ -27,7 +27,7 @@ export const GameControls: React.FC<GameControlsProps> = ({
   return (
     <div className={styles.gameControls}>
       <fieldset className={styles.difficultySelector}>
-        {(['easy', 'normal', 'hard', 'insane'] as const).map((difficulty) => (
+        {(["easy", "normal", "hard", "insane"] as const).map((difficulty) => (
           <label key={difficulty} className={styles.difficultyOption}>
             <input
               type="radio"
@@ -58,7 +58,7 @@ export const GameControls: React.FC<GameControlsProps> = ({
           className={`${styles.gameButton} ${styles.runCodeButton} p-3`}
           onClick={onRunCode}
           disabled={gameState.isRunning}
-          as={'button'}
+          as={"button"}
           borderRadius="var(--radius)"
         >
           AUTO
@@ -71,8 +71,11 @@ export const GameControls: React.FC<GameControlsProps> = ({
         >
           STOP
         </button>
-        <button className={`${styles.gameButton} ${styles.codeItButton}`} onClick={onCodeItClick}>
-          {isCodeOpen ? 'CLOSE' : 'CODE'}
+        <button
+          className={`${styles.gameButton} ${styles.codeItButton}`}
+          onClick={onCodeItClick}
+        >
+          {isCodeOpen ? "CLOSE" : "CODE"}
         </button>
       </div>
     </div>

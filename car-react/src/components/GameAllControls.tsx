@@ -1,7 +1,7 @@
-import React from 'react';
-import { GameControls } from './GameControls';
-import type { GameState, Difficulty } from '../types/game';
-import styles from '../styles/GameControls.module.css';
+import React from "react";
+import { GameControls } from "./GameControls";
+import type { GameState, Difficulty } from "../types/game";
+import styles from "../styles/GameControls.module.css";
 
 interface GameAllControlsProps {
   gameState: GameState;
@@ -59,8 +59,12 @@ export const GameAllControls: React.FC<GameAllControlsProps> = ({
   {
     /* Run button */
   }
-  <button className={styles.runCodeButton} onClick={handleRunCode} disabled={!userCode.trim()}>
-    {gameState.isRunning && gameState.isAutoPlay ? 'Auto Running' : 'Run Code'}
+  <button
+    className={styles.runCodeButton}
+    onClick={handleRunCode}
+    disabled={!userCode.trim()}
+  >
+    {gameState.isRunning && gameState.isAutoPlay ? "Auto Running" : "Run Code"}
   </button>;
   return (
     <div className={styles.codeEditorControls}>

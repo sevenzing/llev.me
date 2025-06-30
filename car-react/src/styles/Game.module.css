@@ -3,7 +3,7 @@
   margin: 0;
   background-color: #303030;
   color: #ffffff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -85,14 +85,14 @@
 }
 .codeTabHeader {
   font-size: 1rem;
-  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-family: "Fira Mono", "Consolas", "Menlo", monospace;
   color: #919291;
   margin-bottom: 12px;
 }
 .codeEditor {
   width: 100%;
   min-height: 350px;
-  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-family: "Fira Mono", "Consolas", "Menlo", monospace;
   font-size: 1rem;
   background: #181818;
   color: #e0e0e0;

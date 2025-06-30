@@ -1,13 +1,13 @@
-import { useRef, useEffect } from 'react';
-import type { GameState } from '../types/game';
+import { useRef, useEffect } from "react";
+import type { GameState, Coin } from "../types/game";
 import {
   GAME_CONFIG,
   CAR_DIMENSIONS,
   CANVAS_CONFIG,
   BONUSES_CONFIG,
   FADE_OUT_DURATION,
-} from '../constants/gameConstants';
-import styles from '../styles/GameCanvas.module.css';
+} from "../constants/gameConstants";
+import styles from "../styles/GameCanvas.module.css";
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -28,14 +28,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw road lines
-    ctx.strokeStyle = '#ccc';
+    ctx.strokeStyle = "#ccc";
     ctx.lineWidth = 2;
     ctx.setLineDash([GAME_CONFIG.laneDashLength, GAME_CONFIG.laneDashGap]);
 
@@ -56,7 +56,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         gameState.carX,
         gameState.carY,
         CAR_DIMENSIONS.width,
-        CAR_DIMENSIONS.height
+        CAR_DIMENSIONS.height,
       );
 
       // Draw shield over the car if active
@@ -74,6 +74,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.restore();
       }
     }
+
+    // Draw coins
+    gameState.coins.forEach((coin) => {
+      if (
+        !coin.collected &&
+        coin.y + coin.height > 0 &&
+        coin.y < CANVAS_CONFIG.height
+      ) {
+        ctx.drawImage(images.coin, coin.x, coin.y, coin.width, coin.height);
+      }
+    });
 
     // Draw bonuses
     gameState.bonuses.forEach((bonus) => {
@@ -129,7 +140,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       className={styles.gameCanvas}
       onClick={onClick}
       onTouchStart={onTouchStart}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      style={{ cursor: onClick ? "pointer" : "default" }}
     />
   );
 };

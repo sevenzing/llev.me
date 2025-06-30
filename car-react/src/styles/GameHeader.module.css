@@ -10,29 +10,39 @@
 
 .canvasUI {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0 10px;
   margin-bottom: 5px;
+  gap: 10px;
 }
 
-.scoreAndLivesDisplay {
+.livesContainer {
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.scoreAndCoinContainer {
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  width: 100%;
+  justify-content: flex-end;
+  gap: 24px;
+  font-size: 1.2rem;
 }
 
 .scoreDisplay {
-  font-size: 1.2rem;
   font-weight: 600;
 }
 
 .heartDisplay {
   display: flex;
-  gap: 4px;
+  gap: 10px;
   justify-content: flex-end;
-  padding: 6px 10px;
+  padding: 6px 14px;
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 20px;
   border: 2px solid rgba(255, 0, 0, 0.3);
@@ -46,7 +56,8 @@
 }
 
 .heartIcon.empty {
-  filter: grayscale(100%) brightness(0.3) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: grayscale(100%) brightness(0.3)
+    drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .heartIcon.lost {
@@ -64,8 +75,17 @@
   }
   100% {
     transform: scale(0.8);
-    filter: grayscale(100%) brightness(0.3) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    filter: grayscale(100%) brightness(0.3)
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   }
+}
+
+.bonusesAndLivesContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
 }
 
 .bonusDisplay {
@@ -128,6 +148,27 @@
 .bonusTime {
   color: #cccccc;
   font-weight: bold;
+  min-width: 30px;
+  text-align: right;
+}
+
+.coinCounter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.coinIcon {
+  width: 24px;
+  height: 24px;
+  margin-right: 2px;
+}
+
+.coinCount {
+  font-weight: bold;
+  color: #ffd700;
   min-width: 30px;
   text-align: right;
 }

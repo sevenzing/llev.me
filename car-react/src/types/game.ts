@@ -8,7 +8,7 @@ export interface DifficultySettings {
   obstacleFrequency: number;
 }
 
-export type BonusType = 'speedup' | 'shield' | 'vortex';
+export type BonusType = "speedup" | "shield" | "vortex";
 
 export interface BonusesConfig {
   items: {
@@ -62,6 +62,17 @@ export interface Obstacle {
   rotation?: number;
 }
 
+export interface Coin {
+  x: number;
+  y: number;
+  lane: number;
+  collected: boolean;
+  trailId: string;
+  width: number;
+  height: number;
+  movingSpeed: number;
+}
+
 export interface GameState {
   currentLane: number;
   carX: number;
@@ -94,6 +105,9 @@ export interface GameState {
   nextBonusSpawn: number;
   executionFrequency: number;
   laneCount: number;
+  coins: Coin[];
+  coinsCollected: number;
+  nextCoinTrailSpawn: number;
 }
 
 export interface GameConfig {
@@ -107,9 +121,9 @@ export interface GameConfig {
   laneDashGap: number;
 }
 
-export type Difficulty = 'easy' | 'normal' | 'hard' | 'insane';
+export type Difficulty = "easy" | "normal" | "hard" | "insane";
 
-export type MoveDirection = 'left' | 'right' | null;
+export type MoveDirection = "left" | "right" | null;
 
 export interface ExecutionResult {
   moveDirection: MoveDirection;

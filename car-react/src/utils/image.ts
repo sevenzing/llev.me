@@ -1,13 +1,13 @@
 export const createNegativeImage = (
   image: HTMLImageElement,
   width: number,
-  height: number
+  height: number,
 ): Promise<HTMLImageElement> => {
   return new Promise((resolve) => {
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) {
       // Fallback to original image if context is not available
       return resolve(image);

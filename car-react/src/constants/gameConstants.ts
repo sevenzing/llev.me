@@ -1,4 +1,9 @@
-import type { DifficultySettings, GameConfig, BonusesConfig, Difficulty } from '../types/game';
+import type {
+  DifficultySettings,
+  GameConfig,
+  BonusesConfig,
+  Difficulty,
+} from "../types/game";
 
 export const DIFFICULTY_SETTINGS: Record<Difficulty, DifficultySettings> = {
   easy: {
@@ -20,7 +25,9 @@ export const DIFFICULTY_SETTINGS: Record<Difficulty, DifficultySettings> = {
 };
 
 const DEFAULT_BONUS_WIDTH = 40;
-const DEFAULT_BONUS_MOVING_SPEED = 0.5;
+const STATIC_SPEED = 0.5;
+const DEFAULT_BONUS_MOVING_SPEED = STATIC_SPEED;
+const DEFAULT_COIN_MOVING_SPEED = STATIC_SPEED;
 
 export const OBSTACLE_CONFIG = {
   minSpeed: 0.8,
@@ -41,7 +48,7 @@ export const BONUSES_CONFIG: BonusesConfig = {
       width: DEFAULT_BONUS_WIDTH,
       height: DEFAULT_BONUS_WIDTH,
       glow: {
-        color: '#3399ff',
+        color: "#3399ff",
         size: 15,
       },
       isReversable: true,
@@ -52,7 +59,7 @@ export const BONUSES_CONFIG: BonusesConfig = {
       width: DEFAULT_BONUS_WIDTH,
       height: DEFAULT_BONUS_WIDTH,
       glow: {
-        color: '#ffcc00',
+        color: "#ffcc00",
         size: 15,
       },
       spriteOnPlayerScale: 0.8,
@@ -64,7 +71,7 @@ export const BONUSES_CONFIG: BonusesConfig = {
       width: DEFAULT_BONUS_WIDTH,
       height: DEFAULT_BONUS_WIDTH,
       glow: {
-        color: '#8a2be2', // A vortex-like purple
+        color: "#8a2be2", // A vortex-like purple
         size: 15,
       },
       isReversable: false,
@@ -99,7 +106,7 @@ export const USER_CODE_CONFIG = {
 
 export const FADE_OUT_DURATION = 300; // 300ms fade-out for cleared obstacles
 
-export const DEFAULT_EDITOR_FILE_NAME = '~/personal/car-project/car-logic.ts';
+export const DEFAULT_EDITOR_FILE_NAME = "~/personal/car-project/car-logic.ts";
 
 export const DEFAULT_EDITOR_CONTENT = `// Car Game AI Logic
 // Write your handleNextMove function to control the car
@@ -187,3 +194,79 @@ interface GameState {
 }
 type MoveDirection = 'left' | 'right' | null;
 `;
+
+const GAP = 60;
+const SIZE = 48;
+export const COIN_CONFIG = {
+  width: SIZE,
+  height: SIZE,
+  minTrailFrequency: 1000,
+  maxTrailFrequency: 2000,
+  movingSpeed: DEFAULT_COIN_MOVING_SPEED,
+  trails: [
+    {
+      name: "straight",
+      shape: [
+        { laneOffset: 0, yOffset: 0 },
+        { laneOffset: 0, yOffset: 1 },
+        { laneOffset: 0, yOffset: 2 },
+        { laneOffset: 0, yOffset: 3 },
+        { laneOffset: 0, yOffset: 4 },
+      ],
+      gap: GAP,
+      startLanes: [0, 1, 2, 3, 4],
+    },
+    {
+      name: "arcLeft",
+      shape: [
+        { laneOffset: 0, yOffset: 0 },
+        { laneOffset: 0, yOffset: 1 },
+        { laneOffset: 1, yOffset: 2 },
+        { laneOffset: 2, yOffset: 3 },
+        { laneOffset: 2, yOffset: 4 },
+      ],
+      gap: GAP,
+      startLanes: [2, 3, 4],
+    },
+    {
+      name: "arcRight",
+      shape: [
+        { laneOffset: 0, yOffset: 0 },
+        { laneOffset: 0, yOffset: 1 },
+        { laneOffset: -1, yOffset: 2 },
+        { laneOffset: -2, yOffset: 3 },
+        { laneOffset: -2, yOffset: 4 },
+      ],
+      gap: GAP,
+      startLanes: [0, 1, 2],
+    },
+    {
+      name: "zigzag",
+      shape: [
+        { laneOffset: 0, yOffset: 0 },
+        { laneOffset: 1, yOffset: 1 },
+        { laneOffset: 2, yOffset: 2 },
+        { laneOffset: 1, yOffset: 3 },
+        { laneOffset: 0, yOffset: 4 },
+      ],
+      gap: GAP,
+      startLanes: [1, 2, 3],
+    },
+    {
+      name: "threeLines",
+      shape: [
+        { laneOffset: 0, yOffset: 0 },
+        { laneOffset: 0, yOffset: 1 },
+        { laneOffset: 0, yOffset: 2 },
+        { laneOffset: 2, yOffset: 0 },
+        { laneOffset: 2, yOffset: 1 },
+        { laneOffset: 2, yOffset: 2 },
+        { laneOffset: -2, yOffset: 0 },
+        { laneOffset: -2, yOffset: 1 },
+        { laneOffset: -2, yOffset: 2 },
+      ],
+      gap: GAP,
+      startLanes: [2],
+    },
+  ],
+};

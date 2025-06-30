@@ -1,5 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import type { GameState, Difficulty, Obstacle, Bonus, BonusType } from '../types/game';
+import { useState, useCallback, useRef, useEffect } from "react";
+import type {
+  GameState,
+  Difficulty,
+  Obstacle,
+  Bonus,
+  BonusType,
+  Coin,
+} from "../types/game";
 import {
   DIFFICULTY_SETTINGS,
   GAME_CONFIG,
@@ -9,11 +16,12 @@ import {
   OBSTACLE_CONFIG,
   FADE_OUT_DURATION,
   USER_CODE_CONFIG,
-} from '../constants/gameConstants';
-import { calculateLaneX, calculateLaneXForCar } from '../utils/cords';
-import { createNegativeImage } from '../utils/image';
-import { mulberry32 } from '../utils/random';
-import { codeRunner, createGameContext } from '../utils/codeRunner';
+  COIN_CONFIG,
+} from "../constants/gameConstants";
+import { calculateLaneX, calculateLaneXForCar } from "../utils/cords";
+import { createNegativeImage } from "../utils/image";
+import { mulberry32 } from "../utils/random";
+import { codeRunner, createGameContext } from "../utils/codeRunner";
 
 const initialGameState: GameState = {
   currentLane: 2,
@@ -45,12 +53,16 @@ const initialGameState: GameState = {
   nextBonusSpawn: 300,
   executionFrequency: USER_CODE_CONFIG.executionFrequency,
   laneCount: GAME_CONFIG.laneCount,
+  coins: [],
+  coinsCollected: 0,
+  nextCoinTrailSpawn: 80,
 };
 
 export const useGameLogic = (seed?: number, userCode?: string) => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
-  const [difficulty, setDifficulty] = useState<Difficulty>('normal');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('normal');
+  const [difficulty, setDifficulty] = useState<Difficulty>("normal");
+  const [selectedDifficulty, setSelectedDifficulty] =
+    useState<Difficulty>("normal");
   const [images, setImages] = useState<{ [key: string]: HTMLImageElement }>({});
   const [codeError, setCodeError] = useState<string | null>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
@@ -74,19 +86,24 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
   // Load images
   useEffect(() => {
     const imageSources: { [key: string]: string } = {
-      playerCar: '/static/green_car.png',
-      enemyCar: '/static/red_car.png',
-      heart: '/static/heart.png',
-      shield: '/static/shield.png',
-      speedup: '/static/speedup.png',
-      vortex: '/static/vortex.png',
+      playerCar: "/static/green_car.png",
+      enemyCar: "/static/red_car.png",
+      heart: "/static/heart.png",
+      shield: "/static/shield.png",
+      speedup: "/static/speedup.png",
+      vortex: "/static/vortex.png",
+      coin: "/static/circle_coin_large.png",
     };
 
     const loadedImages: { [key: string]: HTMLImageElement } = {};
     const imageKeys = Object.keys(imageSources);
     let loadedCount = 0;
 
-    const onImageLoad = (img: HTMLImageElement, key: string, isNegative = false) => {
+    const onImageLoad = (
+      img: HTMLImageElement,
+      key: string,
+      isNegative = false,
+    ) => {
       loadedImages[key] = img;
       loadedCount++;
 
@@ -94,16 +111,24 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       if (!isNegative && BONUSES_CONFIG.isReverseBonusEnabled) {
         const bonusConfig = BONUSES_CONFIG.items[key as BonusType];
         if (bonusConfig) {
-          createNegativeImage(img, bonusConfig.width, bonusConfig.height).then((negativeImg) => {
-            onImageLoad(negativeImg, getReversedImageName(key as BonusType), true);
-          });
+          createNegativeImage(img, bonusConfig.width, bonusConfig.height).then(
+            (negativeImg) => {
+              onImageLoad(
+                negativeImg,
+                getReversedImageName(key as BonusType),
+                true,
+              );
+            },
+          );
         }
       }
 
       // Check if all images (including negatives) are loaded
       const totalImagesToLoad =
         imageKeys.length +
-        (BONUSES_CONFIG.isReverseBonusEnabled ? Object.values(BONUSES_CONFIG.items).length : 0);
+        (BONUSES_CONFIG.isReverseBonusEnabled
+          ? Object.values(BONUSES_CONFIG.items).length
+          : 0);
       if (loadedCount === totalImagesToLoad) {
         setImages(loadedImages);
       }
@@ -127,6 +152,9 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       carX: calculateLaneXForCar(2),
       nextObstacleSpawn: 100,
       nextBonusSpawn: 300,
+      nextCoinTrailSpawn: 80,
+      coins: [],
+      coinsCollected: 0,
     });
   }, [difficulty]);
 
@@ -142,9 +170,10 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       });
 
       // Filter for lanes that are safe to spawn in
-      const availableLanes = Array.from({ length: GAME_CONFIG.laneCount }, (_, i) => i).filter(
-        (lane) => !unsafeLanes.has(lane)
-      );
+      const availableLanes = Array.from(
+        { length: GAME_CONFIG.laneCount },
+        (_, i) => i,
+      ).filter((lane) => !unsafeLanes.has(lane));
 
       if (availableLanes.length === 0) {
         return []; // No safe lanes, so don't spawn any obstacles
@@ -169,7 +198,9 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       const newObstacles: Obstacle[] = [];
 
       for (let i = 0; i < numberOfObstaclesToSpawn; i++) {
-        const laneIndex = Math.floor(randomRef.current() * availableLanes.length);
+        const laneIndex = Math.floor(
+          randomRef.current() * availableLanes.length,
+        );
         const lane = availableLanes.splice(laneIndex, 1)[0]; // Remove to ensure unique lanes per batch
 
         const lastObstacleInLane = existingObstacles
@@ -177,13 +208,17 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           .sort((a, b) => b.y - a.y)[0];
 
         let maxSpeed = OBSTACLE_CONFIG.maxSpeed;
-        if (lastObstacleInLane && lastObstacleInLane.y < CAR_DIMENSIONS.height * 2) {
+        if (
+          lastObstacleInLane &&
+          lastObstacleInLane.y < CAR_DIMENSIONS.height * 2
+        ) {
           maxSpeed = lastObstacleInLane.movingSpeed;
         }
 
         const x = calculateLaneX(lane, CAR_DIMENSIONS.width);
         const speed =
-          OBSTACLE_CONFIG.minSpeed + randomRef.current() * (maxSpeed - OBSTACLE_CONFIG.minSpeed);
+          OBSTACLE_CONFIG.minSpeed +
+          randomRef.current() * (maxSpeed - OBSTACLE_CONFIG.minSpeed);
 
         newObstacles.push({
           x,
@@ -197,15 +232,19 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
 
       return newObstacles;
     },
-    [randomRef]
+    [randomRef],
   );
 
   const createBonus = useCallback(
-    (existingBonuses: Bonus[], activeBonuses: GameState['activeBonuses']): Bonus | null => {
+    (
+      existingBonuses: Bonus[],
+      activeBonuses: GameState["activeBonuses"],
+    ): Bonus | null => {
       const types = Object.keys(BONUSES_CONFIG.items) as Array<BonusType>;
       const type = types[Math.floor(randomRef.current() * types.length)];
       const config = BONUSES_CONFIG.items[type];
-      const isReversed = BONUSES_CONFIG.isReverseBonusEnabled && !!activeBonuses[type];
+      const isReversed =
+        BONUSES_CONFIG.isReverseBonusEnabled && !!activeBonuses[type];
       const imageKey = isReversed ? `${type}-negative` : type;
       const image = images[imageKey];
 
@@ -214,7 +253,10 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         return null;
       }
 
-      const availableLanes = Array.from({ length: GAME_CONFIG.laneCount }, (_, i) => i);
+      const availableLanes = Array.from(
+        { length: GAME_CONFIG.laneCount },
+        (_, i) => i,
+      );
       existingBonuses.forEach((existingBonus) => {
         if (existingBonus.y < config.height * 2) {
           const index = availableLanes.indexOf(existingBonus.lane);
@@ -228,7 +270,8 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         return null;
       }
 
-      const lane = availableLanes[Math.floor(randomRef.current() * availableLanes.length)];
+      const lane =
+        availableLanes[Math.floor(randomRef.current() * availableLanes.length)];
       const x = calculateLaneX(lane, config.width);
 
       return {
@@ -244,11 +287,14 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         movingSpeed: config.movingSpeed,
       };
     },
-    [images, randomRef]
+    [images, randomRef],
   );
 
   const checkCollision = useCallback(
-    (car: { x: number; y: number; width: number; height: number }, obstacle: Obstacle) => {
+    (
+      car: { x: number; y: number; width: number; height: number },
+      obstacle: Obstacle,
+    ) => {
       return (
         car.x < obstacle.x + obstacle.width &&
         car.x + car.width > obstacle.x &&
@@ -256,11 +302,14 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         car.y + car.height > obstacle.y
       );
     },
-    []
+    [],
   );
 
   const checkBonusCollision = useCallback(
-    (car: { x: number; y: number; width: number; height: number }, bonus: Bonus) => {
+    (
+      car: { x: number; y: number; width: number; height: number },
+      bonus: Bonus,
+    ) => {
       return (
         car.x < bonus.x + bonus.width &&
         car.x + car.width > bonus.x &&
@@ -268,7 +317,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         car.y + car.height > bonus.y
       );
     },
-    []
+    [],
   );
 
   const collectBonus = useCallback((bonus: Bonus) => {
@@ -278,13 +327,13 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
 
       if (bonus.isReversed) {
         // If a reversed bonus is collected, end the active bonus effect
-        if (bonus.type === 'speedup') {
+        if (bonus.type === "speedup") {
           newGameSpeed = prev.baseGameSpeed;
         }
         delete newActiveBonuses[bonus.type];
       } else {
         // If a normal bonus is collected, activate it
-        if (bonus.type === 'vortex') {
+        if (bonus.type === "vortex") {
           const now = Date.now();
           const updatedObstacles = prev.obstacles.map((o) => ({
             ...o,
@@ -302,7 +351,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           type: bonus.type,
           endTime: Date.now() + bonus.config.duration,
         };
-        if (bonus.type === 'speedup' && bonus.config.speedMultiplier) {
+        if (bonus.type === "speedup" && bonus.config.speedMultiplier) {
           newGameSpeed = prev.baseGameSpeed * bonus.config.speedMultiplier;
         }
       }
@@ -326,7 +375,8 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       .filter((obstacle) => {
         // Keep obstacles that are not fading or have not finished fading
         const isFadingOut =
-          obstacle.isFadingOut && Date.now() - (obstacle.fadeStartTime || 0) >= FADE_OUT_DURATION;
+          obstacle.isFadingOut &&
+          Date.now() - (obstacle.fadeStartTime || 0) >= FADE_OUT_DURATION;
         return !isFadingOut;
       });
   }, []);
@@ -334,16 +384,25 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
   const updateBonuses = useCallback(
     (gameState: GameState) => {
       return gameState.bonuses
-        .map((bonus) => ({ ...bonus, y: bonus.y + gameState.gameSpeed * bonus.config.movingSpeed }))
+        .map((bonus) => ({
+          ...bonus,
+          y: bonus.y + gameState.gameSpeed * bonus.config.movingSpeed,
+        }))
         .map((bonus) => {
           if (bonus.config.isReversable) {
-            if (gameState.activeBonuses[bonus.type] != undefined && !bonus.isReversed) {
+            if (
+              gameState.activeBonuses[bonus.type] != undefined &&
+              !bonus.isReversed
+            ) {
               return {
                 ...bonus,
                 isReversed: true,
                 image: images[getReversedImageName(bonus.type)],
               };
-            } else if (gameState.activeBonuses[bonus.type] === undefined && bonus.isReversed) {
+            } else if (
+              gameState.activeBonuses[bonus.type] === undefined &&
+              bonus.isReversed
+            ) {
               return { ...bonus, isReversed: false, image: images[bonus.type] };
             }
           }
@@ -351,7 +410,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         })
         .filter((bonus) => bonus.y < CANVAS_CONFIG.height);
     },
-    [images, getReversedImageName]
+    [images, getReversedImageName],
   );
 
   const updateActiveBonuses = useCallback(() => {
@@ -419,8 +478,13 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     setGameState((prev) => {
       if (!prev.isInvincible) return prev;
 
-      const timeSinceInvincibility = prev.frameCount - prev.invincibilityStartTime;
-      console.log('timeSinceInvincibility', timeSinceInvincibility, prev.invincibilityDuration);
+      const timeSinceInvincibility =
+        prev.frameCount - prev.invincibilityStartTime;
+      console.log(
+        "timeSinceInvincibility",
+        timeSinceInvincibility,
+        prev.invincibilityDuration,
+      );
       if (timeSinceInvincibility >= prev.invincibilityDuration) {
         return {
           ...prev,
@@ -482,7 +546,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       }));
       endGame();
     },
-    [endGame]
+    [endGame],
   );
 
   const executeUserCode = useCallback(() => {
@@ -496,33 +560,36 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       codeRunner
         .executeCode(userCode, context)
         .then((executionResult) => {
-          if (executionResult.result === 'success') {
-            if (executionResult.moveDirection === 'left') {
+          if (executionResult.result === "success") {
+            if (executionResult.moveDirection === "left") {
               moveCarLeft();
-            } else if (executionResult.moveDirection === 'right') {
+            } else if (executionResult.moveDirection === "right") {
               moveCarRight();
             }
-          } else if (executionResult.result === 'error') {
+          } else if (executionResult.result === "error") {
             if (executionResult.isTimeout) {
               handleCodeError(
-                `Code execution timed out after ${executionResult.executionTime}ms. Your code took too long to execute. Please optimize your code or reduce complexity.`
+                `Code execution timed out after ${executionResult.executionTime}ms. Your code took too long to execute. Please optimize your code or reduce complexity.`,
               );
             } else {
-              handleCodeError(`Code execution failed: ${executionResult.error}`);
+              handleCodeError(
+                `Code execution failed: ${executionResult.error}`,
+              );
             }
           } else {
-            console.error('Unknown execution result:', executionResult);
+            console.error("Unknown execution result:", executionResult);
           }
         })
         .catch((error) => {
-          console.error('Error executing user code:', error);
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+          console.error("Error executing user code:", error);
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error occurred";
           handleCodeError(`Code execution failed: ${errorMessage}`);
         });
     } catch (error) {
-      console.error('Error setting up user code execution:', error);
+      console.error("Error setting up user code execution:", error);
       handleCodeError(
-        `Failed to set up code execution: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to set up code execution: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }, [userCode, moveCarLeft, moveCarRight, handleCodeError]);
@@ -550,7 +617,87 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       }));
       lastTimeRef.current = performance.now();
     },
-    [resetGameState, resetRandomGenerator]
+    [resetGameState, resetRandomGenerator],
+  );
+
+  // Helper to spawn a coin trail
+  const spawnCoinTrail = useCallback(
+    (frameCount: number, laneCount: number): Coin[] => {
+      const trailTypes = COIN_CONFIG.trails;
+      const trail =
+        trailTypes[Math.floor(randomRef.current() * trailTypes.length)];
+      // Pick a base lane a random from the startLanes
+      const baseLane =
+        trail.startLanes[
+          Math.floor(randomRef.current() * trail.startLanes.length)
+        ];
+      const baseLaneClamped = Math.max(0, Math.min(laneCount - 1, baseLane));
+      const coins: Coin[] = trail.shape.map(
+        (step: { laneOffset: number; yOffset: number }, i: number) => {
+          let lane = baseLaneClamped + (step.laneOffset || 0);
+          lane = Math.max(0, Math.min(laneCount - 1, lane));
+          return {
+            x: calculateLaneX(lane, COIN_CONFIG.width),
+            y:
+              -COIN_CONFIG.height -
+              step.yOffset * (COIN_CONFIG.height + trail.gap),
+            lane,
+            collected: false,
+            trailId: `${frameCount}-${trail.name}`,
+            width: COIN_CONFIG.width,
+            height: COIN_CONFIG.height,
+            movingSpeed: COIN_CONFIG.movingSpeed,
+          };
+        },
+      );
+      return coins;
+    },
+    [randomRef],
+  );
+
+  // Helper to update/move coins
+  const updateCoins = useCallback(
+    (coins: Coin[], gameSpeed: number): Coin[] => {
+      return coins
+        .map((coin) => ({ ...coin, y: coin.y + gameSpeed * coin.movingSpeed }))
+        .filter((coin) => coin.y < CANVAS_CONFIG.height && !coin.collected);
+    },
+    [],
+  );
+
+  // Helper to check coin collision
+  const checkCoinCollision = useCallback(
+    (
+      car: { x: number; y: number; width: number; height: number },
+      coin: Coin,
+    ) => {
+      return (
+        car.x < coin.x + coin.width &&
+        car.x + car.width > coin.x &&
+        car.y < coin.y + coin.height &&
+        car.y + car.height > coin.y
+      );
+    },
+    [],
+  );
+
+  // Helper to check coin collisions and update state
+  const checkCoinCollisions = useCallback(
+    (
+      coins: Coin[],
+      playerCar: { x: number; y: number; width: number; height: number },
+    ) => {
+      let collectedCount = 0;
+      const updatedCoins = coins.map((coin) => {
+        if (!coin.collected && checkCoinCollision(playerCar, coin)) {
+          collectedCount++;
+          return { ...coin, collected: true };
+        }
+        return coin;
+      });
+      return { updatedCoins, collectedCount };
+    },
+    [checkCoinCollision],
   );
 
   const gameLoop = useCallback(
@@ -565,9 +712,11 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         newState.carX += (newState.targetX - newState.carX) * 0.2;
 
         // Update road line offset with smooth movement
-        const laneSegmentHeight = GAME_CONFIG.laneDashLength + GAME_CONFIG.laneDashGap;
+        const laneSegmentHeight =
+          GAME_CONFIG.laneDashLength + GAME_CONFIG.laneDashGap;
         newState.roadLineOffset =
-          (newState.roadLineOffset + newState.gameSpeed * newState.roadSpeedMultiplier) %
+          (newState.roadLineOffset +
+            newState.gameSpeed * newState.roadSpeedMultiplier) %
           laneSegmentHeight;
 
         // Update frame count
@@ -579,17 +728,22 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           if (newObstacles && newObstacles.length > 0) {
             newState.obstacles = [...newState.obstacles, ...newObstacles];
           }
-          const newFrequency = newState.obstacleFrequency + (randomRef.current() * 40 - 20);
+          const newFrequency =
+            newState.obstacleFrequency + (randomRef.current() * 40 - 20);
           newState.nextObstacleSpawn = newState.frameCount + newFrequency;
         }
 
         // Create bonuses
         if (newState.frameCount >= newState.nextBonusSpawn) {
-          const newBonus = createBonus(newState.bonuses, newState.activeBonuses);
+          const newBonus = createBonus(
+            newState.bonuses,
+            newState.activeBonuses,
+          );
           if (newBonus) {
             newState.bonuses = [...newState.bonuses, newBonus];
           }
-          const newFrequency = BONUSES_CONFIG.spawnFrequency + (randomRef.current() * 100 - 50);
+          const newFrequency =
+            BONUSES_CONFIG.spawnFrequency + (randomRef.current() * 100 - 50);
           newState.nextBonusSpawn = newState.frameCount + newFrequency;
         }
 
@@ -637,6 +791,34 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           return newState;
         }
 
+        // Spawn coin trail
+        if (newState.frameCount >= (newState.nextCoinTrailSpawn || 0)) {
+          const newCoins = spawnCoinTrail(
+            newState.frameCount,
+            newState.laneCount,
+          );
+          newState.coins = [...newState.coins, ...newCoins];
+          const nextFreq =
+            COIN_CONFIG.minTrailFrequency +
+            Math.floor(
+              randomRef.current() *
+                (COIN_CONFIG.maxTrailFrequency - COIN_CONFIG.minTrailFrequency),
+            );
+          newState.nextCoinTrailSpawn = newState.frameCount + nextFreq;
+        }
+
+        // Move coins
+        newState.coins = updateCoins(newState.coins, newState.gameSpeed);
+
+        // Check coin collisions
+        const { updatedCoins, collectedCount } = checkCoinCollisions(
+          newState.coins,
+          playerCar,
+        );
+        newState.coins = updatedCoins;
+        newState.coinsCollected =
+          (newState.coinsCollected || 0) + collectedCount;
+
         gameStateRef.current = newState;
         return newState;
       });
@@ -644,7 +826,11 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       // Execute user code if in auto mode (outside of state update to prevent timing issues)
       if (userCode && gameStateRef.current.isAutoPlay) {
         // Only execute user code every N frames to reduce performance impact
-        if (gameStateRef.current.frameCount % gameStateRef.current.executionFrequency == 0) {
+        if (
+          gameStateRef.current.frameCount %
+            gameStateRef.current.executionFrequency ==
+          0
+        ) {
           executeUserCode();
         }
       }
@@ -670,7 +856,9 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       codeError,
       updateObstacles,
       updateBonuses,
-    ]
+      spawnCoinTrail,
+      checkCoinCollisions,
+    ],
   );
 
   useEffect(() => {

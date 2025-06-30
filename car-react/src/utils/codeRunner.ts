@@ -1,6 +1,6 @@
-import type { GameState } from '../types/game';
-import { CAR_DIMENSIONS, USER_CODE_CONFIG } from '../constants/gameConstants';
-import * as ts from 'typescript';
+import type { GameState } from "../types/game";
+import { CAR_DIMENSIONS, USER_CODE_CONFIG } from "../constants/gameConstants";
+import * as ts from "typescript";
 
 // Types for the code runner
 export interface Context {
@@ -55,16 +55,16 @@ export interface Context {
   userData: Record<string, any>;
 }
 
-export type MoveDirection = 'left' | 'right' | null;
+export type MoveDirection = "left" | "right" | null;
 
 export type ExecutionResult =
   | {
-      result: 'success';
+      result: "success";
       moveDirection: MoveDirection;
       executionTime: number;
     }
   | {
-      result: 'error';
+      result: "error";
       error: string | null;
       executionTime: number;
       isTimeout: boolean;
@@ -103,24 +103,27 @@ class SafeCodeRunner {
   private validateReturnValue(result: any): MoveDirection {
     if (result === null || result === undefined) {
       return null;
-    } else if (typeof result === 'string') {
+    } else if (typeof result === "string") {
       const direction = result.toLowerCase().trim();
-      if (['left', 'l'].includes(direction)) {
-        return 'left';
-      } else if (['right', 'r'].includes(direction)) {
-        return 'right';
+      if (["left", "l"].includes(direction)) {
+        return "left";
+      } else if (["right", "r"].includes(direction)) {
+        return "right";
       } else {
         throw new Error(`Invalid return value from user code: ${result}`);
       }
     } else {
       throw new Error(
-        `Invalid return value from user code: ${result}. Expected 'left', 'right', or null.`
+        `Invalid return value from user code: ${result}. Expected 'left', 'right', or null.`,
       );
     }
   }
 
   // Execute user code safely
-  public async executeCode(code: string, context: Context): Promise<ExecutionResult> {
+  public async executeCode(
+    code: string,
+    context: Context,
+  ): Promise<ExecutionResult> {
     const startTime = Date.now();
 
     try {
@@ -131,10 +134,10 @@ class SafeCodeRunner {
 
       // Create the function
       const userFunction = new Function(
-        'context',
-        'Math',
-        'Array',
-        'console',
+        "context",
+        "Math",
+        "Array",
+        "console",
         `
         "use strict";
         ${transpiledCode}
@@ -152,7 +155,7 @@ class SafeCodeRunner {
         }
         
         return result;
-        `
+        `,
       );
 
       // Execute the function with timeout protection
@@ -162,7 +165,7 @@ class SafeCodeRunner {
             context,
             safeContext.Math,
             safeContext.Array,
-            safeContext.console
+            safeContext.console,
           );
           resolve(this.validateReturnValue(result));
         } catch (error) {
@@ -171,32 +174,39 @@ class SafeCodeRunner {
       });
 
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Execution timeout')), this.maxExecutionTime);
+        setTimeout(
+          () => reject(new Error("Execution timeout")),
+          this.maxExecutionTime,
+        );
       });
 
       // Race between execution and timeout
-      const moveDirection = await Promise.race([executionPromise, timeoutPromise]);
+      const moveDirection = await Promise.race([
+        executionPromise,
+        timeoutPromise,
+      ]);
       const executionTime = Date.now() - startTime;
 
       return {
-        result: 'success',
+        result: "success",
         moveDirection,
         executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      const isTimeout = error instanceof Error && error.message === 'Execution timeout';
+      const isTimeout =
+        error instanceof Error && error.message === "Execution timeout";
 
       // Provide more specific error messages
-      let errorMessage = 'Unknown error occurred';
+      let errorMessage = "Unknown error occurred";
       if (error instanceof Error) {
         if (isTimeout) {
           errorMessage = `Execution timed out after ${executionTime}ms`;
-        } else if (error.message.includes('Unexpected token')) {
+        } else if (error.message.includes("Unexpected token")) {
           errorMessage = `Syntax error: ${error.message}. Please check your TypeScript/JavaScript syntax.`;
-        } else if (error.message.includes('is not defined')) {
+        } else if (error.message.includes("is not defined")) {
           errorMessage = `Reference error: ${error.message}. Make sure all variables are properly declared.`;
-        } else if (error.message.includes('Cannot read property')) {
+        } else if (error.message.includes("Cannot read property")) {
           errorMessage = `Property access error: ${error.message}. Check that objects exist before accessing their properties.`;
         } else {
           errorMessage = error.message;
@@ -204,7 +214,7 @@ class SafeCodeRunner {
       }
 
       return {
-        result: 'error',
+        result: "error",
         error: errorMessage,
         executionTime,
         isTimeout,
@@ -228,15 +238,23 @@ export function createGameContext(gameState: GameState): Context {
   const gameSpeed = gameState.gameSpeed;
   const execFreq = gameState.executionFrequency;
 
-  function getCollisionInfo(obj: { y: number; height: number; lane: number; movingSpeed: number }) {
+  function getCollisionInfo(obj: {
+    y: number;
+    height: number;
+    lane: number;
+    movingSpeed: number;
+  }) {
     // Only relevant if in the same lane
     const pixelsToCollision = Math.max(0, carY - obj.y - carHeight);
     // Calculate frames to collision (if in same lane)
     const speed = obj.movingSpeed * gameSpeed;
-    const framesToCollision = speed > 0 ? Math.floor(pixelsToCollision / speed) : null;
+    const framesToCollision =
+      speed > 0 ? Math.floor(pixelsToCollision / speed) : null;
     // Calculate iterations to collision
     const itersToCollision =
-      framesToCollision !== null ? Math.floor(framesToCollision / execFreq) : null;
+      framesToCollision !== null
+        ? Math.floor(framesToCollision / execFreq)
+        : null;
     return {
       pixelsToCollision,
       framesToCollision,
@@ -244,8 +262,10 @@ export function createGameContext(gameState: GameState): Context {
     };
   }
 
-  const timeSinceInvincibility = gameState.frameCount - gameState.invincibilityStartTime;
-  const untilInvincibilityEnds = gameState.invincibilityDuration - timeSinceInvincibility;
+  const timeSinceInvincibility =
+    gameState.frameCount - gameState.invincibilityStartTime;
+  const untilInvincibilityEnds =
+    gameState.invincibilityDuration - timeSinceInvincibility;
 
   const framesLeft = gameState.isInvincible ? untilInvincibilityEnds : 0;
   const invincibility = {
@@ -301,6 +321,8 @@ export function resetUserData() {
 }
 
 function transpileTypeScript(tsCode: string): string {
-  const result = ts.transpileModule(tsCode, { compilerOptions: { module: ts.ModuleKind.ESNext } });
+  const result = ts.transpileModule(tsCode, {
+    compilerOptions: { module: ts.ModuleKind.ESNext },
+  });
   return result.outputText;
 }

@@ -1,16 +1,16 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useGameLogic } from '../hooks/useGameLogic';
-import { GameCanvas } from './GameCanvas';
-import { GameHeader } from './GameHeader';
-import { GameAllControls } from './GameAllControls';
+import React, { useEffect, useState, useRef } from "react";
+import { useGameLogic } from "../hooks/useGameLogic";
+import { GameCanvas } from "./GameCanvas";
+import { GameHeader } from "./GameHeader";
+import { GameAllControls } from "./GameAllControls";
 import {
   CANVAS_CONFIG,
   DEFAULT_EDITOR_CONTENT,
   DEFAULT_EDITOR_FILE_NAME,
-} from '../constants/gameConstants';
-import styles from '../styles/Game.module.css';
-import MonacoEditor from '@monaco-editor/react';
-import { errorToast } from './ErrorToast';
+} from "../constants/gameConstants";
+import styles from "../styles/Game.module.css";
+import MonacoEditor from "@monaco-editor/react";
+import { errorToast } from "./ErrorToast";
 
 const MIN_GAME_WIDTH = 450;
 const MIN_CODE_WIDTH = 530;
@@ -43,15 +43,15 @@ export const CarGame: React.FC = () => {
       if (!gameState.isRunning) return;
 
       switch (event.key) {
-        case 'ArrowLeft':
-        case 'a':
-        case 'A':
+        case "ArrowLeft":
+        case "a":
+        case "A":
           event.preventDefault();
           moveCarLeft();
           break;
-        case 'ArrowRight':
-        case 'd':
-        case 'D':
+        case "ArrowRight":
+        case "d":
+        case "D":
           event.preventDefault();
           moveCarRight();
           break;
@@ -60,8 +60,8 @@ export const CarGame: React.FC = () => {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [gameState.isRunning, moveCarLeft, moveCarRight]);
 
   // Handle canvas click for mobile
@@ -112,11 +112,11 @@ export const CarGame: React.FC = () => {
     const handleMouseUp = () => {
       dragging.current = false;
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isCodeOpen]);
 
@@ -137,7 +137,7 @@ export const CarGame: React.FC = () => {
   // Handle Run button click (auto mode with code execution)
   const handleRunCode = () => {
     if (!userCode.trim()) {
-      console.log('Please write some code first!');
+      console.log("Please write some code first!");
       return;
     }
 
@@ -147,9 +147,9 @@ export const CarGame: React.FC = () => {
     }
 
     if (gameState.isRunning) {
-      console.log('Game is already running!');
+      console.log("Game is already running!");
     } else {
-      console.log('Starting game in auto mode with your code...');
+      console.log("Starting game in auto mode with your code...");
       startGame(true); // true = auto mode
     }
   };
@@ -174,7 +174,7 @@ export const CarGame: React.FC = () => {
   // Show toast when codeError changes
   React.useEffect(() => {
     if (codeError) {
-      errorToast('Runtime error', codeError);
+      errorToast("Runtime error", codeError);
     }
   }, [codeError]);
 
@@ -187,26 +187,35 @@ export const CarGame: React.FC = () => {
             style={{
               width: gamePaneWidth,
               minWidth: MIN_GAME_WIDTH,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
             {gameHeaderPlusCanvas}
           </div>
-          <div className={styles.resizer} onMouseDown={startDrag} style={{ minHeight: '100vh' }} />
-          <div className={styles.rightPane} style={{ minWidth: MIN_CODE_WIDTH }}>
-            <div className={styles.codeTabHeader}>{DEFAULT_EDITOR_FILE_NAME}</div>
+          <div
+            className={styles.resizer}
+            onMouseDown={startDrag}
+            style={{ minHeight: "100vh" }}
+          />
+          <div
+            className={styles.rightPane}
+            style={{ minWidth: MIN_CODE_WIDTH }}
+          >
+            <div className={styles.codeTabHeader}>
+              {DEFAULT_EDITOR_FILE_NAME}
+            </div>
             <MonacoEditor
               height="100%"
               defaultLanguage="typescript"
               theme="vs-dark"
               value={userCode}
-              onChange={(value) => setUserCode(value ?? '')}
+              onChange={(value) => setUserCode(value ?? "")}
               options={{
                 fontSize: 16,
                 minimap: { enabled: false },
-                wordWrap: 'on',
+                wordWrap: "on",
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
               }}
