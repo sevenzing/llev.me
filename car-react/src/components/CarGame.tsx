@@ -64,37 +64,44 @@ export const CarGame: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [gameState.isRunning, moveCarLeft, moveCarRight]);
 
-  // Handle canvas click for mobile
+  // Handle canvas click: move to the lane that was clicked
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!gameState.isRunning) return;
-
     const canvas = event.currentTarget;
     const rect = canvas.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
-    const canvasCenter = CANVAS_CONFIG.width / 2;
-
-    if (clickX < canvasCenter) {
-      moveCarLeft();
-    } else {
-      moveCarRight();
-    }
+    const laneWidth = CANVAS_CONFIG.width / gameState.laneCount;
+    const clickedLane = Math.floor(clickX / laneWidth);
+    if (clickedLane < 0 || clickedLane >= gameState.laneCount) return;
+    if (clickedLane === gameState.currentLane) return;
+    if (clickedLane < gameState.currentLane) moveCarLeft();
+    else moveCarRight();
   };
 
-  // Handle touch events for mobile
-  const handleTouchStart = (event: React.TouchEvent<HTMLCanvasElement>) => {
-    if (!gameState.isRunning) return;
-
-    const canvas = event.currentTarget;
-    const rect = canvas.getBoundingClientRect();
-    const touchX = event.touches[0].clientX - rect.left;
-    const canvasCenter = CANVAS_CONFIG.width / 2;
-
-    if (touchX < canvasCenter) {
-      moveCarLeft();
-    } else {
-      moveCarRight();
-    }
-  };
+  // Touch swipe logic (anywhere on screen)
+  const touchStartX = useRef<number | null>(null);
+  useEffect(() => {
+    const handleTouchStart = (event: TouchEvent) => {
+      if (!gameState.isRunning) return;
+      touchStartX.current = event.touches[0].clientX;
+    };
+    const handleTouchEnd = (event: TouchEvent) => {
+      if (!gameState.isRunning || touchStartX.current === null) return;
+      const endX = event.changedTouches[0].clientX;
+      const deltaX = endX - touchStartX.current;
+      if (Math.abs(deltaX) > 30) {
+        if (deltaX > 0) moveCarRight();
+        else moveCarLeft();
+      }
+      touchStartX.current = null;
+    };
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchend', handleTouchEnd);
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [gameState.isRunning, moveCarLeft, moveCarRight]);
 
   // Drag handlers for resizer
   useEffect(() => {
@@ -165,7 +172,6 @@ export const CarGame: React.FC = () => {
           gameState={gameState}
           images={images}
           onClick={handleCanvasClick}
-          onTouchStart={handleTouchStart}
         />
       </div>
     </>
