@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import type { GameState, Coin } from "../types/game";
+import type { GameState } from "../types/game";
 import {
   GAME_CONFIG,
   CAR_DIMENSIONS,

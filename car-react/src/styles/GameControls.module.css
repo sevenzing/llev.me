@@ -19,7 +19,6 @@
 .seedControls {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 10px;
 }
 
@@ -27,6 +26,19 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.seedInput {
+  background-color: #393939;
+  padding: 0px 10px;
+  border-radius: 5px;
+  border: none;
+  text-align: right;
+}
+
+.seedInput:disabled {
+  background-color: #292929;
+  color: #b9b9b9;
 }
 
 .difficultySelector {
@@ -175,7 +187,7 @@
   box-shadow: none;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 400px) {
   .codeItButton {
     display: none;
   }
@@ -200,9 +212,7 @@
     flex: 1 1 40%;
     min-width: 80px;
   }
-}
-
-@media (max-width: 400px) {
+ 
   .gameButton {
     font-size: 0.95rem;
     padding: 10px 0;
@@ -211,5 +221,9 @@
     font-size: 0.9rem;
     padding: 3px 4px;
     min-width: 60px;
+  }
+
+  .gameControls {
+    gap: 5px;
   }
 }

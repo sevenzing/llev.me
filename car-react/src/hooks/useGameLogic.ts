@@ -92,7 +92,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       shield: "/static/shield.png",
       speedup: "/static/speedup.png",
       vortex: "/static/vortex.png",
-      coin: "/static/circle_coin_large.png",
+      coin: "/static/classic_coin.png",
     };
 
     const loadedImages: { [key: string]: HTMLImageElement } = {};
@@ -520,9 +520,21 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     moveCarToLane(gameState.currentLane - 1);
   }, [gameState.currentLane, moveCarToLane]);
 
+  const userMovesCarLeft = useCallback(() => {
+    if (gameStateRef.current.isRunning && !gameStateRef.current.isAutoPlay) {
+      moveCarToLane(gameStateRef.current.currentLane - 1);
+    }
+  }, [gameStateRef.current.currentLane, moveCarToLane, gameStateRef.current.isAutoPlay]);
+
   const moveCarRight = useCallback(() => {
     moveCarToLane(gameState.currentLane + 1);
   }, [gameState.currentLane, moveCarToLane]);
+
+  const userMovesCarRight = useCallback(() => {
+    if (gameStateRef.current.isRunning && !gameStateRef.current.isAutoPlay) {
+      moveCarToLane(gameStateRef.current.currentLane + 1);
+    }
+  }, [gameStateRef.current.currentLane, moveCarToLane, gameStateRef.current.isAutoPlay]);
 
   const endGame = useCallback(() => {
     setGameState((prev) => ({
@@ -882,8 +894,8 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     difficulty,
     selectedDifficulty,
     setSelectedDifficulty,
-    moveCarLeft,
-    moveCarRight,
+    userMovesCarLeft,
+    userMovesCarRight,
     startGame,
     endGame,
     images,

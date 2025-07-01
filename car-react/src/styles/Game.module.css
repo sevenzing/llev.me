@@ -1,9 +1,5 @@
 /* Reset and base styles */
 .carGame {
-  margin: 0;
-  background-color: #303030;
-  color: #ffffff;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,20 +30,6 @@
   vertical-align: middle;
 }
 
-/* Game canvas container */
-.gameCanvasContainer {
-  width: 100%;
-  max-width: 420px;
-  margin-bottom: 15px;
-}
-
-.gameCanvas {
-  width: 100%;
-  background-color: #444444;
-  border: 4px solid var(--primary-color);
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2);
-}
 
 /* Split layout for code editor */
 .splitContainer {
@@ -115,5 +97,10 @@
 
   .carGame {
     margin: 0px 20px;
+  }
+
+  .gameTitle {
+    margin-bottom: 5px;
+    margin-top: 5px;
   }
 }

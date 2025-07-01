@@ -171,3 +171,15 @@
   min-width: 30px;
   text-align: right;
 }
+
+
+
+@media (max-width: 900px) {
+  .canvasUI {
+    gap: 2px;
+  }
+
+  .gameHeader {
+    margin-bottom: 2px;
+  }
+}

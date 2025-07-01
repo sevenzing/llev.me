@@ -195,8 +195,8 @@ interface GameState {
 type MoveDirection = 'left' | 'right' | null;
 `;
 
-const GAP = 50;
-const SIZE = 40;
+const GAP = 0;
+const SIZE = 64;
 export const COIN_CONFIG = {
   width: SIZE,
   height: SIZE,

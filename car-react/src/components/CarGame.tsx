@@ -29,8 +29,8 @@ export const CarGame: React.FC = () => {
     gameState,
     selectedDifficulty,
     setSelectedDifficulty,
-    moveCarLeft,
-    moveCarRight,
+    userMovesCarLeft,
+    userMovesCarRight,
     startGame,
     endGame,
     images,
@@ -47,13 +47,13 @@ export const CarGame: React.FC = () => {
         case "a":
         case "A":
           event.preventDefault();
-          moveCarLeft();
+          userMovesCarLeft();
           break;
         case "ArrowRight":
         case "d":
         case "D":
           event.preventDefault();
-          moveCarRight();
+          userMovesCarRight();
           break;
         default:
           break;
@@ -62,7 +62,7 @@ export const CarGame: React.FC = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [gameState.isRunning, moveCarLeft, moveCarRight]);
+  }, [gameState.isRunning, userMovesCarLeft, userMovesCarRight]);
 
   // Handle canvas click: move to the lane that was clicked
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -74,8 +74,8 @@ export const CarGame: React.FC = () => {
     const clickedLane = Math.floor(clickX / laneWidth);
     if (clickedLane < 0 || clickedLane >= gameState.laneCount) return;
     if (clickedLane === gameState.currentLane) return;
-    if (clickedLane < gameState.currentLane) moveCarLeft();
-    else moveCarRight();
+    if (clickedLane < gameState.currentLane) userMovesCarLeft();
+    else userMovesCarRight();
   };
 
   // Touch swipe logic (anywhere on screen)
@@ -85,23 +85,29 @@ export const CarGame: React.FC = () => {
       if (!gameState.isRunning) return;
       touchStartX.current = event.touches[0].clientX;
     };
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!gameState.isRunning) return;
+      event.preventDefault(); // Prevent default touch behavior (scrolling)
+    };
     const handleTouchEnd = (event: TouchEvent) => {
       if (!gameState.isRunning || touchStartX.current === null) return;
       const endX = event.changedTouches[0].clientX;
       const deltaX = endX - touchStartX.current;
       if (Math.abs(deltaX) > 30) {
-        if (deltaX > 0) moveCarRight();
-        else moveCarLeft();
+        if (deltaX > 0) userMovesCarRight();
+        else userMovesCarLeft();
       }
       touchStartX.current = null;
     };
-    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('touchend', handleTouchEnd);
     return () => {
       window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [gameState.isRunning, moveCarLeft, moveCarRight]);
+  }, [gameState.isRunning, userMovesCarLeft, userMovesCarRight]);
 
   // Drag handlers for resizer
   useEffect(() => {

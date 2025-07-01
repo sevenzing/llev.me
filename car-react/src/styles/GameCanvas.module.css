@@ -9,3 +9,11 @@
   border-radius: 12px;
   box-shadow: 0 0px 0px 4px var(--primary-color);
 }
+
+
+
+@media (max-width: 900px) {
+  .gameCanvasContainer {
+    margin-bottom: 5px;
+  }
+}

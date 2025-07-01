@@ -83,7 +83,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({ gameState }) => {
           <div className={styles.coinCounter}>
             <span className={styles.coinCount}>{gameState.coinsCollected}</span>
             <img
-              src="/static/circle_coin_small.png"
+              src="/static/classic_coin.png"
               className={styles.coinIcon}
               alt="Coin"
             />
