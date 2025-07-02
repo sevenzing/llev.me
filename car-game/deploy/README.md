@@ -20,7 +20,7 @@ This guide will help you deploy the car game to your Ubuntu server with nginx us
 2. **Clone your repository:**
    ```bash
    git clone <your-repository-url>
-   cd car-react
+   cd car-game
    ```
 
 ## Step 2: Configure Nginx
@@ -206,7 +206,7 @@ Set up automatic deployment every few minutes:
 crontab -e
 
 # Add this line to check for updates every 5 minutes
-*/5 * * * * cd /home/user/car-react && git fetch origin && git diff --quiet origin/main || (git pull origin main && ./deploy.sh)
+*/5 * * * * cd /home/user/car-game && git fetch origin && git diff --quiet origin/main || (git pull origin main && ./deploy.sh)
 ```
 
 ## Step 7: Update Workflow
@@ -219,14 +219,14 @@ git commit -m "Update game features"
 git push origin main
 
 # On your server
-cd /path/to/car-react
+cd /path/to/car-game
 ./deploy.sh
 ```
 
 ### For hotfixes:
 ```bash
 # On your server
-cd /path/to/car-react
+cd /path/to/car-game
 git pull origin main
 ./quick-deploy.sh
 ```
