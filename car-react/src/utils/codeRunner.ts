@@ -44,6 +44,20 @@ export interface Context {
       itersToCollision: number | null;
     };
   }>;
+  coins: Array<{
+    lane: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    movingSpeed: number;
+    trailId: string;
+    collision: {
+      pixelsToCollision: number | null;
+      framesToCollision: number | null;
+      itersToCollision: number | null;
+    };
+  }>;
   gameState: {
     score: number;
     lives: number;
@@ -51,6 +65,7 @@ export interface Context {
     frameCount: number;
     nextInterationInFrames: number;
     laneCount: number;
+    coinsCollected: number;
   };
   userData: Record<string, any>;
 }
@@ -303,6 +318,16 @@ export function createGameContext(gameState: GameState): Context {
       movingSpeed: bonus.config.movingSpeed * gameState.gameSpeed,
       collision: getCollisionInfo(bonus),
     })),
+    coins: gameState.coins.map((coin) => ({
+      lane: coin.lane,
+      x: coin.x,
+      y: coin.y,
+      width: coin.width,
+      height: coin.height,
+      movingSpeed: coin.movingSpeed * gameState.gameSpeed,
+      trailId: coin.trailId,
+      collision: getCollisionInfo(coin),
+    })),
     gameState: {
       score: Math.floor(gameState.publicScore),
       lives: gameState.lives,
@@ -310,6 +335,7 @@ export function createGameContext(gameState: GameState): Context {
       frameCount: gameState.frameCount,
       nextInterationInFrames: gameState.executionFrequency,
       laneCount: gameState.laneCount,
+      coinsCollected: gameState.coinsCollected,
     },
     userData,
   };

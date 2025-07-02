@@ -108,45 +108,22 @@ export const FADE_OUT_DURATION = 300; // 300ms fade-out for cleared obstacles
 
 export const DEFAULT_EDITOR_FILE_NAME = "~/personal/car-project/car-logic.ts";
 
-export const DEFAULT_EDITOR_CONTENT = `// Car Game AI Logic
-// Write your handleNextMove function to control the car
-// This is TypeScript - you get full type safety and IntelliSense!
+const EDITOR_CONTENT_INTERFACES = `// ===== INTERFACES =====
+type MoveDirection = 'left' | 'right' | null;
 
-
-function handleNextMove(context: Context): MoveDirection {
-  const { lane } = context.player;
-  const { laneCount } = context.gameState;
-  const offsets = [0, -1, 1, 2, -2, -3, 3, -4, 4];
-  const lanesWithIter = offsets
-    .map(offset => lane + offset)
-    .filter(l => l >= 0 && l < laneCount)
-    .map(l => ({
-      lane: l,
-      iter: Math.min(
-        ...context.obstacles
-          .filter(o => o.lane === l)
-          .map(o => o.collision.itersToCollision)
-          .concat(Infinity)
-      )
-    }));
-  const safest = lanesWithIter.reduce((max, curr) => (curr.iter > max.iter ? curr : max)).lane;
-  if (safest === lane) return null;
-  return safest < lane ? 'left' : 'right'; // Return the direction to move the car
-}
-
-// Context type:
 interface Context {
   player: Player;
   obstacles: Array<Obstacle>;
   bonuses: Array<Bonus>;
+  coins: Array<Coin>;
   gameState: GameState;
   userData: Record<string, any>; // Persistent between iterations
 }
 
 interface CollisionInfo {
-  pixelsToCollision: number;
-  framesToCollision: number;
-  itersToCollision: number;
+  pixelsToCollision: number | null;
+  framesToCollision: number | null;
+  itersToCollision: number | null;
 }
 
 interface Player {
@@ -184,6 +161,17 @@ interface Bonus {
   collision: CollisionInfo;
 }
 
+interface Coin {
+  lane: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  movingSpeed: number;
+  trailId: string;
+  collision: CollisionInfo;
+}
+
 interface GameState {
   score: number;
   lives: number;
@@ -191,9 +179,41 @@ interface GameState {
   frameCount: number;
   nextInterationInFrames: number;
   laneCount: number;
+  coinsCollected: number;
 }
-type MoveDirection = 'left' | 'right' | null;
 `;
+
+const EDITOR_CONTENT_COMMENT = `// Car Game AI Logic
+// Write your handleNextMove function to control the car
+// This is TypeScript - you get full type safety and IntelliSense!`;
+
+const EDITOR_CONTENT_FUNCTION = `// ===== MAIN FUNCTION =====
+function handleNextMove(context: Context): MoveDirection {
+  const { lane } = context.player;
+  const { laneCount } = context.gameState;
+  const offsets = [0, -1, 1, 2, -2, -3, 3, -4, 4];
+  const lanesWithIter = offsets
+    .map(offset => lane + offset)
+    .filter(l => l >= 0 && l < laneCount)
+    .map(l => ({
+      lane: l,
+      iter: Math.min(
+        ...context.obstacles
+          .filter(o => o.lane === l)
+          .map(o => o.collision.itersToCollision)
+          .concat(Infinity)
+      )
+    }));
+  const safest = lanesWithIter.reduce((max, curr) => (curr.iter > max.iter ? curr : max)).lane;
+  if (safest === lane) return null;
+  return safest < lane ? 'left' : 'right'; // Return the direction to move the car
+}
+`;
+
+export const DEFAULT_EDITOR_CONTENT = `${EDITOR_CONTENT_COMMENT}
+
+${EDITOR_CONTENT_FUNCTION}
+${EDITOR_CONTENT_INTERFACES}`;
 
 const GAP = 0;
 const SIZE = 64;

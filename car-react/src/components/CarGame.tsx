@@ -230,6 +230,7 @@ export const CarGame: React.FC = () => {
                 wordWrap: "on",
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
+                readOnly: gameState.isRunning,
               }}
             />
             <GameAllControls

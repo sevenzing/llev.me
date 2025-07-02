@@ -66,7 +66,6 @@ export interface Coin {
   x: number;
   y: number;
   lane: number;
-  collected: boolean;
   trailId: string;
   width: number;
   height: number;

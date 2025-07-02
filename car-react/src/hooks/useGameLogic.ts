@@ -480,11 +480,6 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
 
       const timeSinceInvincibility =
         prev.frameCount - prev.invincibilityStartTime;
-      console.log(
-        "timeSinceInvincibility",
-        timeSinceInvincibility,
-        prev.invincibilityDuration,
-      );
       if (timeSinceInvincibility >= prev.invincibilityDuration) {
         return {
           ...prev,
@@ -645,7 +640,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         ];
       const baseLaneClamped = Math.max(0, Math.min(laneCount - 1, baseLane));
       const coins: Coin[] = trail.shape.map(
-        (step: { laneOffset: number; yOffset: number }, i: number) => {
+        (step: { laneOffset: number; yOffset: number }) => {
           let lane = baseLaneClamped + (step.laneOffset || 0);
           lane = Math.max(0, Math.min(laneCount - 1, lane));
           return {
@@ -654,7 +649,6 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
               -COIN_CONFIG.height -
               step.yOffset * (COIN_CONFIG.height + trail.gap),
             lane,
-            collected: false,
             trailId: `${frameCount}-${trail.name}`,
             width: COIN_CONFIG.width,
             height: COIN_CONFIG.height,
@@ -672,7 +666,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     (coins: Coin[], gameSpeed: number): Coin[] => {
       return coins
         .map((coin) => ({ ...coin, y: coin.y + gameSpeed * coin.movingSpeed }))
-        .filter((coin) => coin.y < CANVAS_CONFIG.height && !coin.collected);
+        .filter((coin) => coin.y < CANVAS_CONFIG.height);
     },
     [],
   );
@@ -700,12 +694,12 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       playerCar: { x: number; y: number; width: number; height: number },
     ) => {
       let collectedCount = 0;
-      const updatedCoins = coins.map((coin) => {
-        if (!coin.collected && checkCoinCollision(playerCar, coin)) {
+      const updatedCoins = coins.filter((coin) => {
+        if (checkCoinCollision(playerCar, coin)) {
           collectedCount++;
-          return { ...coin, collected: true };
+          return false; // Remove the coin from the array
         }
-        return coin;
+        return true; // Keep the coin in the array
       });
       return { updatedCoins, collectedCount };
     },

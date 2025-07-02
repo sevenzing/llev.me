@@ -78,7 +78,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Draw coins
     gameState.coins.forEach((coin) => {
       if (
-        !coin.collected &&
         coin.y + coin.height > 0 &&
         coin.y < CANVAS_CONFIG.height
       ) {
