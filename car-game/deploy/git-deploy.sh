@@ -9,12 +9,6 @@ echo "🚗 Git-based deployment of LLev's Car Game..."
 BRANCH=${1:-main}  # Default to main branch, can be overridden
 REMOTE=${2:-origin}  # Default to origin remote
 
-# Check if we're in a Git repository
-if [ ! -d ".git" ]; then
-    echo "❌ Error: Not in a Git repository. Please clone the repository first."
-    exit 1
-fi
-
 # Check current branch
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo "📍 Current branch: $CURRENT_BRANCH"

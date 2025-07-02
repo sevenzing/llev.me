@@ -5,12 +5,6 @@ set -e
 
 echo "🚗 Quick deployment of LLev's Car Game..."
 
-# Check if we're in a Git repository
-if [ ! -d ".git" ]; then
-    echo "❌ Error: Not in a Git repository. Please clone the repository first."
-    exit 1
-fi
-
 # Check if dist directory exists
 if [ ! -d "dist" ]; then
     echo "❌ Error: dist directory not found. Run 'yarn build' first."

@@ -5,11 +5,6 @@ set -e
 
 echo "🚗 Starting deployment of LLev's Car Game..."
 
-# Check if we're in a Git repository
-if [ ! -d ".git" ]; then
-    echo "❌ Error: Not in a Git repository. Please clone the repository first."
-    exit 1
-fi
 
 # Check for updates if on a branch that tracks remote
 if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
