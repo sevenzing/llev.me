@@ -1,0 +1,8 @@
+.App {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #303030;
+  color: #ffffff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
