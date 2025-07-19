@@ -50,11 +50,31 @@ function handleNextMove(context: Context): MoveDirection {
   }
   
   // Look for valuable bonuses (within 5 iterations)
-  const valuableBonuses = bonuses.filter(b => 
-    b.collision.itersToCollision !== null && 
-    b.collision.itersToCollision <= 5 &&
-    !b.isReversed // Avoid negative bonuses
-  );
+  const valuableBonuses = bonuses.filter(b => {
+    // Basic filtering
+    if (b.collision.itersToCollision === null || b.collision.itersToCollision > 5) {
+      return false;
+    }
+    
+    // Avoid all reversed bonuses
+    if (b.isReversed) {
+      return false;
+    }
+    
+    // Special handling for shield bonuses
+    if (b.type === 'shield') {
+      // Check if player currently has shield protection
+      const hasShieldProtection = player.invincibility.isActive || 
+        (userData.activeBonuses && userData.activeBonuses.shield);
+      
+      // If we have shield protection, avoid reversed shields more aggressively
+      if (hasShieldProtection) {
+        return false; // Don't risk losing protection
+      }
+    }
+    
+    return true;
+  });
   
   // Look for coin trails (within 4 iterations)
   const valuableCoins = coins.filter(c => 
@@ -74,6 +94,28 @@ function handleNextMove(context: Context): MoveDirection {
       const distance = b.collision.itersToCollision;
       const bonus = 50 / (distance + 1);
       laneScores[b.lane] += bonus;
+    }
+  });
+  
+  // Avoid dangerous reversed bonuses (especially shields)
+  bonuses.forEach(b => {
+    if (b.collision.itersToCollision !== null && b.collision.itersToCollision <= 5) {
+      if (b.isReversed) {
+        const distance = b.collision.itersToCollision;
+        let penalty = 30 / (distance + 1); // Base penalty for reversed bonuses
+        
+        // Extra penalty for reversed shields when we have protection
+        if (b.type === 'shield') {
+          const hasShieldProtection = player.invincibility.isActive || 
+            (userData.activeBonuses && userData.activeBonuses.shield);
+          
+          if (hasShieldProtection) {
+            penalty *= 3; // Triple penalty for reversed shields when protected
+          }
+        }
+        
+        laneScores[b.lane] -= penalty;
+      }
     }
   });
   
@@ -181,7 +223,7 @@ function handleNextMove(context: Context): MoveDirection {
   }
   
   // Last resort: move to the least dangerous adjacent lane
-  const adjacentLanes = [];
+  const adjacentLanes = [lane];
   if (lane > 0) adjacentLanes.push(lane - 1);
   if (lane < laneCount - 1) adjacentLanes.push(lane + 1);
   
@@ -202,8 +244,14 @@ function handleNextMove(context: Context): MoveDirection {
     
     adjacentDanger.sort((a, b) => a.danger - b.danger);
     const safestAdjacent = adjacentDanger[0];
-    
-    return safestAdjacent.lane < lane ? 'left' : 'right';
+
+    if (safestAdjacent.lane === lane) {
+      return null;
+    } else if (safestAdjacent.lane < lane) {
+      return 'left';
+    } else {
+      return 'right';
+    }
   }
   
   // If all else fails, stay in current lane
