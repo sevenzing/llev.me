@@ -108,6 +108,9 @@ export const FADE_OUT_DURATION = 300; // 300ms fade-out for cleared obstacles
 
 export const DEFAULT_EDITOR_FILE_NAME = "~/personal/car-project/car-logic.ts";
 
+// Version tracking for default editor content
+export const DEFAULT_EDITOR_CONTENT_VERSION = "1.0.0";
+
 const EDITOR_CONTENT_INTERFACES = `// ===== INTERFACES =====
 type MoveDirection = 'left' | 'right' | null;
 

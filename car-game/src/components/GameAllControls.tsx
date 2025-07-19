@@ -54,18 +54,9 @@ export const GameAllControls: React.FC<GameAllControlsProps> = ({
         disabled={!isSeedEnabled}
         className={styles.seedInput}
       />
+
     </div>
   );
-  {
-    /* Run button */
-  }
-  <button
-    className={styles.runCodeButton}
-    onClick={handleRunCode}
-    disabled={!userCode.trim()}
-  >
-    {gameState.isRunning && gameState.isAutoPlay ? "Auto Running" : "Run Code"}
-  </button>;
   return (
     <div className={styles.codeEditorControls}>
       {isCodeOpen && codeItControls}

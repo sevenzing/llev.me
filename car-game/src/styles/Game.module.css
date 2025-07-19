@@ -70,6 +70,37 @@
   font-family: "Fira Mono", "Consolas", "Menlo", monospace;
   color: #919291;
   margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.codeTabHeader .resetButton {
+  background: none;
+  border: none;
+  color: #919291;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.codeTabHeader .resetButton:hover:enabled {
+  background-color: #404040;
+  color: #ffffff;
+}
+
+.codeTabHeader .resetButton:disabled {
+  color: #666;
+  cursor: not-allowed;
+}
+
+.codeTabHeader .resetButton svg {
+  width: 16px;
+  height: 16px;
 }
 .codeEditor {
   width: 100%;

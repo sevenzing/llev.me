@@ -8,9 +8,11 @@ import {
   DEFAULT_EDITOR_CONTENT,
   DEFAULT_EDITOR_FILE_NAME,
 } from "../constants/gameConstants";
+import { loadUserCode, saveUserCode, shouldUpdateToNewVersion, clearUserCode, getInitialCode } from "../utils/codePersistence";
 import styles from "../styles/Game.module.css";
 import MonacoEditor from "@monaco-editor/react";
 import { errorToast } from "./ErrorToast";
+import { CustomTooltip } from "./CustomTooltip";
 
 const MIN_GAME_WIDTH = 450;
 const MIN_CODE_WIDTH = 530;
@@ -22,8 +24,56 @@ export const CarGame: React.FC = () => {
   const [isSeedEnabled, setIsSeedEnabled] = useState<boolean>(false);
   const [isCodeOpen, setIsCodeOpen] = useState(false);
   const [userCode, setUserCode] = useState(DEFAULT_EDITOR_CONTENT);
+  const [isInitialCode, setIsInitialCode] = useState(true);
   const [gamePaneWidth, setGamePaneWidth] = useState(DEFAULT_GAME_WIDTH);
   const dragging = useRef(false);
+
+  // Load saved code on component mount
+  useEffect(() => {
+    const savedData = loadUserCode();
+    
+    if (savedData) {
+      // Check if we need to update to a new version
+      if (savedData.isInitial && shouldUpdateToNewVersion(savedData.version)) {
+        // Update to new initial code
+        const newInitialCode = getInitialCode();
+        setUserCode(newInitialCode);
+        setIsInitialCode(true);
+        saveUserCode(newInitialCode, true);
+      } else {
+        // Load saved code
+        setUserCode(savedData.code);
+        setIsInitialCode(savedData.isInitial);
+      }
+    } else {
+      // First time loading - save initial code
+      saveUserCode(DEFAULT_EDITOR_CONTENT, true);
+    }
+  }, []);
+
+  // Save code changes to localStorage
+  const handleCodeChange = (value: string | undefined) => {
+    const newCode = value ?? "";
+    setUserCode(newCode);
+    
+    // Check if this is still the initial code
+    const isStillInitial = newCode === getInitialCode();
+    setIsInitialCode(isStillInitial);
+    
+    // Save to localStorage
+    saveUserCode(newCode, isStillInitial);
+  };
+
+  // Reset code to initial
+  const handleResetCode = () => {
+    const confirmed = window.confirm("Are you sure? This will reset your code to the initial version and you'll lose any changes.");
+    if (confirmed) {
+      const initialCode = getInitialCode();
+      setUserCode(initialCode);
+      setIsInitialCode(true);
+      saveUserCode(initialCode, true);
+    }
+  };
 
   const {
     gameState,
@@ -216,14 +266,32 @@ export const CarGame: React.FC = () => {
             style={{ minWidth: MIN_CODE_WIDTH }}
           >
             <div className={styles.codeTabHeader}>
-              {DEFAULT_EDITOR_FILE_NAME}
+              <span>{DEFAULT_EDITOR_FILE_NAME}</span>
+              <CustomTooltip 
+                content={isInitialCode ? "Code is already at initial state" : "Reset code to initial version"}
+                position="left"
+                delay={0}
+              >
+                <button
+                  className={styles.resetButton}
+                  onClick={handleResetCode}
+                  disabled={isInitialCode}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                    <path d="M21 3v5h-5"/>
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                    <path d="M3 21v-5h5"/>
+                  </svg>
+                </button>
+              </CustomTooltip>
             </div>
             <MonacoEditor
               height="100%"
               defaultLanguage="typescript"
               theme="vs-dark"
               value={userCode}
-              onChange={(value) => setUserCode(value ?? "")}
+              onChange={handleCodeChange}
               options={{
                 fontSize: 16,
                 minimap: { enabled: false },
