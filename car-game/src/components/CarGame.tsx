@@ -5,9 +5,10 @@ import { GameHeader } from "./GameHeader";
 import { GameAllControls } from "./GameAllControls";
 import {
   CANVAS_CONFIG,
-  DEFAULT_EDITOR_CONTENT,
   DEFAULT_EDITOR_FILE_NAME,
 } from "../constants/gameConstants";
+import { DEFAULT_EDITOR_CONTENT } from "../constants/defaultCode";
+import { SUPER_AI_EDITOR_CONTENT } from "../constants/superAICode";
 import { loadUserCode, saveUserCode, shouldUpdateToNewVersion, getInitialCode } from "../utils/codePersistence";
 import { getURLState, updateURLState } from "../utils/urlState";
 import styles from "../styles/Game.module.css";
@@ -31,6 +32,11 @@ export const CarGame: React.FC = () => {
   const [isInitialCode, setIsInitialCode] = useState(true);
   const [gamePaneWidth, setGamePaneWidth] = useState(DEFAULT_GAME_WIDTH);
   const dragging = useRef(false);
+  
+  const [secretClickCount, setSecretClickCount] = useState(0);
+  const [lastSecretClickTime, setLastSecretClickTime] = useState(0);
+  const SECRET_CLICK_TIMEOUT = 500; // 500ms between clicks
+  const SECRET_CLICKS_NEEDED = 10;
 
   // Load saved code on component mount
   useEffect(() => {
@@ -43,7 +49,7 @@ export const CarGame: React.FC = () => {
         const newInitialCode = getInitialCode();
         setUserCode(newInitialCode);
         setIsInitialCode(true);
-        saveUserCode(newInitialCode, true);
+        saveUserCode({code: newInitialCode, isInitial: true});
       } else {
         // Load saved code
         setUserCode(savedData.code);
@@ -51,7 +57,7 @@ export const CarGame: React.FC = () => {
       }
     } else {
       // First time loading - save initial code
-      saveUserCode(DEFAULT_EDITOR_CONTENT, true);
+      saveUserCode({code: DEFAULT_EDITOR_CONTENT, isInitial: true});
     }
   }, []);
 
@@ -65,7 +71,7 @@ export const CarGame: React.FC = () => {
     setIsInitialCode(isStillInitial);
     
     // Save to localStorage
-    saveUserCode(newCode, isStillInitial);
+    saveUserCode({code: newCode, isInitial: isStillInitial});
   };
 
   // Reset code to initial
@@ -75,7 +81,7 @@ export const CarGame: React.FC = () => {
       const initialCode = getInitialCode();
       setUserCode(initialCode);
       setIsInitialCode(true);
-      saveUserCode(initialCode, true);
+      saveUserCode({code: initialCode, isInitial: true});
     }
   };
 
@@ -97,6 +103,40 @@ export const CarGame: React.FC = () => {
     setSeed(newSeed);
     if (isSeedEnabled) {
       updateURLState({ seed: newSeed });
+    }
+  };
+
+  // Handle secret click
+  const handleSecretClick = () => {
+    const now = Date.now();
+    
+    // Reset count if too much time has passed
+    if (now - lastSecretClickTime > SECRET_CLICK_TIMEOUT) {
+      setSecretClickCount(1);
+      setLastSecretClickTime(now);
+      return;
+    }
+    
+    const newCount = secretClickCount + 1;
+    setSecretClickCount(newCount);
+    setLastSecretClickTime(now);
+    
+    // Check if secret is unlocked
+    if (newCount >= SECRET_CLICKS_NEEDED) {
+      // Only activate if current code is initial
+      if (isInitialCode) {
+        setUserCode(SUPER_AI_EDITOR_CONTENT);
+        setIsInitialCode(false);
+        saveUserCode({code: SUPER_AI_EDITOR_CONTENT, isInitial: false});
+        
+        // Show secret unlocked message
+        setTimeout(() => {
+          alert("🎉 SECRET UNLOCKED! 🎉\n\nYou've discovered the Super AI code!\nThis advanced AI will help you achieve incredible scores.\n\nTry running it now!");
+        }, 100);
+      }
+      
+      // Reset secret count
+      setSecretClickCount(0);
     }
   };
 
@@ -291,7 +331,19 @@ export const CarGame: React.FC = () => {
             style={{ minWidth: MIN_CODE_WIDTH }}
           >
             <div className={styles.codeTabHeader}>
-              <span>{DEFAULT_EDITOR_FILE_NAME}</span>
+              <div className={styles.fileNameContainer}>
+                <span>{DEFAULT_EDITOR_FILE_NAME}</span>
+                <div 
+                  className={styles.secretAnimation}
+                  onClick={handleSecretClick}
+                  title="Just a cute animation... or is it? 🤔"
+                >
+                  <img 
+                    src="/notepad.gif" 
+                    alt="Notepad and pencil animation" 
+                  />
+                </div>
+              </div>
               <CustomTooltip 
                 content={"Reset code to initial version"}
                 position="left"

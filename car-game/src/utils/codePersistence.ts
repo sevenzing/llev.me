@@ -1,4 +1,5 @@
-import { DEFAULT_EDITOR_CONTENT, DEFAULT_EDITOR_CONTENT_VERSION } from "../constants/gameConstants";
+import { DEFAULT_EDITOR_CONTENT_VERSION } from "../constants/gameConstants";
+import { DEFAULT_EDITOR_CONTENT } from "../constants/defaultCode";
 
 const STORAGE_KEYS = {
   USER_CODE: "car-game-user-code",
@@ -12,11 +13,17 @@ export interface CodePersistenceData {
   isInitial: boolean;
 }
 
-export function saveUserCode(code: string, isInitial: boolean = false): void {
+export function saveUserCode({code, version, isInitial}: Partial<CodePersistenceData>): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.USER_CODE, code);
-    localStorage.setItem(STORAGE_KEYS.CODE_VERSION, DEFAULT_EDITOR_CONTENT_VERSION);
-    localStorage.setItem(STORAGE_KEYS.IS_INITIAL, isInitial.toString());
+    if (code !== undefined) {
+      localStorage.setItem(STORAGE_KEYS.USER_CODE, code);
+    }
+    if (version !== undefined) {
+      localStorage.setItem(STORAGE_KEYS.CODE_VERSION, version);
+    }
+    if (isInitial !== undefined) {
+      localStorage.setItem(STORAGE_KEYS.IS_INITIAL, isInitial.toString());
+    }
   } catch (error) {
     console.warn("Failed to save user code to localStorage:", error);
   }

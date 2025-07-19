@@ -75,6 +75,29 @@
   align-items: center;
 }
 
+.fileNameContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.secretAnimation {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: 24px;
+  height: 24px;
+  margin-left: 8px;
+}
+
+.secretAnimation:hover {
+  transform: scale(1.1);
+}
+
+.secretAnimation img {
+  width: 100%;
+  height: 100%;
+}
+
 .codeTabHeader .resetButton {
   background: none;
   border: none;
