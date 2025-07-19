@@ -519,7 +519,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     if (gameStateRef.current.isRunning && !gameStateRef.current.isAutoPlay) {
       moveCarToLane(gameStateRef.current.currentLane - 1);
     }
-  }, [gameStateRef.current.currentLane, moveCarToLane, gameStateRef.current.isAutoPlay]);
+  }, [moveCarToLane]);
 
   const moveCarRight = useCallback(() => {
     moveCarToLane(gameState.currentLane + 1);
@@ -529,7 +529,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     if (gameStateRef.current.isRunning && !gameStateRef.current.isAutoPlay) {
       moveCarToLane(gameStateRef.current.currentLane + 1);
     }
-  }, [gameStateRef.current.currentLane, moveCarToLane, gameStateRef.current.isAutoPlay]);
+  }, [moveCarToLane]);
 
   const endGame = useCallback(() => {
     setGameState((prev) => ({
@@ -864,6 +864,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       updateBonuses,
       spawnCoinTrail,
       checkCoinCollisions,
+      updateCoins,
     ],
   );
 

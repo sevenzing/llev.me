@@ -8,7 +8,8 @@ import {
   DEFAULT_EDITOR_CONTENT,
   DEFAULT_EDITOR_FILE_NAME,
 } from "../constants/gameConstants";
-import { loadUserCode, saveUserCode, shouldUpdateToNewVersion, clearUserCode, getInitialCode } from "../utils/codePersistence";
+import { loadUserCode, saveUserCode, shouldUpdateToNewVersion, getInitialCode } from "../utils/codePersistence";
+import { getURLState, updateURLState } from "../utils/urlState";
 import styles from "../styles/Game.module.css";
 import MonacoEditor from "@monaco-editor/react";
 import { errorToast } from "./ErrorToast";
@@ -19,10 +20,13 @@ const MIN_CODE_WIDTH = 530;
 const DEFAULT_GAME_WIDTH = 600;
 
 export const CarGame: React.FC = () => {
+  // Initialize from URL state
+  const initialURLState = getURLState();
+  
   // Add seed state and checkbox state
-  const [seed, setSeed] = useState<number>(0);
-  const [isSeedEnabled, setIsSeedEnabled] = useState<boolean>(false);
-  const [isCodeOpen, setIsCodeOpen] = useState(false);
+  const [seed, setSeed] = useState<number>(initialURLState.seed || 0);
+  const [isSeedEnabled, setIsSeedEnabled] = useState<boolean>(initialURLState.seed !== null);
+  const [isCodeOpen, setIsCodeOpen] = useState(initialURLState.codeOpen || false);
   const [userCode, setUserCode] = useState(DEFAULT_EDITOR_CONTENT);
   const [isInitialCode, setIsInitialCode] = useState(true);
   const [gamePaneWidth, setGamePaneWidth] = useState(DEFAULT_GAME_WIDTH);
@@ -72,6 +76,27 @@ export const CarGame: React.FC = () => {
       setUserCode(initialCode);
       setIsInitialCode(true);
       saveUserCode(initialCode, true);
+    }
+  };
+
+  // Handle code section toggle with URL state update
+  const handleCodeSectionToggle = (open: boolean | ((open: boolean) => boolean)) => {
+    const newState = typeof open === 'function' ? open(isCodeOpen) : open;
+    setIsCodeOpen(newState);
+    updateURLState({ codeOpen: newState });
+  };
+
+  // Handle seed enabled toggle with URL state update
+  const handleSeedEnabledToggle = (enabled: boolean) => {
+    setIsSeedEnabled(enabled);
+    updateURLState({ seed: enabled ? seed : null });
+  };
+
+  // Handle seed value change with URL state update
+  const handleSeedChange = (newSeed: number) => {
+    setSeed(newSeed);
+    if (isSeedEnabled) {
+      updateURLState({ seed: newSeed });
     }
   };
 
@@ -268,7 +293,7 @@ export const CarGame: React.FC = () => {
             <div className={styles.codeTabHeader}>
               <span>{DEFAULT_EDITOR_FILE_NAME}</span>
               <CustomTooltip 
-                content={isInitialCode ? "Code is already at initial state" : "Reset code to initial version"}
+                content={"Reset code to initial version"}
                 position="left"
                 delay={0}
               >
@@ -308,11 +333,11 @@ export const CarGame: React.FC = () => {
               handleStartGame={handleStartGame}
               endGame={endGame}
               isCodeOpen={isCodeOpen}
-              setIsCodeOpen={setIsCodeOpen}
+              setIsCodeOpen={handleCodeSectionToggle}
               isSeedEnabled={isSeedEnabled}
-              setIsSeedEnabled={setIsSeedEnabled}
+              setIsSeedEnabled={handleSeedEnabledToggle}
               seed={seed}
-              setSeed={setSeed}
+              setSeed={handleSeedChange}
               userCode={userCode}
               handleRunCode={handleRunCode}
             />
@@ -328,11 +353,11 @@ export const CarGame: React.FC = () => {
             handleStartGame={handleStartGame}
             endGame={endGame}
             isCodeOpen={isCodeOpen}
-            setIsCodeOpen={setIsCodeOpen}
+            setIsCodeOpen={handleCodeSectionToggle}
             isSeedEnabled={isSeedEnabled}
-            setIsSeedEnabled={setIsSeedEnabled}
+            setIsSeedEnabled={handleSeedEnabledToggle}
             seed={seed}
-            setSeed={setSeed}
+            setSeed={handleSeedChange}
             userCode={userCode}
             handleRunCode={handleRunCode}
           />

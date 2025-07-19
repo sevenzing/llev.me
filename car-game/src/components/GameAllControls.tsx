@@ -31,7 +31,6 @@ export const GameAllControls: React.FC<GameAllControlsProps> = ({
   setIsSeedEnabled,
   seed,
   setSeed,
-  userCode,
   handleRunCode,
 }) => {
   const codeItControls = (
