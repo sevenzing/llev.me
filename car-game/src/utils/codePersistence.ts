@@ -1,5 +1,6 @@
 import { DEFAULT_EDITOR_CONTENT_VERSION } from "../constants/gameConstants";
-import { DEFAULT_EDITOR_CONTENT } from "../constants/defaultCode";
+import * as defaultCode from "../constants/defaultCode.ts?raw";
+import * as superAICode from "../constants/superAICode.ts?raw";
 
 const STORAGE_KEYS = {
   USER_CODE: "car-game-user-code",
@@ -79,5 +80,9 @@ export function clearUserCode(): void {
 }
 
 export function getInitialCode(): string {
-  return DEFAULT_EDITOR_CONTENT;
+  return defaultCode.default;
 } 
+
+export function getSuperAICode(): string {
+  return superAICode.default;
+}

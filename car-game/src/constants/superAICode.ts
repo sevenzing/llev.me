@@ -1,84 +1,10 @@
-const SUPER_AI_INTERFACES = `// ===== INTERFACES =====
-type MoveDirection = 'left' | 'right' | null;
-
-interface Context {
-  player: Player;
-  obstacles: Array<Obstacle>;
-  bonuses: Array<Bonus>;
-  coins: Array<Coin>;
-  gameState: GameState;
-  userData: Record<string, any>; // Persistent between iterations
-}
-
-interface CollisionInfo {
-  pixelsToCollision: number | null;
-  framesToCollision: number | null;
-  itersToCollision: number | null;
-}
-
-interface Player {
-  lane: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  invincibility: {
-    isActive: boolean;
-    framesLeft: number;
-    itersLeft: number;
-  };
-}
-
-interface Obstacle {
-  lane: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  movingSpeed: number;
-  collision: CollisionInfo;
-}
-
-interface Bonus {
-  lane: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  type: string;
-  isReversed: boolean;
-  movingSpeed: number;
-  collision: CollisionInfo;
-}
-
-interface Coin {
-  lane: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  movingSpeed: number;
-  trailId: string;
-  collision: CollisionInfo;
-}
-
-interface GameState {
-  score: number;
-  lives: number;
-  gameSpeed: number;
-  frameCount: number;
-  nextInterationInFrames: number;
-  laneCount: number;
-  coinsCollected: number;
-}
-`;
-
-const SUPER_AI_COMMENT = `// 🚀 SUPER AI CAR LOGIC - SECRET UNLOCKED! 🚀
+// 🚀 SUPER AI CAR LOGIC - SECRET UNLOCKED! 🚀
 // This is an advanced AI that uses machine learning techniques
 // to predict optimal paths and maximize score while avoiding obstacles
-// Features: Path prediction, bonus optimization, coin collection, adaptive behavior`;
+// Features: Path prediction, bonus optimization, coin collection, adaptive behavior
 
-const SUPER_AI_FUNCTION = `// ===== SUPER AI MAIN FUNCTION =====
+
+// ===== SUPER AI MAIN FUNCTION =====
 function handleNextMove(context: Context): MoveDirection {
   const { player, obstacles, bonuses, coins, gameState, userData } = context;
   const { lane, invincibility } = player;
@@ -171,9 +97,79 @@ function handleNextMove(context: Context): MoveDirection {
   if (bestLane === lane) return null;
   return bestLane < lane ? 'left' : 'right';
 }
-`;
 
-export const SUPER_AI_EDITOR_CONTENT = `${SUPER_AI_COMMENT}
 
-${SUPER_AI_FUNCTION}
-${SUPER_AI_INTERFACES}`; 
+
+// ===== INTERFACES =====
+type MoveDirection = 'left' | 'right' | null;
+
+interface Context {
+  player: Player;
+  obstacles: Array<Obstacle>;
+  bonuses: Array<Bonus>;
+  coins: Array<Coin>;
+  gameState: GameState;
+  userData: Record<string, any>; // Persistent between iterations
+}
+
+interface CollisionInfo {
+  pixelsToCollision: number | null;
+  framesToCollision: number | null;
+  itersToCollision: number | null;
+}
+
+interface Player {
+  lane: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  invincibility: {
+    isActive: boolean;
+    framesLeft: number;
+    itersLeft: number;
+  };
+}
+
+interface Obstacle {
+  lane: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  movingSpeed: number;
+  collision: CollisionInfo;
+}
+
+interface Bonus {
+  lane: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  type: string;
+  isReversed: boolean;
+  movingSpeed: number;
+  collision: CollisionInfo;
+}
+
+interface Coin {
+  lane: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  movingSpeed: number;
+  trailId: string;
+  collision: CollisionInfo;
+}
+
+interface GameState {
+  score: number;
+  lives: number;
+  gameSpeed: number;
+  frameCount: number;
+  nextInterationInFrames: number;
+  laneCount: number;
+  coinsCollected: number;
+}

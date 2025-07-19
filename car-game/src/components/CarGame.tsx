@@ -7,9 +7,7 @@ import {
   CANVAS_CONFIG,
   DEFAULT_EDITOR_FILE_NAME,
 } from "../constants/gameConstants";
-import { DEFAULT_EDITOR_CONTENT } from "../constants/defaultCode";
-import { SUPER_AI_EDITOR_CONTENT } from "../constants/superAICode";
-import { loadUserCode, saveUserCode, shouldUpdateToNewVersion, getInitialCode } from "../utils/codePersistence";
+import { loadUserCode, saveUserCode, shouldUpdateToNewVersion, getInitialCode, getSuperAICode } from "../utils/codePersistence";
 import { getURLState, updateURLState } from "../utils/urlState";
 import styles from "../styles/Game.module.css";
 import MonacoEditor from "@monaco-editor/react";
@@ -28,7 +26,7 @@ export const CarGame: React.FC = () => {
   const [seed, setSeed] = useState<number>(initialURLState.seed || 0);
   const [isSeedEnabled, setIsSeedEnabled] = useState<boolean>(initialURLState.seed !== null);
   const [isCodeOpen, setIsCodeOpen] = useState(initialURLState.codeOpen || false);
-  const [userCode, setUserCode] = useState(DEFAULT_EDITOR_CONTENT);
+  const [userCode, setUserCode] = useState(getInitialCode());
   const [isInitialCode, setIsInitialCode] = useState(true);
   const [gamePaneWidth, setGamePaneWidth] = useState(DEFAULT_GAME_WIDTH);
   const dragging = useRef(false);
@@ -57,7 +55,7 @@ export const CarGame: React.FC = () => {
       }
     } else {
       // First time loading - save initial code
-      saveUserCode({code: DEFAULT_EDITOR_CONTENT, isInitial: true});
+      saveUserCode({code: getInitialCode(), isInitial: true});
     }
   }, []);
 
@@ -125,9 +123,9 @@ export const CarGame: React.FC = () => {
     if (newCount >= SECRET_CLICKS_NEEDED) {
       // Only activate if current code is initial
       if (isInitialCode) {
-        setUserCode(SUPER_AI_EDITOR_CONTENT);
+        setUserCode(getSuperAICode());
         setIsInitialCode(false);
-        saveUserCode({code: SUPER_AI_EDITOR_CONTENT, isInitial: false});
+        saveUserCode({code: getSuperAICode(), isInitial: false});
         
         // Show secret unlocked message
         setTimeout(() => {
