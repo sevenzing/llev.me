@@ -4,6 +4,8 @@
 
 
 // ===== MAIN FUNCTION =====
+// @ts-expect-error: Unused function for display purposes only
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function handleNextMove(context: Context): MoveDirection {
   const { lane } = context.player;
   const { laneCount } = context.gameState;

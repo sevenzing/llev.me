@@ -3,12 +3,13 @@
 // to predict optimal paths and maximize score while avoiding obstacles
 // Features: Path prediction, bonus optimization, coin collection, adaptive behavior
 
-
 // ===== SUPER AI MAIN FUNCTION =====
+// @ts-expect-error: Unused function for display purposes only
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function handleNextMove(context: Context): MoveDirection {
   const { player, obstacles, bonuses, coins, gameState, userData } = context;
-  const { lane, invincibility } = player;
-  const { laneCount, gameSpeed, score } = gameState;
+  const { lane } = player;
+  const { laneCount } = gameState;
   
   // Initialize persistent data
   if (!userData.pathHistory) userData.pathHistory = [];

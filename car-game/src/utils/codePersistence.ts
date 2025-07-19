@@ -79,10 +79,31 @@ export function clearUserCode(): void {
   }
 }
 
+
+let defaultCodeString: string | undefined = undefined;
 export function getInitialCode(): string {
-  return defaultCode.default;
+  if (defaultCodeString === undefined) {
+    defaultCodeString = defaultCode.default;
+    for (const line of LINT_LINES) {
+      defaultCodeString = defaultCodeString.replace(line, "");
+    }
+  }
+  return defaultCodeString!;
 } 
 
+let superAICodeString: string | undefined = undefined;
 export function getSuperAICode(): string {
-  return superAICode.default;
+  if (superAICodeString === undefined) {
+    superAICodeString = superAICode.default;
+    for (const line of LINT_LINES) {
+      superAICodeString = superAICodeString.replace(line, "");
+    }
+  }
+  return superAICodeString!;
 }
+
+
+const LINT_LINES = [
+  "// eslint-disable-next-line @typescript-eslint/no-unused-vars\n",
+  "// @ts-expect-error: Unused function for display purposes only\n",
+];
