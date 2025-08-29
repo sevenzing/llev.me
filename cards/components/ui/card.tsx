@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import LockedCardContent from "./locked-card";
 import {
+  Box,
   Center,
   Flex,
   Heading,
@@ -153,16 +154,11 @@ const FrontContent = ({ gift }: { gift: Gift }) => {
 };
 
 const BackContent = ({ gift }: { gift: Gift }) => {
+  let content = null;
   if (gift.gift_content.type === "urls") {
     const colorPalette = (gift.gift_content.colorPalette as any) || undefined;
-    return (
-      <Flex
-        direction="column"
-        alignItems="center"
-        justifyContent="space-evenly"
-      >
-        <VStack justifyContent="center" mx={4}>
-          {gift.gift_content.urls.map((url) => (
+    content =
+          gift.gift_content.urls.map((url) => (
             <Link
               key={url.url}
               href={url.url}
@@ -172,9 +168,23 @@ const BackContent = ({ gift }: { gift: Gift }) => {
               {url.title}
               <LuExternalLink />
             </Link>
-          ))}
-        </VStack>
-      </Flex>
-    );
+          ));
   }
+  else if (gift.gift_content.type === "text") {
+    const colorPalette = gift.gift_content.color || 'pink.400';
+    content = <Flex textAlign="center">
+      <Text color={colorPalette}>{gift.gift_content.text}</Text>
+    </Flex>;
+  }
+  return (
+    <Flex
+      direction="column"
+      alignItems="center"
+      justifyContent="space-evenly"
+    >
+      <VStack justifyContent="center" mx={4}>
+        {content}
+      </VStack>
+    </Flex>
+  );
 };
