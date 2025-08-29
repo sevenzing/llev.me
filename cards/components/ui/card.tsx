@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import LockedCardContent from "./locked-card";
 import {
-  Box,
   Center,
   Flex,
   Heading,

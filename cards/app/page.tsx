@@ -7,7 +7,7 @@ export default function Home() {
       This site contains a collection of cards -- presents for my friends.
     </Text>
     <Text textAlign="center">
-    If you dont have a specifal url, I think it's not time for you to receive a gift.
+    If you dont have a specifal url, I think its not time for you to receive a gift.
     </Text>
     </VStack>
     </AbsoluteCenter>;
