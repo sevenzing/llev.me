@@ -77,3 +77,8 @@ body {
     text-shadow: 0 0 5px yellow, 0 0 7px yellow;
   }
 }  
+
+
+.pointer-events-auto {
+  pointer-events: auto;
+}

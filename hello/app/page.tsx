@@ -12,6 +12,8 @@ import { IM } from "../components/IM";
 import { randomBitNumber } from "@/utils/random";
 import { Achievements } from "@/components/Achievement";
 import { AchievementCard } from "./api/stateInfo/route";
+import PixelBlast from "@/components/PixelBlast";
+import { WithBackground } from "@/components/WithBackground";
 
 
 export default function Home() {
@@ -145,13 +147,17 @@ export default function Home() {
     const noTextShadow = '0 0 0px';
 
     return (
+    <WithBackground>
+        {/* Header */}
         <Flex flexDir="column" className="main" h="100%" gap={1}>
-            <Flex justifyContent="flex-end" h="16">
-                <HStack spacing="2" mr={["2", "8"]}>
-                    <IconButton size="sm" colorScheme="gray" aria-label="Refresh" icon={<RepeatIcon />} onClick={handleRefreshPressed}></IconButton>
-                    <IconButton size="sm" colorScheme="gray" aria-label="Toggle dark mode" icon={<SunIcon />} onClick={handleChangeColorMode} />
-                </HStack>
-            </Flex>
+        <Flex justifyContent="flex-end" h="16">
+            <HStack spacing="2" mr={["2", "8"]}>
+                <IconButton className="pointer-events-auto" size="sm" colorScheme="gray" aria-label="Refresh" icon={<RepeatIcon />} onClick={handleRefreshPressed}></IconButton>
+                <IconButton className="pointer-events-auto" size="sm" colorScheme="gray" aria-label="Toggle dark mode" icon={<SunIcon />} onClick={handleChangeColorMode} />
+            </HStack>
+        </Flex>
+        
+        {/* Main content */}
             <Flex flex={1} flexDir="column" alignItems="center" justifyContent="space-evenly" h="100%">
                 <Flex flexDir="column" justifyContent="center" alignItems="center" gap="5">
                     <Flex textShadow={textShadow} fontSize={["4xl", "5xl"]}>
@@ -176,6 +182,7 @@ export default function Home() {
                     {achStorage && <Achievements onAchievementClose={onAchievementClose} achievements={Object.values(achStorage)}/>}
                 </Flex>
             </Flex>
+            {/* Bottom links */}
             <Flex justifyContent="center" alignItems="center" marginBottom="1rem">
                 <HStack spacing="6">
                     <Text><PressableText text="links:" id={10} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Text>
@@ -185,6 +192,9 @@ export default function Home() {
                 </HStack>
             </Flex>
         </Flex>
-    );
+        
+
+    </WithBackground>
+    )
 }
 

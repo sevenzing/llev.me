@@ -24,6 +24,7 @@ export const Achievement = (props: AchievementProps) => {
             glareMaxOpacity={0.45}
             glareBorderRadius="0.25rem"
             glarePosition="top"
+            className="pointer-events-auto"
         >
             <Card
                 key={props.key} 
