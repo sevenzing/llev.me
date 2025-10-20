@@ -127,7 +127,7 @@ const stateAchievementsConfig: Achievement[] = [
             title: "MY EYES!!!",
             description: "switch to light mode",
             emoji: "🌞",
-            bg: "whiteAlpha.400",
+            bg: "gray.400",
         }
     },
     {
