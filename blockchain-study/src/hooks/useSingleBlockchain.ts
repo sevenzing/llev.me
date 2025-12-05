@@ -3,8 +3,12 @@ import { Block } from "@/lib/types";
 import { mockedBlockList } from "@/lib/mockData";
 import { calculateBlockHash, mineBlock } from "@/lib/blockchain";
 
-export function useSingleBlockchain(initialBlockCount: number = 3) {
-    const [blocks, setBlocks] = useState<Block[]>(mockedBlockList(initialBlockCount));
+export function useSingleBlockchainMocked(numberOfBlocks: number) {
+    return useSingleBlockchain(mockedBlockList(numberOfBlocks));
+}
+
+export function useSingleBlockchain(initialBlocks: Block[]) {
+    const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
     const [miningBlock, setMiningBlock] = useState<number | null>(null);
     const [miningNonce, setMiningNonce] = useState<number>(0);
 

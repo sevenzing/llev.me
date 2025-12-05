@@ -6,10 +6,19 @@ import { SingleBlockchainPlayground } from "@/components/playgrounds/SingleBlock
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NetworkPlayground } from "@/components/playgrounds/NetworkPlayground";
 import { useSingleBlockchain } from "@/hooks/useSingleBlockchain";
+import { calculateBlockHash } from "@/lib/blockchain";
 
 export default function Home() {
   const { language, setLanguage, t } = useLanguage();
-  const { blocks, miningBlock, miningNonce, mineBlockAtIndex, recalculateBlockHash, updateNonce } = useSingleBlockchain(1);
+  const { blocks, miningBlock, miningNonce, mineBlockAtIndex, recalculateBlockHash, updateNonce } = useSingleBlockchain([
+    {
+      index: 0,
+      nonce: 0,
+      data: "Hello world!",
+      prevHash: "0000000000000000000000000000000000000000000000000000000000000000",
+      hash: "5bfc4ce7f6435a4e49278938a2d3b93a7cf48eea596318f40c9419a163ca394b"
+    }
+  ]);
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">

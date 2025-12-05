@@ -1,7 +1,7 @@
 "use client";
 
 import { BlockchainRenderer } from "./BlockchainRenderer";
-import { useSingleBlockchain } from "@/hooks/useSingleBlockchain";
+import { useSingleBlockchain, useSingleBlockchainMocked } from "@/hooks/useSingleBlockchain";
 
 interface BlockchainProps {
     orientation?: 'horizontal' | 'vertical';
@@ -9,7 +9,7 @@ interface BlockchainProps {
 }
 
 export function SingleBlockchainPlayground({ orientation, numberOfBlocks = 3 }: BlockchainProps) {
-    const { blocks, miningBlock, miningNonce, mineBlockAtIndex, recalculateBlockHash, updateNonce } = useSingleBlockchain(numberOfBlocks);
+    const { blocks, miningBlock, miningNonce, mineBlockAtIndex, recalculateBlockHash, updateNonce } = useSingleBlockchainMocked(numberOfBlocks);
 
     return (
         <div className="w-full">
