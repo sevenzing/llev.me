@@ -2,14 +2,14 @@
 
 import { HashPlayground } from "@/components/playgrounds/HashPlayground";
 import { BlockWithData } from "@/components/playgrounds/BlockWithData";
-import { Blockchain } from "@/components/playgrounds/Blockchain";
-import { NetworkView } from "@/components/playgrounds/NetworkView";
+import { SingleBlockchainPlayground } from "@/components/playgrounds/SingleBlockchainPlayground";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState } from "react";
+import { NetworkPlayground } from "@/components/playgrounds/NetworkPlayground";
+import { useSingleBlockchain } from "@/hooks/useSingleBlockchain";
 
 export default function Home() {
   const { language, setLanguage, t } = useLanguage();
+  const { blocks, miningBlock, miningNonce, mineBlockAtIndex, recalculateBlockHash, updateNonce } = useSingleBlockchain(1);
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
@@ -35,7 +35,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="pt-24 pb-32 space-y-32">
+      <div className="pt-24 pb-32 space-y-16">
         {/* Hero */}
         <section className="max-w-4xl mx-auto px-6 text-center space-y-6">
           <h2 className="text-5xl md:text-7xl font-heading font-bold tracking-tight text-slate-900">
@@ -62,7 +62,19 @@ export default function Home() {
           title={t.block.title}
           description={t.block.description}
         >
-          <BlockWithData size="large" />
+          <BlockWithData
+            size="large"
+            blockNumber={blocks[0].index}
+            prevHash={blocks[0].prevHash}
+            initialData={typeof blocks[0].data === 'string' ? blocks[0].data : JSON.stringify(blocks[0].data)}
+            initialNonce={blocks[0].nonce}
+            initialHash={blocks[0].hash}
+            miningNonce={miningBlock === 0 ? miningNonce : undefined}
+            onDataChange={(data) => recalculateBlockHash(0, data)}
+            onNonceChange={(nonce) => updateNonce(0, nonce)}
+            onMineClick={() => mineBlockAtIndex(0)}
+            isMining={miningBlock === 0}
+          />
         </Section>
 
         {/* Section 3: The Chain */}
@@ -72,12 +84,12 @@ export default function Home() {
             <p className="text-lg text-slate-600 leading-relaxed">{t.chain.description}</p>
           </div>
           <div className="bg-slate-100 rounded-2xl p-8 border border-slate-200 shadow-inner">
-            <Blockchain orientation="horizontal" />
+            <SingleBlockchainPlayground orientation="horizontal" numberOfBlocks={3} />
           </div>
         </section>
 
         {/* Section 4: Distributed */}
-        <NetworkSection t={t} />
+        <NetworkPlayground t={t} />
       </div>
     </main>
   );
@@ -94,124 +106,5 @@ function Section({ id, title, description, children }: { id: string, title: stri
         {children}
       </div>
     </section>
-  );
-}
-
-function NetworkSection({ t }: { t: any }) {
-  const [networkBlockchain, setNetworkBlockchain] = useState([
-    { index: 1, data: "Genesis", hash: "0x1a2b", prevHash: "0x0000" }
-  ]);
-  const [selectedNode, setSelectedNode] = useState("A");
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncFn, setSyncFn] = useState<(() => void) | null>(null);
-
-  const handleAddBlock = () => {
-    const newIndex = networkBlockchain.length + 1;
-    const prevBlock = networkBlockchain[networkBlockchain.length - 1];
-    const newBlock = {
-      index: newIndex,
-      data: `Transaction ${newIndex}`,
-      hash: `0x${Math.random().toString(16).slice(2, 6)}`,
-      prevHash: prevBlock.hash,
-    };
-    setNetworkBlockchain([...networkBlockchain, newBlock]);
-  };
-
-  const handleSync = () => {
-    if (syncFn) {
-      syncFn();
-    }
-  };
-
-  return (
-    <section id="network" className="max-w-7xl mx-auto px-6 space-y-8">
-      <div className="grid md:grid-cols-2 gap-12 items-start">
-        <div className="space-y-6">
-          <h3 className="text-3xl font-heading font-bold text-slate-900">{t.network.title}</h3>
-          <p className="text-lg text-slate-600 leading-relaxed">{t.network.description}</p>
-        </div>
-        <div className="space-y-4">
-          <div className="bg-slate-100 rounded-2xl p-6 border border-slate-200 shadow-inner">
-            <NetworkView
-              onBlockchainChange={setNetworkBlockchain}
-              onSelectedNodeChange={setSelectedNode}
-              onSyncingChange={setIsSyncing}
-              onSyncRequest={(fn) => setSyncFn(() => fn)}
-            />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={handleAddBlock}
-              className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-bold"
-            >
-              + Block to {selectedNode}
-            </button>
-            <button
-              onClick={handleSync}
-              disabled={isSyncing}
-              className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-gray-400 transition-colors text-xs font-bold"
-            >
-              {isSyncing ? "Syncing..." : `Sync from ${selectedNode}`}
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="bg-slate-100 rounded-2xl p-8 border border-slate-200 shadow-inner">
-        <NetworkBlockchain blocks={networkBlockchain} onBlocksChange={setNetworkBlockchain} />
-      </div>
-    </section>
-  );
-}
-
-function NetworkBlockchain({ blocks, onBlocksChange }: { blocks: any[], onBlocksChange: (blocks: any[]) => void }) {
-  const handleDataChange = (index: number, newData: string) => {
-    const updated = [...blocks];
-    updated[index].data = newData;
-    onBlocksChange(updated);
-  };
-
-  return (
-    <div className="w-full">
-      <div className="flex flex-wrap gap-4 justify-center">
-        {blocks.map((block, index) => (
-          <div key={block.index} className="relative">
-            <div className="p-3 rounded-lg shadow border-2 bg-emerald-50 border-emerald-200 w-52">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-xs font-heading font-bold text-slate-800">Block #{block.index}</h3>
-                <span className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">✓</span>
-              </div>
-              <div className="space-y-1.5">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Data</label>
-                  <input
-                    type="text"
-                    value={block.data}
-                    onChange={(e) => handleDataChange(index, e.target.value)}
-                    className="w-full p-1.5 rounded border border-slate-300 font-mono text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Prev Hash</label>
-                  <div className="w-full p-1.5 rounded bg-slate-100 border border-slate-200 font-mono text-xs text-slate-600 break-all">
-                    {block.prevHash.slice(0, 6)}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Hash</label>
-                  <div className="w-full p-1.5 rounded border font-mono text-xs bg-emerald-100 text-emerald-800 border-emerald-200 break-all">
-                    {block.hash.slice(0, 6)}
-                  </div>
-                </div>
-              </div>
-            </div>
-            {index < blocks.length - 1 && (
-              <div className="absolute top-1/2 -right-3 transform -translate-y-1/2 z-10 hidden lg:block">
-                <div className="text-2xl text-emerald-400">→</div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
