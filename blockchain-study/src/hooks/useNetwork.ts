@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Block, Node, Connection, SyncMessage, SyncFeedback } from "@/lib/types";
 import { mockedBlockDataByIndex, mockedGenesisBlock } from "@/lib/mockData";
 import { calculateBlockHash, mineBlock } from "@/lib/blockchain";
@@ -30,6 +30,12 @@ export function useNetwork() {
     const feedbackIdRef = useRef(0);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    // Keep a ref to nodes for async access in handleSync
+    const nodesRef = useRef(nodes);
+    useEffect(() => {
+        nodesRef.current = nodes;
+    }, [nodes]);
+
     // Get selected node's blockchain
     const selectedBlockchain = nodes.find(n => n.id === selectedNode)?.blockchain || [];
 
@@ -57,8 +63,11 @@ export function useNetwork() {
 
     // Sync function
     const handleSync = useCallback(async (fromId: string, toId: string, isRecursive = false, visitedNodes = new Set<string>()) => {
-        const fromNode = nodes.find(n => n.id === fromId);
-        const toNode = nodes.find(n => n.id === toId);
+        // Use ref to get latest nodes state, avoiding stale closures in recursive calls
+        const currentNodes = nodesRef.current;
+        const fromNode = currentNodes.find(n => n.id === fromId);
+        const toNode = currentNodes.find(n => n.id === toId);
+
         if (!fromNode || !toNode) return;
 
         // Add current nodes to visited set
@@ -102,11 +111,23 @@ export function useNetwork() {
             requestAnimationFrame(animate);
         });
 
-        const fromValid = validateChain(fromNode.blockchain);
-        const toValid = validateChain(toNode.blockchain);
+        // Re-fetch nodes from ref after animation to ensure we have the very latest state
+        // (State might have changed during the animation wait)
+        const latestNodes = nodesRef.current;
+        const latestFromNode = latestNodes.find(n => n.id === fromId);
+        const latestToNode = latestNodes.find(n => n.id === toId);
+
+        if (!latestFromNode || !latestToNode) return;
+
+        const fromValid = validateChain(latestFromNode.blockchain);
+        // We don't strictly need to validate 'to' node to accept, but good for logic
+        // const toValid = validateChain(latestToNode.blockchain);
 
         // Allow accepting if chain is valid and length is greater OR equal
-        const shouldAccept = fromValid && fromNode.blockchain.length >= toNode.blockchain.length;
+        const isLongerOrEqual = latestFromNode.blockchain.length >= latestToNode.blockchain.length;
+
+        // User wants to see "Accepted" even if chains are identical
+        const shouldAccept = fromValid && isLongerOrEqual;
 
         setSyncFeedback(prev => [...prev, {
             id: feedbackId,
@@ -118,7 +139,7 @@ export function useNetwork() {
         if (shouldAccept) {
             // Update the node's blockchain
             setNodes(prev => prev.map(node =>
-                node.id === toId ? { ...node, blockchain: [...fromNode.blockchain] } : node
+                node.id === toId ? { ...node, blockchain: [...latestFromNode.blockchain] } : node
             ));
 
             // Recursive propagation: Sync to all neighbors of 'toId' that haven't been visited
@@ -140,7 +161,7 @@ export function useNetwork() {
             setSyncMessages(prev => prev.filter(m => m.id !== syncId));
             setSyncFeedback(prev => prev.filter(f => f.id !== feedbackId));
         }, 2000);
-    }, [nodes, connections, validateChain]);
+    }, [connections, validateChain]);
 
     // Add block to selected node
     const addBlock = useCallback(async () => {
@@ -177,20 +198,65 @@ export function useNetwork() {
         }));
     }, [selectedNode, nodes]);
 
+    // Helper to propagate changes to subsequent blocks
+    const propagateChanges = useCallback(async (currentBlocks: Block[], startIndex: number, newHash: string) => {
+        const newBlocks = [...currentBlocks];
+
+        // Update the start block's hash
+        const startBlockIdx = newBlocks.findIndex(b => b.index === startIndex);
+        if (startBlockIdx === -1) return newBlocks;
+
+        newBlocks[startBlockIdx] = { ...newBlocks[startBlockIdx], hash: newHash };
+
+        // Propagate to subsequent blocks
+        for (let i = startBlockIdx + 1; i < newBlocks.length; i++) {
+            const prevBlock = newBlocks[i - 1];
+            const currentBlock = newBlocks[i];
+
+            // Update prevHash
+            const updatedBlock = { ...currentBlock, prevHash: prevBlock.hash };
+
+            // Recalculate hash for this block because its prevHash changed
+            const newBlockHash = await calculateBlockHash(
+                updatedBlock.index,
+                updatedBlock.nonce,
+                updatedBlock.data,
+                updatedBlock.prevHash
+            );
+
+            updatedBlock.hash = newBlockHash;
+            newBlocks[i] = updatedBlock;
+        }
+
+        return newBlocks;
+    }, []);
+
     // Update block in selected node
-    const updateBlock = useCallback((blockIndex: number, hash: string, nonce: number, data: string) => {
+    const updateBlock = useCallback(async (blockIndex: number, hash: string, nonce: number, data: string) => {
         if (!selectedNode) return;
 
-        setNodes(prev => prev.map(node => {
-            if (node.id === selectedNode) {
-                const newBlockchain = node.blockchain.map((block, idx) =>
-                    idx === blockIndex ? { ...block, hash, nonce, data } : block
-                );
-                return { ...node, blockchain: newBlockchain };
-            }
-            return node;
-        }));
-    }, [selectedNode]);
+        // This function seems unused or redundant with recalculateBlockHash/updateNonce?
+        // But if used, it needs to propagate too.
+        // Let's assume it's used for generic updates.
+
+        const node = nodes.find(n => n.id === selectedNode);
+        if (!node) return;
+
+        const currentBlocks = [...node.blockchain];
+        const idx = currentBlocks.findIndex(b => b.index === blockIndex);
+        if (idx !== -1) {
+            currentBlocks[idx] = { ...currentBlocks[idx], hash, nonce, data };
+            // If hash changed, propagate? Or if data/nonce changed, we should recalculate hash?
+            // The signature implies hash is passed in.
+            // If hash is passed, we assume it's correct for the data/nonce.
+            // But we MUST propagate to next blocks.
+            const updatedBlocks = await propagateChanges(currentBlocks, blockIndex, hash);
+
+            setNodes(prev => prev.map(n =>
+                n.id === selectedNode ? { ...n, blockchain: updatedBlocks } : n
+            ));
+        }
+    }, [selectedNode, nodes, propagateChanges]);
 
     // Mine a block at a specific index for a given node
     const mineBlockAtIndex = useCallback(async (nodeId: string, blockIndex: number) => {
@@ -211,20 +277,21 @@ export function useNetwork() {
                 }
             );
 
-            // Update the mined block
-            setNodes(prevNodes => prevNodes.map(n => {
-                if (n.id === nodeId) {
-                    const newBlockchain = n.blockchain.map((b, idx) =>
-                        idx === blockIndex ? { ...b, hash, nonce } : b
-                    );
-                    return { ...n, blockchain: newBlockchain };
-                }
-                return n;
-            }));
+            // Update and propagate
+            const currentBlocks = [...node.blockchain];
+            const idx = currentBlocks.findIndex(b => b.index === blockIndex);
+            if (idx !== -1) {
+                currentBlocks[idx] = { ...currentBlocks[idx], nonce };
+                const updatedBlocks = await propagateChanges(currentBlocks, blockIndex, hash);
+
+                setNodes(prevNodes => prevNodes.map(n =>
+                    n.id === nodeId ? { ...n, blockchain: updatedBlocks } : n
+                ));
+            }
         } finally {
             setMiningBlock(null);
         }
-    }, [nodes]);
+    }, [nodes, propagateChanges]);
 
     // Recalculate hash when block data changes
     const recalculateBlockHash = useCallback(async (nodeId: string, blockIndex: number, newData: any) => {
@@ -234,16 +301,17 @@ export function useNetwork() {
         const block = node.blockchain[blockIndex];
         const hash = await calculateBlockHash(block.index, block.nonce, newData, block.prevHash);
 
-        setNodes(prevNodes => prevNodes.map(n => {
-            if (n.id === nodeId) {
-                const newBlockchain = n.blockchain.map((b, idx) =>
-                    idx === blockIndex ? { ...b, data: newData, hash } : b
-                );
-                return { ...n, blockchain: newBlockchain };
-            }
-            return n;
-        }));
-    }, [nodes]);
+        const currentBlocks = [...node.blockchain];
+        const idx = currentBlocks.findIndex(b => b.index === blockIndex);
+        if (idx !== -1) {
+            currentBlocks[idx] = { ...currentBlocks[idx], data: newData };
+            const updatedBlocks = await propagateChanges(currentBlocks, blockIndex, hash);
+
+            setNodes(prevNodes => prevNodes.map(n =>
+                n.id === nodeId ? { ...n, blockchain: updatedBlocks } : n
+            ));
+        }
+    }, [nodes, propagateChanges]);
 
     // Update nonce manually
     const updateNonce = useCallback(async (nodeId: string, blockIndex: number, newNonce: number) => {
@@ -253,16 +321,17 @@ export function useNetwork() {
         const block = node.blockchain[blockIndex];
         const hash = await calculateBlockHash(block.index, newNonce, block.data, block.prevHash);
 
-        setNodes(prevNodes => prevNodes.map(n => {
-            if (n.id === nodeId) {
-                const newBlockchain = n.blockchain.map((b, idx) =>
-                    idx === blockIndex ? { ...b, nonce: newNonce, hash } : b
-                );
-                return { ...n, blockchain: newBlockchain };
-            }
-            return n;
-        }));
-    }, [nodes]);
+        const currentBlocks = [...node.blockchain];
+        const idx = currentBlocks.findIndex(b => b.index === blockIndex);
+        if (idx !== -1) {
+            currentBlocks[idx] = { ...currentBlocks[idx], nonce: newNonce };
+            const updatedBlocks = await propagateChanges(currentBlocks, blockIndex, hash);
+
+            setNodes(prevNodes => prevNodes.map(n =>
+                n.id === nodeId ? { ...n, blockchain: updatedBlocks } : n
+            ));
+        }
+    }, [nodes, propagateChanges]);
 
     // Propagate chain from a node to its peers
     const propagateChain = useCallback(async (nodeId: string) => {

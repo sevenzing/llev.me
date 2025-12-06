@@ -10,25 +10,33 @@ import { calculateBlockHash } from "@/lib/blockchain";
 
 export default function Home() {
   const { language, setLanguage, t } = useLanguage();
+  const blockExampleNumber = 711;
   const { blocks, miningBlock, miningNonce, mineBlockAtIndex, recalculateBlockHash, updateNonce } = useSingleBlockchain([
     {
-      index: 0,
+      index: blockExampleNumber,
       nonce: 0,
       data: "Hello world!",
-      prevHash: "0000000000000000000000000000000000000000000000000000000000000000",
+      prevHash: "b493ac361a9149c04f813695aee84fc7a39b3d2a83987294e4a5346f7ec4cfb5",
       hash: "5bfc4ce7f6435a4e49278938a2d3b93a7cf48eea596318f40c9419a163ca394b"
     }
   ]);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
-      <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50">
+    <main className="min-h-screen bg-[#f5f5f7] text-slate-900 font-sans selection:bg-blue-500/30 relative overflow-hidden">
+      {/* Mesh Gradient Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-60">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/30 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute top-[20%] right-[-10%] w-[40%] h-[60%] rounded-full bg-purple-400/30 blur-[120px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '1s' }} />
+        <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[40%] rounded-full bg-pink-400/30 blur-[120px] animate-pulse" style={{ animationDuration: '12s', animationDelay: '2s' }} />
+      </div>
+
+      <header className="fixed top-0 w-full bg-white/70 backdrop-blur-xl border-b border-white/20 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <h1 className="text-xl font-heading font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             {t.title}
           </h1>
           <div className="flex items-center gap-6">
-            <nav className="text-sm font-medium text-slate-500 space-x-4">
+            <nav className="text-sm font-medium text-slate-600 space-x-4">
               <a href="#hashing" className="hover:text-blue-600 transition-colors">{t.nav.hashing}</a>
               <a href="#block" className="hover:text-blue-600 transition-colors">{t.nav.block}</a>
               <a href="#chain" className="hover:text-blue-600 transition-colors">{t.nav.chain}</a>
@@ -36,7 +44,7 @@ export default function Home() {
             </nav>
             <button
               onClick={() => setLanguage(language === 'en' ? 'ru' : 'en')}
-              className="px-3 py-1 text-sm font-bold bg-slate-100 hover:bg-slate-200 rounded-md transition-colors"
+              className="px-3 py-1 text-sm font-bold bg-white/50 hover:bg-white/80 backdrop-blur-md border border-white/40 rounded-lg transition-all shadow-sm"
             >
               {language === 'en' ? 'RU' : 'EN'}
             </button>
@@ -44,14 +52,14 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="pt-24 pb-32 space-y-16">
+      <div className="pt-24 pb-32 space-y-16 relative z-10">
         {/* Hero */}
         <section className="max-w-4xl mx-auto px-6 text-center space-y-6">
-          <h2 className="text-5xl md:text-7xl font-heading font-bold tracking-tight text-slate-900">
+          <h2 className="text-5xl md:text-7xl font-heading font-bold tracking-tight text-slate-900 drop-shadow-sm">
             {t.hero.title} <br />
-            <span className="text-blue-600">{t.hero.subtitle}</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">{t.hero.subtitle}</span>
           </h2>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-medium">
             {t.hero.description}
           </p>
         </section>
@@ -78,11 +86,11 @@ export default function Home() {
             initialData={typeof blocks[0].data === 'string' ? blocks[0].data : JSON.stringify(blocks[0].data)}
             initialNonce={blocks[0].nonce}
             initialHash={blocks[0].hash}
-            miningNonce={miningBlock === 0 ? miningNonce : undefined}
-            onDataChange={(data) => recalculateBlockHash(0, data)}
-            onNonceChange={(nonce) => updateNonce(0, nonce)}
-            onMineClick={() => mineBlockAtIndex(0)}
-            isMining={miningBlock === 0}
+            miningNonce={miningBlock === blockExampleNumber ? miningNonce : undefined}
+            onDataChange={(data) => recalculateBlockHash(blockExampleNumber, data)}
+            onNonceChange={(nonce) => updateNonce(blockExampleNumber, nonce)}
+            onMineClick={() => mineBlockAtIndex(blockExampleNumber)}
+            isMining={miningBlock === blockExampleNumber}
           />
         </Section>
 
@@ -92,7 +100,7 @@ export default function Home() {
             <h3 className="text-3xl font-heading font-bold text-slate-900">{t.chain.title}</h3>
             <p className="text-lg text-slate-600 leading-relaxed">{t.chain.description}</p>
           </div>
-          <div className="bg-slate-100 rounded-2xl p-8 border border-slate-200 shadow-inner">
+          <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40">
             <SingleBlockchainPlayground orientation="horizontal" numberOfBlocks={3} />
           </div>
         </section>
@@ -111,7 +119,7 @@ function Section({ id, title, description, children }: { id: string, title: stri
         <h3 className="text-3xl font-heading font-bold text-slate-900">{title}</h3>
         <p className="text-lg text-slate-600 leading-relaxed">{description}</p>
       </div>
-      <div className="bg-slate-100 rounded-2xl p-8 border border-slate-200 shadow-inner flex items-center justify-center min-h-[400px]">
+      <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 flex items-center justify-center min-h-[400px]">
         {children}
       </div>
     </section>

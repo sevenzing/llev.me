@@ -8,7 +8,7 @@ export async function calculateBlockHash(
     prevHash: string
 ): Promise<string> {
     const dataString = typeof data === 'string' ? data : JSON.stringify(data);
-    const str = blockNumber + nonce + dataString + prevHash;
+    const str = blockNumber + dataString + prevHash + nonce;
     const msgBuffer = new TextEncoder().encode(str);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -24,10 +24,12 @@ export async function mineBlock(
     prevHash: string,
     onProgress?: (nonce: number, hash: string) => void
 ): Promise<{ hash: string; nonce: number }> {
-    let nonce = 0;
+    let nonce = -1;
     let hash = '';
+    console.log('mine for block', blockNumber);
 
     while (!hash.startsWith('0000')) {
+        nonce++;
         hash = await calculateBlockHash(blockNumber, nonce, data, prevHash);
 
         // Call progress callback every 100 iterations for smooth animation
@@ -36,9 +38,7 @@ export async function mineBlock(
             // Yield to UI thread
             await new Promise(resolve => setTimeout(resolve, 0));
         }
-
-        nonce++;
     }
 
-    return { hash, nonce: nonce - 1 };
+    return { hash, nonce };
 }

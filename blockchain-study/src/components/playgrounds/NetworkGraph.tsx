@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNetwork } from "@/hooks/useNetwork";
 
@@ -10,27 +10,38 @@ interface NetworkGraphProps {
 
 export function NetworkGraph({ network }: NetworkGraphProps) {
     const containerRef = useRef<HTMLDivElement>(null);
+    const [cursorPos, setCursorPos] = useState<{ x: number, y: number } | null>(null);
 
     const handleNodeMouseDown = (nodeId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
         if (e.detail === 2) {
-            network.setMovingNode(nodeId);
-        } else {
+            // Double click: Create connection
+            network.setMovingNode(null); // Cancel any moving
             network.setDraggingFrom(nodeId);
+        } else {
+            // Single click: Move node
+            network.setMovingNode(nodeId);
         }
         e.preventDefault();
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
-        if (network.movingNode && containerRef.current) {
+        if (containerRef.current) {
             const rect = containerRef.current.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * 100;
             const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-            network.setNodes(prev => prev.map(node =>
-                node.id === network.movingNode
-                    ? { ...node, x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) }
-                    : node
-            ));
+            if (network.movingNode) {
+                network.setNodes(prev => prev.map(node =>
+                    node.id === network.movingNode
+                        ? { ...node, x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) }
+                        : node
+                ));
+            }
+
+            if (network.draggingFrom) {
+                setCursorPos({ x, y });
+            }
         }
     };
 
@@ -50,19 +61,20 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
         network.setDraggingFrom(null);
         network.setDragTarget(null);
         network.setMovingNode(null);
+        setCursorPos(null);
     };
 
     return (
-        <div className="w-full space-y-2 select-none">
+        <div className="w-full space-y-4 select-none">
             <div
                 ref={containerRef}
-                className="relative w-full h-80 bg-slate-50 rounded-xl border-2 border-slate-300 overflow-hidden"
+                className="relative w-full h-96 bg-white/30 backdrop-blur-xl rounded-3xl border border-white/40 shadow-inner overflow-hidden ring-1 ring-white/30"
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
             >
                 {/* Connections */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                <svg className="absolute inset-0 w-full h-full pointer-events-none filter drop-shadow-sm">
                     {network.connections.map((conn, idx) => {
                         const fromNode = network.nodes.find(n => n.id === conn.from);
                         const toNode = network.nodes.find(n => n.id === conn.to);
@@ -75,21 +87,28 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                                 y1={`${fromNode.y}%`}
                                 x2={`${toNode.x}%`}
                                 y2={`${toNode.y}%`}
-                                stroke="#94a3b8"
-                                strokeWidth="2"
+                                stroke="rgba(148, 163, 184, 0.6)"
+                                strokeWidth="3"
+                                strokeLinecap="round"
                             />
                         );
                     })}
 
-                    {network.draggingFrom && network.dragTarget && (
+                    {/* Connection Line to Cursor or Target */}
+                    {network.draggingFrom && (
                         <line
                             x1={`${network.nodes.find(n => n.id === network.draggingFrom)?.x}%`}
                             y1={`${network.nodes.find(n => n.id === network.draggingFrom)?.y}%`}
-                            x2={`${network.nodes.find(n => n.id === network.dragTarget)?.x}%`}
-                            y2={`${network.nodes.find(n => n.id === network.dragTarget)?.y}%`}
-                            stroke="#3b82f6"
-                            strokeWidth="2"
-                            strokeDasharray="5,5"
+                            x2={network.dragTarget
+                                ? `${network.nodes.find(n => n.id === network.dragTarget)?.x}%`
+                                : `${cursorPos?.x ?? network.nodes.find(n => n.id === network.draggingFrom)?.x}%`}
+                            y2={network.dragTarget
+                                ? `${network.nodes.find(n => n.id === network.dragTarget)?.y}%`
+                                : `${cursorPos?.y ?? network.nodes.find(n => n.id === network.draggingFrom)?.y}%`}
+                            stroke="#60a5fa"
+                            strokeWidth="3"
+                            strokeDasharray="6,6"
+                            className="animate-pulse"
                         />
                     )}
                 </svg>
@@ -107,7 +126,9 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                         return (
                             <motion.div
                                 key={msg.id}
-                                className={`absolute w-3 h-3 rounded-full ${msg.isRecursive ? 'bg-blue-400' : 'bg-yellow-400'}`}
+                                className={`absolute w-4 h-4 rounded-full shadow-lg border border-white/50 ${msg.isRecursive
+                                    ? 'bg-gradient-to-br from-blue-300 to-blue-500'
+                                    : 'bg-gradient-to-br from-yellow-300 to-yellow-500'}`}
                                 style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
@@ -120,15 +141,23 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                 {/* Nodes */}
                 {network.nodes.map(node => {
                     const latestBlock = node.blockchain[node.blockchain.length - 1];
-                    const blockHeight = node.blockchain.length;
-                    const lastHashBytes = latestBlock.hash.slice(-4);
+                    const latestBlockNumber = latestBlock.index;
+                    const firstHashBytes = latestBlock.hash.slice(0, 8);
                     const feedback = network.syncFeedback.find(f => f.nodeId === node.id);
+                    const isSelected = network.selectedNode === node.id;
 
                     return (
                         <div key={node.id} className="absolute" style={{ left: `${node.x}%`, top: `${node.y}%`, transform: 'translate(-50%, -50%)' }}>
                             <motion.div
-                                className={`w-10 h-10 rounded-full border-2 flex items-center justify-center text-white text-sm font-bold cursor-pointer z-10 ${network.movingNode === node.id ? '' : 'transition-all'} ${network.selectedNode === node.id ? 'bg-blue-600 border-blue-400 scale-110' : 'bg-slate-800 border-blue-500'
-                                    } ${network.draggingFrom === node.id ? 'ring-4 ring-yellow-400' : ''} ${network.movingNode === node.id ? 'ring-4 ring-green-400' : ''}`}
+                                className={`w-14 h-14 rounded-full flex items-center justify-center text-white text-lg font-bold cursor-pointer z-10 relative shadow-xl transition-all duration-300
+                                    ${isSelected
+                                        ? 'bg-gradient-to-br from-blue-500 to-indigo-600 ring-4 ring-blue-400/30 scale-110'
+                                        : 'bg-gradient-to-br from-slate-700 to-slate-900 hover:scale-105'
+                                    }
+                                    ${network.draggingFrom === node.id ? 'ring-4 ring-yellow-400/50' : ''}
+                                    ${network.movingNode === node.id ? 'ring-4 ring-green-400/50 cursor-grabbing' : ''}
+                                    border border-white/20
+                                `}
                                 onClick={() => network.selectNode(node.id)}
                                 onMouseDown={(e) => handleNodeMouseDown(node.id, e)}
                                 onMouseEnter={() => network.draggingFrom && network.setDragTarget(node.id)}
@@ -136,19 +165,23 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                {node.id}
+                                {/* Glossy shine effect */}
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/40 to-transparent opacity-50 pointer-events-none" />
+                                <span className="drop-shadow-md">{node.id}</span>
                             </motion.div>
-                            <div className="absolute top-12 left-1/2 transform -translate-x-1/2 text-xs text-slate-300 font-mono whitespace-nowrap bg-slate-900/80 px-2 py-1 rounded">
-                                #{blockHeight} ...{lastHashBytes}
+
+                            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 text-xs font-mono whitespace-nowrap bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-white/50 text-slate-600 font-bold">
+                                #{latestBlockNumber} <span className="text-slate-400">{firstHashBytes}...</span>
                             </div>
+
                             {feedback && (
                                 <motion.div
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0 }}
-                                    className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold px-2 py-1 rounded whitespace-nowrap ${feedback.accepted
-                                        ? 'bg-green-500 text-white'
-                                        : 'bg-red-500 text-white'
+                                    initial={{ opacity: 0, y: -10, scale: 0.8 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    className={`absolute -top-10 left-1/2 transform -translate-x-1/2 text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap shadow-lg backdrop-blur-md border border-white/20 ${feedback.accepted
+                                        ? 'bg-emerald-500/90 text-white'
+                                        : 'bg-red-500/90 text-white'
                                         }`}
                                 >
                                     {feedback.accepted ? 'Accepted ✓' : 'Rejected ✗'}
@@ -159,30 +192,30 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                 })}
             </div>
 
-            <div className="flex flex-col gap-2 items-center justify-between">
-                <div className="flex gap-2">
+            <div className="flex flex-col gap-3 items-center justify-between bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-white/40 shadow-sm">
+                <div className="flex gap-3">
                     <button
                         onClick={network.addNode}
-                        className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-bold"
+                        className="px-4 py-2 bg-white/60 hover:bg-white/80 text-purple-700 border border-purple-200 rounded-xl transition-all text-xs font-bold shadow-sm hover:shadow-md backdrop-blur-sm"
                     >
-                        + Node
+                        + Add Node
                     </button>
                     <button
                         onClick={network.addBlock}
-                        className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-bold"
+                        className="px-4 py-2 bg-blue-500/90 hover:bg-blue-600/90 text-white rounded-xl transition-all text-xs font-bold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 backdrop-blur-sm border border-white/20"
                     >
-                        + Block
+                        + Add Block
                     </button>
                     <button
                         onClick={() => network.propagateChain(network.selectedNode)}
                         disabled={network.isSyncing}
-                        className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors text-xs font-bold"
+                        className="px-4 py-2 bg-emerald-500/90 hover:bg-emerald-600/90 text-white rounded-xl disabled:bg-slate-400/50 disabled:cursor-not-allowed transition-all text-xs font-bold shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 backdrop-blur-sm border border-white/20"
                     >
-                        {network.isSyncing ? 'Syncing...' : 'Sync'}
+                        {network.isSyncing ? 'Syncing...' : 'Sync Network'}
                     </button>
                 </div>
-                <p className="text-xs text-slate-500 text-center">
-                    Click to select • Double-click & drag to move • Drag between nodes to connect/disconnect
+                <p className="text-xs text-slate-500 font-medium text-center">
+                    Click to select • Drag to move • Double-click & drag to connect
                 </p>
             </div>
         </div>

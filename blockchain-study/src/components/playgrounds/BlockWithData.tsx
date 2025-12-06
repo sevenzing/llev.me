@@ -94,15 +94,16 @@ export function BlockWithData({
 
     return (
         <motion.div
-            className={`${classes.container} ${classes.spacing} bg-white rounded-xl shadow-lg border-2 ${isValid ? 'border-emerald-400' : 'border-red-400'
-                } p-4 font-mono`}
+            className={`${classes.container} ${classes.spacing} bg-white/60 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-5 font-mono ring-1 ring-white/50`}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
         >
             <div className={`flex justify-between items-center ${classes.text}`}>
-                <span className="font-bold text-slate-700">Block #{blockNumber}</span>
-                <span className={`px-2 py-0.5 rounded text-white text-xs font-bold ${isValid ? 'bg-emerald-500' : 'bg-red-500'
+                <span className="font-bold text-slate-700/80 tracking-wide">Block #{blockNumber}</span>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-bold border backdrop-blur-md shadow-sm ${isValid
+                    ? 'bg-emerald-400/20 text-emerald-700 border-emerald-400/30'
+                    : 'bg-red-400/20 text-red-700 border-red-400/30'
                     }`}>
                     {isValid ? '✓ Valid' : '✗ Invalid'}
                 </span>
@@ -110,46 +111,46 @@ export function BlockWithData({
 
             <div className={classes.spacing}>
                 <div>
-                    <label className={`block text-slate-600 font-semibold mb-1 ${classes.text}`}>Nonce</label>
+                    <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Nonce</label>
                     <input
                         type="number"
                         value={nonce}
                         onChange={(e) => onNonceChange?.(parseInt(e.target.value) || 0)}
                         disabled={isMining}
-                        className={`w-full border border-slate-300 rounded ${classes.input} ${isMining ? 'bg-slate-50' : 'bg-white'} font-mono focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                        className={`w-full border rounded-xl ${classes.input} ${isMining ? 'bg-slate-100/50 text-slate-400' : 'bg-white/50 text-slate-700'} border-white/40 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all shadow-inner`}
                     />
                 </div>
 
                 <div>
-                    <label className={`block text-slate-600 font-semibold mb-1 ${classes.text}`}>Data</label>
+                    <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Data</label>
                     <input
                         type="text"
                         value={data}
                         onChange={(e) => setData(e.target.value)}
-                        className={`w-full border border-slate-300 rounded ${classes.input} font-mono focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                        className={`w-full border border-white/40 rounded-xl ${classes.input} bg-white/50 backdrop-blur-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all shadow-inner placeholder:text-slate-400`}
                         placeholder="Enter block data..."
                     />
                 </div>
 
                 <div>
-                    <label className={`block text-slate-600 font-semibold mb-1 ${classes.text}`}>Prev</label>
+                    <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Prev</label>
                     <input
                         type="text"
                         value={prevHash}
                         readOnly
-                        className={`w-full border border-slate-300 rounded ${classes.input} bg-slate-50 font-mono text-slate-500 overflow-hidden text-ellipsis`}
+                        className={`w-full border border-white/30 rounded-xl ${classes.input} bg-slate-50/50 backdrop-blur-sm text-slate-500 overflow-hidden text-ellipsis shadow-inner`}
                     />
                 </div>
 
                 <div>
-                    <label className={`block text-slate-600 font-semibold mb-1 ${classes.text}`}>Hash</label>
+                    <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Hash</label>
                     <input
                         type="text"
                         value={isMining ? miningHash : displayHash}
                         readOnly
-                        className={`w-full border border-slate-300 rounded ${classes.input} ${isMining ? 'bg-yellow-50 text-yellow-700 animate-pulse' :
-                                isValid ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
-                            } font-mono font-bold overflow-hidden text-ellipsis`}
+                        className={`w-full border border-white/30 rounded-xl ${classes.input} ${isMining ? 'bg-yellow-100/40 text-yellow-700 animate-pulse' :
+                                isValid ? 'bg-emerald-50/40 text-emerald-700' : 'bg-red-50/40 text-red-700'
+                            } backdrop-blur-sm font-bold overflow-hidden text-ellipsis shadow-inner`}
                     />
                 </div>
 
@@ -157,19 +158,19 @@ export function BlockWithData({
                     <button
                         onClick={onMineClick}
                         disabled={isMining}
-                        className={`w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-lg ${classes.button
-                            } hover:from-purple-700 hover:to-blue-700 transition-all disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed shadow-md hover:shadow-lg`}
+                        className={`w-full bg-gradient-to-r from-blue-500/90 to-indigo-600/90 backdrop-blur-md text-white font-bold rounded-xl ${classes.button
+                            } hover:from-blue-600 hover:to-indigo-700 transition-all disabled:from-slate-400/50 disabled:to-slate-500/50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 active:scale-[0.98] border border-white/20`}
                     >
                         {isMining ? (
-                            <span className="flex items-center justify-center">
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <span className="flex items-center justify-center gap-2">
+                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                 </svg>
                                 Mining...
                             </span>
                         ) : (
-                            '⛏ Mine'
+                            '⛏ Mine Block'
                         )}
                     </button>
                 )}

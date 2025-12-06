@@ -4,9 +4,9 @@ export function mockedGenesisBlock(): Block {
     return {
         index: 0,
         data: "Genesis",
-        hash: "0000dc20d02fe253818318e51f0570903a1eb4aeeb6f2446133d7ace7ba03d18",
+        hash: "000073d85df97757bd4c0f801b4c633b6e61105dd43a99780f6ae5c202a6fd6e",
         prevHash: "0000000000000000000000000000000000000000000000000000000000000000",
-        nonce: 10688
+        nonce: 56066
     };
 }
 

@@ -56,7 +56,7 @@ export function NetworkPlayground({ t }: NetworkPlaygroundProps) {
             </div>
 
             {/* Selected Node's Blockchain */}
-            <div className="bg-slate-100 rounded-2xl p-8 border border-slate-200 shadow-inner">
+            <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40">
                 <SelectedNetworkBlockchain
                     selectedNode={network.selectedNode}
                     blockchain={network.selectedBlockchain}
