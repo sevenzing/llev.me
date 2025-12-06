@@ -133,7 +133,7 @@ export function BlockWithData({
                 </div>
 
                 <div>
-                    <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Prev</label>
+                    <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Prev Hash</label>
                     <input
                         type="text"
                         value={prevHash}
@@ -149,7 +149,7 @@ export function BlockWithData({
                         value={isMining ? miningHash : displayHash}
                         readOnly
                         className={`w-full border border-white/30 rounded-xl ${classes.input} ${isMining ? 'bg-yellow-100/40 text-yellow-700 animate-pulse' :
-                                isValid ? 'bg-emerald-50/40 text-emerald-700' : 'bg-red-50/40 text-red-700'
+                            isValid ? 'bg-emerald-50/40 text-emerald-700' : 'bg-red-50/40 text-red-700'
                             } backdrop-blur-sm font-bold overflow-hidden text-ellipsis shadow-inner`}
                     />
                 </div>

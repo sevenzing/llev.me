@@ -1,6 +1,10 @@
 "use client";
 
+import { Highlight } from "@/components/ui/Highlight";
+import { InteractionGuide } from "@/components/ui/InteractionGuide";
 import { HashPlayground } from "@/components/playgrounds/HashPlayground";
+import { HashComparator } from "@/components/playgrounds/HashComparator";
+import { MiningGame } from "@/components/playgrounds/MiningGame";
 import { BlockWithData } from "@/components/playgrounds/BlockWithData";
 import { SingleBlockchainPlayground } from "@/components/playgrounds/SingleBlockchainPlayground";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -52,7 +56,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="pt-24 pb-32 space-y-16 relative z-10">
+      <div className="pt-24 pb-32 space-y-32 relative z-10">
         {/* Hero */}
         <section className="max-w-4xl mx-auto px-6 text-center space-y-6">
           <h2 className="text-5xl md:text-7xl font-heading font-bold tracking-tight text-slate-900 drop-shadow-sm">
@@ -69,8 +73,31 @@ export default function Home() {
           id="hashing"
           title={t.hashing.title}
           description={t.hashing.description}
+          instruction="Type anything in the box to the right. Watch how the Hash changes completely with even a single character difference!"
         >
           <HashPlayground />
+        </Section>
+
+        {/* Section 1.5: Determinism */}
+        <section className="max-w-7xl mx-auto px-6 space-y-8">
+          <div className="space-y-6 max-w-3xl mx-auto text-center">
+            <h3 className="text-3xl font-heading font-bold text-slate-900">Determinism</h3>
+            <p className="text-lg text-slate-600 leading-relaxed">
+              <Highlight>The same input always produces the same **Hash**. It doesn't matter if you're in New York or Moscow, using a phone or a supercomputer.</Highlight>
+            </p>
+            <InteractionGuide text="Type the EXACT same text in both boxes (e.g. 'Hello'). Watch the equality sign light up green!" />
+          </div>
+          <HashComparator initialA="Привет" initialB="Hello" />
+        </section>
+
+        {/* Section 1.6: The Mining Game */}
+        <Section
+          id="mining"
+          title="The Mining Game"
+          description="We can say that data is valid if **Hash** of the data starts with 4 zeros '0000'. Let's add additional number called **Nonce** and try to increase it until Hash starts with four zeros."
+          instruction="Try to find a **Nonce** that makes the Hash start with '0000'. You can guess manually, or wait for a hint!"
+        >
+          <MiningGame />
         </Section>
 
         {/* Section 2: The Block */}
@@ -78,6 +105,7 @@ export default function Home() {
           id="block"
           title={t.block.title}
           description={t.block.description}
+          instruction="Change the data to anything you want to store in Block. Then find the Nonce. Or dont waste your time and click **Mine** and fix the Block!"
         >
           <BlockWithData
             size="large"
@@ -97,8 +125,13 @@ export default function Home() {
         {/* Section 3: The Chain */}
         <section id="chain" className="max-w-7xl mx-auto px-6 space-y-8">
           <div className="space-y-6 max-w-3xl">
-            <h3 className="text-3xl font-heading font-bold text-slate-900">{t.chain.title}</h3>
-            <p className="text-lg text-slate-600 leading-relaxed">{t.chain.description}</p>
+            <h3 className="text-3xl font-heading font-bold text-slate-900">
+              <Highlight>{t.chain.title}</Highlight>
+            </h3>
+            <p className="text-lg text-slate-600 leading-relaxed">
+              <Highlight>{t.chain.description}</Highlight>
+            </p>
+            <InteractionGuide text="Mine all blocks to fix the Chain. Change data in Block #0. See how it breaks all blocks. Well, to change data in chain you need to mine everything after it!" />
           </div>
           <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40">
             <SingleBlockchainPlayground orientation="horizontal" numberOfBlocks={3} />
@@ -112,12 +145,19 @@ export default function Home() {
   );
 }
 
-function Section({ id, title, description, children }: { id: string, title: string, description: string, children: React.ReactNode }) {
+
+
+function Section({ id, title, description, instruction, children }: { id: string, title: string, description: string, instruction?: string, children: React.ReactNode }) {
   return (
     <section id={id} className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center min-h-[60vh]">
       <div className="space-y-6">
-        <h3 className="text-3xl font-heading font-bold text-slate-900">{title}</h3>
-        <p className="text-lg text-slate-600 leading-relaxed">{description}</p>
+        <h3 className="text-3xl font-heading font-bold text-slate-900">
+          <Highlight>{title}</Highlight>
+        </h3>
+        <p className="text-lg text-slate-600 leading-relaxed">
+          <Highlight>{description}</Highlight>
+        </p>
+        {instruction && <InteractionGuide text={instruction} />}
       </div>
       <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 flex items-center justify-center min-h-[400px]">
         {children}

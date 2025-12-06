@@ -12,6 +12,15 @@ module.exports = {
         heading: ["var(--font-outfit)"],
         mono: ["monospace"],
       },
+      keyframes: {
+        shimmer: {
+          '0%': { backgroundPosition: '200% center' },
+          '100%': { backgroundPosition: '-200% center' },
+        },
+      },
+      animation: {
+        shimmer: 'shimmer 3s linear infinite',
+      },
     },
   },
   plugins: [],

@@ -3,6 +3,8 @@
 import { useNetwork } from "@/hooks/useNetwork";
 import { NetworkGraph } from "./NetworkGraph";
 import { SelectedNetworkBlockchain } from "./SelectedNetworkBlockchain";
+import { Highlight } from "../ui/Highlight";
+import { InteractionGuide } from "../ui/InteractionGuide";
 
 interface NetworkPlaygroundProps {
     t: any;
@@ -37,7 +39,7 @@ export function NetworkPlayground({ t }: NetworkPlaygroundProps) {
         <section id="network" className="max-w-7xl mx-auto px-6 space-y-8">
             <div className="text-center space-y-4">
                 <h2 className="text-4xl font-heading font-bold text-slate-900">
-                    {t.network.title}
+                    <Highlight>{t.network.title}</Highlight>
                 </h2>
             </div>
 
@@ -45,8 +47,9 @@ export function NetworkPlayground({ t }: NetworkPlaygroundProps) {
                 {/* Description */}
                 <div className="space-y-6">
                     <p className="text-lg text-slate-600 leading-relaxed">
-                        {t.network.description}
+                        <Highlight>{t.network.description}</Highlight>
                     </p>
+                    <InteractionGuide text="Click on any Node to see its blockchain. Try to change data in one node and see how other nodes reject the change!" />
                 </div>
 
                 {/* Network Graph */}

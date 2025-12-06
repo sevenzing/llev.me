@@ -19,7 +19,7 @@ export const translations = {
         // Section 1: Hashing
         hashing: {
             title: "The Fingerprint",
-            description: "At the core of blockchain is the Hash. Think of it as a digital fingerprint. If you change even a single comma in the data, the fingerprint changes completely.",
+            description: "At the core of blockchain is the **Hash**. Think of it as a digital fingerprint. If you change even a single comma in the data, the fingerprint changes completely. Input data can as long is you want (even a whole 'War and Peace'!), but it is hashed to 64 characters. Proccess of hashing is mathematically complicated and was created specifically to be one way, so there is no option to guess the source by only hash",
             inputLabel: "Data Input",
             outputLabel: "Hash Output (256-bit)",
             placeholder: "Type something here...",
@@ -29,7 +29,7 @@ export const translations = {
         // Section 2: Block
         block: {
             title: "The Container",
-            description: "A Block is just a container for data. But to make it 'official', we need to sign it. This is called Mining. We look for a special number (Nonce) that makes the block's hash start with four zeros.",
+            description: "A **Block** is just a container for data. In order to participe in **Blockchain** it has to be valid. Valid block is our Gold Ticket — block that has a hash starting with N zeros (in our toy example N = 4). Long process of finding good Nonce is called **Mining** or **Proof of Work**",
             nonce: "Nonce",
             data: "Data",
             prevHash: "Prev Hash",
@@ -44,13 +44,13 @@ export const translations = {
         // Section 3: Chain
         chain: {
             title: "The Chain",
-            description: "Blocks are linked together. Each block contains the fingerprint of the previous one. If you go back and change Block 1, the fingerprint changes, breaking the link to Block 2. The whole chain turns red.",
+            description: "You might note that block has field **Prev Hash**. This is hash of previous block. This field also participates in hash calculation and this is how we can connect blocks into the **Chain**!",
         },
 
         // Section 4: Network
         network: {
             title: "The Network",
-            description: "A blockchain isn't stored in one place. It's distributed across thousands of computers (nodes). They gossip to share new blocks. If one node tries to cheat, the others reject it.",
+            description: "A blockchain isn't stored in one place. It's distributed across thousands of computers, we call them **Nodes**. Nodes can send new block over the network, but they can't change existing blocks. If one node tries to cheat, the others just reject it.",
             clickNode: "Click a node to broadcast",
         },
     },
@@ -75,7 +75,7 @@ export const translations = {
         // Section 1: Hashing
         hashing: {
             title: "Цифровой отпечаток",
-            description: "В основе блокчейна лежит Хеш. Думайте о нём как о цифровом отпечатке пальца. Если вы измените хотя бы одну запятую в данных, отпечаток полностью изменится.",
+            description: "В основе блокчейна лежит **Хеш**. Думайте о нём как о цифровом отпечатке пальца. Если вы измените хотя бы одну запятую в данных, отпечаток полностью изменится.",
             inputLabel: "Ввод данных",
             outputLabel: "Хеш (256 бит)",
             placeholder: "Введите что-нибудь...",
@@ -85,7 +85,7 @@ export const translations = {
         // Section 2: Block
         block: {
             title: "Контейнер",
-            description: "Блок — это просто контейнер для данных. Но чтобы сделать его 'официальным', нам нужно его подписать. Это называется Майнинг. Мы ищем специальное число (Nonce), которое делает хеш блока начинающимся с четырёх нулей.",
+            description: "**Блок** — это просто контейнер для данных. Но чтобы сделать его 'официальным', нам нужно его подписать. Это называется **Майнинг**. Мы ищем специальное число (**Nonce**), которое делает хеш блока начинающимся с четырёх нулей.",
             nonce: "Nonce",
             data: "Данные",
             prevHash: "Пред. хеш",
@@ -100,13 +100,13 @@ export const translations = {
         // Section 3: Chain
         chain: {
             title: "Цепь",
-            description: "Блоки связаны друг с другом. Каждый блок содержит отпечаток предыдущего. Если вы вернётесь и измените Блок 1, отпечаток изменится, разорвав связь с Блоком 2. Вся цепь станет красной.",
+            description: "**Блоки** связаны друг с другом. Каждый блок содержит отпечаток предыдущего. Если вы вернётесь и измените Блок 1, отпечаток изменится, разорвав связь с Блоком 2. Вся **Цепь** станет красной.",
         },
 
         // Section 4: Network
         network: {
             title: "Сеть",
-            description: "Блокчейн не хранится в одном месте. Он распределён по тысячам компьютеров (узлов). Они обмениваются информацией, чтобы делиться новыми блоками. Если один узел попытается обмануть, остальные отклонят это.",
+            description: "Блокчейн не хранится в одном месте. Он распределён по тысячам компьютеров (**Узлов**). Они обмениваются информацией, чтобы делиться новыми блоками. Если один узел попытается обмануть, остальные отклонят это.",
             clickNode: "Нажмите на узел для трансляции",
         },
     },
