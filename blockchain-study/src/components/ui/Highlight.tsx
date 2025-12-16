@@ -14,7 +14,7 @@ export function Highlight({ children }: { children: string }) {
                     // Remove ** from start and end
                     const content = part.slice(2, -2);
                     return (
-                        <span key={i} className="font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-blue-600 bg-[length:200%_auto] animate-shimmer bg-clip-text text-transparent drop-shadow-sm inline-block">
+                        <span key={i} className="font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-blue-600 bg-[length:200%_auto] bg-clip-text text-transparent drop-shadow-sm inline-block">
                             {content}
                         </span>
                     );

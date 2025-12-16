@@ -1,3 +1,5 @@
+import { Block } from "./types";
+
 /**
  * Calculate SHA-256 hash for a block
  */
@@ -41,4 +43,13 @@ export async function mineBlock(
     }
 
     return { hash, nonce };
+}
+
+
+export function blockIsValid(block: Block): boolean {
+    return hashIsValid(block.hash)
+}
+
+export function hashIsValid(hash: string): boolean {
+    return hash.startsWith('0000')
 }

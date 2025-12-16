@@ -191,6 +191,9 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                     );
                 })}
             </div>
+            <p className="text-xs text-slate-500 font-medium text-center">
+                Click to select • Drag to move • Double-click & drag to connect
+            </p>
 
             <div className="flex flex-col gap-3 items-center justify-between bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-white/40 shadow-sm">
                 <div className="flex gap-3">
@@ -200,12 +203,12 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                     >
                         + Add Node
                     </button>
-                    <button
+                    {/* <button
                         onClick={network.addBlock}
                         className="px-4 py-2 bg-blue-500/90 hover:bg-blue-600/90 text-white rounded-xl transition-all text-xs font-bold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 backdrop-blur-sm border border-white/20"
                     >
                         + Add Block
-                    </button>
+                    </button> */}
                     <button
                         onClick={() => network.propagateChain(network.selectedNode)}
                         disabled={network.isSyncing}
@@ -214,9 +217,7 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                         {network.isSyncing ? 'Syncing...' : 'Sync Network'}
                     </button>
                 </div>
-                <p className="text-xs text-slate-500 font-medium text-center">
-                    Click to select • Drag to move • Double-click & drag to connect
-                </p>
+
             </div>
         </div>
     );

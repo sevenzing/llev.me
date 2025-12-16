@@ -43,32 +43,35 @@ export function NetworkPlayground({ t }: NetworkPlaygroundProps) {
                 </h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 items-start">
-                {/* Description */}
-                <div className="space-y-6">
-                    <p className="text-lg text-slate-600 leading-relaxed">
-                        <Highlight>{t.network.description}</Highlight>
-                    </p>
-                    <InteractionGuide text="Click on any Node to see its blockchain. Try to change data in one node and see how other nodes reject the change!" />
-                </div>
-
-                {/* Network Graph */}
-                <div className="bg-slate-100 rounded-2xl p-6 border border-slate-200 shadow-inner">
-                    <NetworkGraph network={network} />
-                </div>
+            {/* Description */}
+            <div className="space-y-6 max-w-4xl mx-auto text-center">
+                <p className="text-lg text-slate-600 leading-relaxed">
+                    <Highlight>{t.network.description}</Highlight>
+                </p>
+                <InteractionGuide text="Click on any Node to see its blockchain. Try to change data in one node and try to sync the network! Try to add new Blocks, mine and sync the network. Try to cheat and see what will happen!" />
             </div>
 
-            {/* Selected Node's Blockchain */}
-            <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40">
-                <SelectedNetworkBlockchain
-                    selectedNode={network.selectedNode}
-                    blockchain={network.selectedBlockchain}
-                    onDataChange={handleDataChange}
-                    onNonceChange={handleNonceChange}
-                    onMineClick={handleMineClick}
-                    miningBlock={currentMiningBlock}
-                    miningNonce={network.miningNonce}
-                />
+            <div className="grid lg:grid-cols-[350px_1fr] gap-8 items-start relative">
+                {/* Network Graph */}
+                <div className="bg-slate-100 rounded-2xl p-6 border border-slate-200 shadow-inner sticky top-32 min-h-[400px] w-full">
+                    <NetworkGraph network={network} />
+                </div>
+
+                {/* Selected Node's Blockchain */}
+                <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 min-w-0">
+                    <SelectedNetworkBlockchain
+                        selectedNode={network.selectedNode}
+                        blockchain={network.selectedBlockchain}
+                        onDataChange={handleDataChange}
+                        onNonceChange={handleNonceChange}
+                        onMineClick={handleMineClick}
+                        onAddBlock={network.addBlock}
+                        onRemoveBlock={network.removeBlock}
+                        miningBlock={currentMiningBlock}
+                        miningNonce={network.miningNonce}
+                        scrollable={true}
+                    />
+                </div>
             </div>
         </section>
     );

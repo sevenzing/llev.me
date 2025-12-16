@@ -8,8 +8,11 @@ interface SelectedNetworkBlockchainProps {
     onDataChange: (blockIndex: number, data: any) => void;
     onNonceChange: (blockIndex: number, nonce: number) => void;
     onMineClick: (blockIndex: number) => void;
+    onAddBlock: () => void;
+    onRemoveBlock: (nodeId: string) => void;
     miningBlock: number | null;
     miningNonce: number;
+    scrollable?: boolean;
 }
 
 export function SelectedNetworkBlockchain({
@@ -18,8 +21,11 @@ export function SelectedNetworkBlockchain({
     onDataChange,
     onNonceChange,
     onMineClick,
+    onAddBlock,
+    onRemoveBlock,
     miningBlock,
-    miningNonce
+    miningNonce,
+    scrollable
 }: SelectedNetworkBlockchainProps) {
     if (!selectedNode) {
         return (
@@ -37,9 +43,12 @@ export function SelectedNetworkBlockchain({
                 onDataChange={onDataChange}
                 onNonceChange={onNonceChange}
                 onMineClick={onMineClick}
+                onAddBlock={onAddBlock}
+                onRemoveBlock={() => onRemoveBlock(selectedNode)}
                 miningBlock={miningBlock}
                 miningNonce={miningNonce}
                 uniqueKey={`network-${selectedNode}`}
+                scrollable={scrollable}
             />
         </div>
     );

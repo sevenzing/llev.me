@@ -11,6 +11,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { NetworkPlayground } from "@/components/playgrounds/NetworkPlayground";
 import { useSingleBlockchain } from "@/hooks/useSingleBlockchain";
 import { calculateBlockHash } from "@/lib/blockchain";
+import { KeysAndSignatures } from "@/components/playgrounds/KeysAndSignatures";
+import { DataValidityPlayground } from "@/components/playgrounds/DataValidityPlayground";
+import { DataDemo } from "@/components/playgrounds/DataDemo";
 
 export default function Home() {
   const { language, setLanguage, t } = useLanguage();
@@ -41,6 +44,7 @@ export default function Home() {
           </h1>
           <div className="flex items-center gap-6">
             <nav className="text-sm font-medium text-slate-600 space-x-4">
+              <a href="#data" className="hover:text-blue-600 transition-colors">{t.nav.data}</a>
               <a href="#hashing" className="hover:text-blue-600 transition-colors">{t.nav.hashing}</a>
               <a href="#block" className="hover:text-blue-600 transition-colors">{t.nav.block}</a>
               <a href="#chain" className="hover:text-blue-600 transition-colors">{t.nav.chain}</a>
@@ -57,18 +61,28 @@ export default function Home() {
       </header>
 
       <div className="pt-24 pb-32 space-y-32 relative z-10">
-        {/* Hero */}
+        {/* Hero / Intro */}
         <section className="max-w-4xl mx-auto px-6 text-center space-y-6">
           <h2 className="text-5xl md:text-7xl font-heading font-bold tracking-tight text-slate-900 drop-shadow-sm">
-            {t.hero.title} <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">{t.hero.subtitle}</span>
+            {t.intro.title} <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">{t.intro.subtitle}</span>
           </h2>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-medium">
-            {t.hero.description}
+            {t.intro.description}
           </p>
         </section>
 
-        {/* Section 1: Hashing */}
+        {/* The Data */}
+        <Section
+          id="data"
+          title={t.data.title}
+          description={t.data.description}
+          instruction={t.data.instruction}
+        >
+          <DataDemo />
+        </Section>
+
+        {/* Hashing */}
         <Section
           id="hashing"
           title={t.hashing.title}
@@ -78,34 +92,42 @@ export default function Home() {
           <HashPlayground />
         </Section>
 
-        {/* Section 1.5: Determinism */}
-        <section className="max-w-7xl mx-auto px-6 space-y-8">
-          <div className="space-y-6 max-w-3xl mx-auto text-center">
-            <h3 className="text-3xl font-heading font-bold text-slate-900">Determinism</h3>
-            <p className="text-lg text-slate-600 leading-relaxed">
-              <Highlight>The same input always produces the same **Hash**. It doesn't matter if you're in New York or Moscow, using a phone or a supercomputer.</Highlight>
-            </p>
-            <InteractionGuide text="Type the EXACT same text in both boxes (e.g. 'Hello'). Watch the equality sign light up green!" />
-          </div>
+        {/* Determinism */}
+        <Section
+          id="determinism"
+          title={t.determinism.title}
+          description={t.determinism.description}
+          instruction={t.determinism.instruction}
+        >
           <HashComparator initialA="Привет" initialB="Hello" />
-        </section>
+        </Section>
 
-        {/* Section 1.6: The Mining Game */}
+        {/* Data Validity */}
+        <Section
+          id="validity"
+          title={t.dataValidity.title}
+          description={t.dataValidity.description}
+          instruction={t.dataValidity.instruction}
+        >
+          <DataValidityPlayground />
+        </Section>
+
+        {/* The Mining Game */}
         <Section
           id="mining"
-          title="The Mining Game"
-          description="We can say that data is valid if **Hash** of the data starts with 4 zeros '0000'. Let's add additional number called **Nonce** and try to increase it until Hash starts with four zeros."
-          instruction="Try to find a **Nonce** that makes the Hash start with '0000'. You can guess manually, or wait for a hint!"
+          title={t.miningGame.title}
+          description={t.miningGame.description}
+          instruction={t.miningGame.instruction}
         >
           <MiningGame />
         </Section>
 
-        {/* Section 2: The Block */}
+        {/* The Block */}
         <Section
           id="block"
           title={t.block.title}
           description={t.block.description}
-          instruction="Change the data to anything you want to store in Block. Then find the Nonce. Or dont waste your time and click **Mine** and fix the Block!"
+          instruction="Change the data to anything you want to store in Block. Then find the Nonce. Or dont waste your time and click Mine and fix the Block!"
         >
           <BlockWithData
             size="large"
@@ -122,24 +144,30 @@ export default function Home() {
           />
         </Section>
 
-        {/* Section 3: The Chain */}
-        <section id="chain" className="max-w-7xl mx-auto px-6 space-y-8">
-          <div className="space-y-6 max-w-3xl">
-            <h3 className="text-3xl font-heading font-bold text-slate-900">
-              <Highlight>{t.chain.title}</Highlight>
-            </h3>
-            <p className="text-lg text-slate-600 leading-relaxed">
-              <Highlight>{t.chain.description}</Highlight>
-            </p>
-            <InteractionGuide text="Mine all blocks to fix the Chain. Change data in Block #0. See how it breaks all blocks. Well, to change data in chain you need to mine everything after it!" />
-          </div>
-          <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40">
-            <SingleBlockchainPlayground orientation="horizontal" numberOfBlocks={3} />
-          </div>
-        </section>
+        {/* The Chain */}
+        <Section
+          id="chain"
+          title={t.chain.title}
+          description={t.chain.description}
+          instruction="Mine all blocks to fix the Chain. Change data in Block #0. See how it breaks all blocks. Well, to change data in chain you need to mine everything after it!"
+          layout="vertical"
+        >
+          <SingleBlockchainPlayground orientation="horizontal" numberOfBlocks={3} />
+        </Section>
 
-        {/* Section 4: Distributed */}
+        {/* Distributed */}
         <NetworkPlayground t={t} />
+
+        {/* Keys */}
+        <Section
+          id="keys"
+          title={t.keys.title}
+          description={t.keys.description}
+          instruction="Generate a wallet. Copy the Private Key to sign a message. Then copy the Public Key and Signature to verify it!"
+          layout="vertical"
+        >
+          <KeysAndSignatures />
+        </Section>
       </div>
     </main>
   );
@@ -147,21 +175,40 @@ export default function Home() {
 
 
 
-function Section({ id, title, description, instruction, children }: { id: string, title: string, description: string, instruction?: string, children: React.ReactNode }) {
-  return (
-    <section id={id} className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center min-h-[60vh]">
-      <div className="space-y-6">
-        <h3 className="text-3xl font-heading font-bold text-slate-900">
-          <Highlight>{title}</Highlight>
-        </h3>
-        <p className="text-lg text-slate-600 leading-relaxed">
-          <Highlight>{description}</Highlight>
-        </p>
-        {instruction && <InteractionGuide text={instruction} />}
-      </div>
-      <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 flex items-center justify-center min-h-[400px]">
-        {children}
-      </div>
-    </section>
-  );
+function Section({ id, title, description, instruction, layout = 'horizontal', children }: { id: string, title: string, description: string, instruction?: string, layout?: 'vertical' | 'horizontal' | undefined, children: React.ReactNode }) {
+  if (layout === 'horizontal') {
+    return (
+      <section id={id} className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center min-h-[60vh]">
+        <div className="space-y-6">
+          <h3 className="text-3xl font-heading font-bold text-slate-900">
+            <Highlight>{title}</Highlight>
+          </h3>
+          <p className="text-lg text-slate-600 leading-relaxed">
+            <Highlight>{description}</Highlight>
+          </p>
+          {instruction && <InteractionGuide text={instruction} />}
+        </div>
+        <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 flex items-center justify-center min-h-[400px]">
+          {children}
+        </div>
+      </section>
+    );
+  } else {
+    return (
+      <section className="max-w-7xl mx-auto px-6 space-y-8">
+        <div className="space-y-6 max-w-3xl mx-auto text-center">
+          <h3 className="text-3xl font-heading font-bold text-slate-900">
+            <Highlight>{title}</Highlight>
+          </h3>
+          <p className="text-lg text-slate-600 leading-relaxed">
+            <Highlight>{description}</Highlight>
+          </p>
+          {instruction && <InteractionGuide text={instruction} />}
+        </div>
+        <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 flex items-center justify-center min-h-[400px]">
+          {children}
+        </div>
+      </section>
+    );
+  }
 }

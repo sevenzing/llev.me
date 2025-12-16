@@ -1,19 +1,25 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Block, Node, Connection, SyncMessage, SyncFeedback } from "@/lib/types";
 import { mockedBlockDataByIndex, mockedGenesisBlock } from "@/lib/mockData";
-import { calculateBlockHash, mineBlock } from "@/lib/blockchain";
+import { blockIsValid, calculateBlockHash, mineBlock } from "@/lib/blockchain";
+
+const INITIAL_SQUARE_OFFSET = 25;
+const INITIAL_SQUARE_SIZE = 50;
 
 export function useNetwork() {
     const [nodes, setNodes] = useState<Node[]>([
-        { id: "A", x: 20, y: 30, blockchain: [mockedGenesisBlock()] },
-        { id: "B", x: 80, y: 30, blockchain: [mockedGenesisBlock()] },
-        { id: "C", x: 50, y: 70, blockchain: [mockedGenesisBlock()] },
+        { id: "A", x: INITIAL_SQUARE_OFFSET, y: INITIAL_SQUARE_OFFSET, blockchain: [mockedGenesisBlock()] },
+        { id: "B", x: INITIAL_SQUARE_OFFSET + INITIAL_SQUARE_SIZE, y: INITIAL_SQUARE_OFFSET, blockchain: [mockedGenesisBlock()] },
+        { id: "C", x: INITIAL_SQUARE_OFFSET, y: INITIAL_SQUARE_OFFSET + INITIAL_SQUARE_SIZE, blockchain: [mockedGenesisBlock()] },
+        { id: "D", x: INITIAL_SQUARE_OFFSET + INITIAL_SQUARE_SIZE, y: INITIAL_SQUARE_OFFSET + INITIAL_SQUARE_SIZE, blockchain: [mockedGenesisBlock()] },
+
     ]);
 
     const [connections, setConnections] = useState<Connection[]>([
         { from: "A", to: "B" },
-        { from: "B", to: "C" },
+        { from: "B", to: "D" },
         { from: "A", to: "C" },
+        { from: "C", to: "D" },
     ]);
 
     const [selectedNode, setSelectedNode] = useState<string>("A");
@@ -46,7 +52,7 @@ export function useNetwork() {
         for (let i = 0; i < chain.length; i++) {
             const block = chain[i];
 
-            if (!block.hash.startsWith('0000')) {
+            if (!blockIsValid(block)) {
                 return false;
             }
 
@@ -123,11 +129,14 @@ export function useNetwork() {
         // We don't strictly need to validate 'to' node to accept, but good for logic
         // const toValid = validateChain(latestToNode.blockchain);
 
-        // Allow accepting if chain is valid and length is greater OR equal
-        const isLongerOrEqual = latestFromNode.blockchain.length >= latestToNode.blockchain.length;
+        // Allow accepting if chain is valid and EITHER longer OR identical length & content
+        const isLonger = latestFromNode.blockchain.length > latestToNode.blockchain.length;
 
-        // User wants to see "Accepted" even if chains are identical
-        const shouldAccept = fromValid && isLongerOrEqual;
+        // Check for identity to allow re-syncing the same state (e.g. recovery)
+        const isIdentical = latestFromNode.blockchain.length === latestToNode.blockchain.length &&
+            JSON.stringify(latestFromNode.blockchain) === JSON.stringify(latestToNode.blockchain);
+
+        const shouldAccept = fromValid && (isLonger || isIdentical);
 
         setSyncFeedback(prev => [...prev, {
             id: feedbackId,
@@ -138,6 +147,7 @@ export function useNetwork() {
 
         if (shouldAccept) {
             // Update the node's blockchain
+            // If identical, we technically don't need to update, but doing so is harmless and consistent
             setNodes(prev => prev.map(node =>
                 node.id === toId ? { ...node, blockchain: [...latestFromNode.blockchain] } : node
             ));
@@ -361,6 +371,17 @@ export function useNetwork() {
         setSelectedNode(nodeId);
     }, []);
 
+    // Remove the last block from selected node
+    const removeBlock = useCallback((nodeId: string) => {
+        setNodes(prev => prev.map(n => {
+            if (n.id === nodeId && n.blockchain.length > 1) {
+                // Ensure we don't remove genesis block
+                return { ...n, blockchain: n.blockchain.slice(0, -1) };
+            }
+            return n;
+        }));
+    }, []);
+
     return {
         // State
         nodes,
@@ -387,6 +408,7 @@ export function useNetwork() {
         handleSync,
         propagateChain,
         addBlock,
+        removeBlock,
         addNode,
         updateBlock,
         mineBlockAtIndex,
