@@ -9,6 +9,9 @@ import { Phone } from '../ui/Phone';
 
 const ec = new EC('secp256k1');
 
+// Deterministic key for E2E tests and consistent initial state
+const INITIAL_PRIVATE_KEY = "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725";
+
 interface Message {
     id: string;
     data: string;
@@ -36,17 +39,23 @@ export function KeysAndSignatures() {
         return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
     };
 
-    const generateKeys = () => {
-        const key = ec.genKeyPair();
+    const generateKeys = (useFixed = false) => {
+        let key;
+        if (useFixed) {
+            key = ec.keyFromPrivate(INITIAL_PRIVATE_KEY);
+        } else {
+            key = ec.genKeyPair();
+        }
+
         setPrivateKey(key.getPrivate('hex'));
         setPublicKey(key.getPublic('hex'));
         // Clear all signatures when identity changes as they are no longer valid for new key
         setMessages(msgs => msgs.map(m => ({ ...m, signature: '' })));
     };
 
-    // Auto-generate keys on mount
+    // Auto-generate keys on mount (deterministic)
     useEffect(() => {
-        generateKeys();
+        generateKeys(true);
     }, []);
 
     const addMessage = () => {
@@ -77,7 +86,7 @@ export function KeysAndSignatures() {
         ));
     };
 
-    const signMessage = (id: string) => {
+    const signMessage = async (id: string) => {
         if (!privateKey) return;
 
         try {
@@ -85,8 +94,14 @@ export function KeysAndSignatures() {
             if (!message) return;
 
             const key = ec.keyFromPrivate(privateKey);
-            const msgHash = Array.from(new TextEncoder().encode(message.data));
-            const signature = key.sign(msgHash).toDER('hex');
+
+            // Hash the message data first (SHA-256)
+            const msgBuffer = new TextEncoder().encode(message.data);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+            // Sign the hash
+            const signature = key.sign(hashArray).toDER('hex');
 
             setMessages(messages.map(m =>
                 m.id === id ? { ...m, signature } : m
@@ -114,7 +129,7 @@ export function KeysAndSignatures() {
 
                         <div className="space-y-4">
                             <button
-                                onClick={generateKeys}
+                                onClick={() => generateKeys(false)}
                                 className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all active:scale-95 shadow-md shadow-blue-500/20"
                             >
                                 Generate New ID
@@ -206,17 +221,30 @@ function MessageItem({
     onChangeData: (data: string) => void,
     toAddress: (key: string) => string
 }) {
-    // Verify signature on render
-    let isValid = false;
-    if (message.signature && publicKey) {
-        try {
-            const key = ec.keyFromPublic(publicKey, 'hex');
-            const msgHash = Array.from(new TextEncoder().encode(message.data));
-            isValid = key.verify(msgHash, message.signature);
-        } catch {
-            isValid = false;
-        }
-    }
+    // Verify signature state
+    const [isValid, setIsValid] = useState(false);
+
+    useEffect(() => {
+        const verify = async () => {
+            if (message.signature && publicKey) {
+                try {
+                    const key = ec.keyFromPublic(publicKey, 'hex');
+                    // Hash data before verify
+                    const msgBuffer = new TextEncoder().encode(message.data);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+                    const valid = key.verify(hashArray, message.signature);
+                    setIsValid(valid);
+                } catch {
+                    setIsValid(false);
+                }
+            } else {
+                setIsValid(false);
+            }
+        };
+        verify();
+    }, [message.data, message.signature, publicKey]);
 
     const hasSignature = !!message.signature;
 

@@ -53,25 +53,24 @@ export function NetworkPlayground({ t }: NetworkPlaygroundProps) {
 
             <div className="grid lg:grid-cols-[350px_1fr] gap-8 items-start relative">
                 {/* Network Graph */}
-                <div className="bg-slate-100 rounded-2xl p-6 border border-slate-200 shadow-inner sticky top-32 min-h-[400px] w-full">
-                    <NetworkGraph network={network} />
-                </div>
+
+                <NetworkGraph network={network} />
+
 
                 {/* Selected Node's Blockchain */}
-                <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 min-w-0">
-                    <SelectedNetworkBlockchain
-                        selectedNode={network.selectedNode}
-                        blockchain={network.selectedBlockchain}
-                        onDataChange={handleDataChange}
-                        onNonceChange={handleNonceChange}
-                        onMineClick={handleMineClick}
-                        onAddBlock={network.addBlock}
-                        onRemoveBlock={network.removeBlock}
-                        miningBlock={currentMiningBlock}
-                        miningNonce={network.miningNonce}
-                        scrollable={true}
-                    />
-                </div>
+
+                <SelectedNetworkBlockchain
+                    selectedNode={network.selectedNode}
+                    blockchain={network.selectedBlockchain}
+                    onDataChange={handleDataChange}
+                    onNonceChange={handleNonceChange}
+                    onMineClick={handleMineClick}
+                    onAddBlock={network.addBlock}
+                    onRemoveBlock={network.removeBlock}
+                    miningBlock={currentMiningBlock}
+                    miningNonce={network.miningNonce}
+                    scrollable={true}
+                />
             </div>
         </section>
     );

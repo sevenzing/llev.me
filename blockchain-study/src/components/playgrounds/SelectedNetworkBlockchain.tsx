@@ -1,5 +1,6 @@
 "use client";
 
+import { CardBackground } from "../ui/CardBackground";
 import { BlockchainRenderer } from "./BlockchainRenderer";
 
 interface SelectedNetworkBlockchainProps {
@@ -36,20 +37,23 @@ export function SelectedNetworkBlockchain({
     }
 
     return (
-        <div>
-            <h3 className="text-lg font-bold mb-4">Node {selectedNode}'s Blockchain</h3>
-            <BlockchainRenderer
-                blocks={blockchain}
-                onDataChange={onDataChange}
-                onNonceChange={onNonceChange}
-                onMineClick={onMineClick}
-                onAddBlock={onAddBlock}
-                onRemoveBlock={() => onRemoveBlock(selectedNode)}
-                miningBlock={miningBlock}
-                miningNonce={miningNonce}
-                uniqueKey={`network-${selectedNode}`}
-                scrollable={scrollable}
-            />
-        </div>
+        <CardBackground className="space-y-4 min-w-0 h-full">
+            <h3 className="text-lg font-bold pt-4 px-4">Node {selectedNode}'s Blockchain</h3>
+            <div className="pl-4">
+                <BlockchainRenderer
+                    blocks={blockchain}
+                    onDataChange={onDataChange}
+                    onNonceChange={onNonceChange}
+                    onMineClick={onMineClick}
+                    onAddBlock={onAddBlock}
+                    onRemoveBlock={() => onRemoveBlock(selectedNode)}
+                    miningBlock={miningBlock}
+                    miningNonce={miningNonce}
+                    uniqueKey={`network-${selectedNode}`}
+                    scrollable={scrollable}
+                    size="small"
+                />
+            </div>
+        </CardBackground>
     );
 }

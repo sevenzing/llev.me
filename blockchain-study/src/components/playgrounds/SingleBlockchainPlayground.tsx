@@ -22,6 +22,8 @@ export function SingleBlockchainPlayground({ orientation, numberOfBlocks = 3 }: 
                 miningBlock={miningBlock}
                 miningNonce={miningNonce}
                 uniqueKey="single-blockchain"
+                size="small"
+                scrollable={true}
             />
         </div>
     );

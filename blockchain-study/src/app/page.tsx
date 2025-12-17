@@ -14,6 +14,7 @@ import { calculateBlockHash } from "@/lib/blockchain";
 import { KeysAndSignatures } from "@/components/playgrounds/KeysAndSignatures";
 import { DataValidityPlayground } from "@/components/playgrounds/DataValidityPlayground";
 import { DataDemo } from "@/components/playgrounds/DataDemo";
+import { CardBackground } from "@/components/ui/CardBackground";
 
 export default function Home() {
   const { language, setLanguage, t } = useLanguage();
@@ -78,6 +79,7 @@ export default function Home() {
           title={t.data.title}
           description={t.data.description}
           instruction={t.data.instruction}
+          withCard={false}
         >
           <DataDemo />
         </Section>
@@ -88,6 +90,7 @@ export default function Home() {
           title={t.hashing.title}
           description={t.hashing.description}
           instruction="Type anything in the box to the right. Watch how the Hash changes completely with even a single character difference!"
+          withCard={false}
         >
           <HashPlayground />
         </Section>
@@ -98,6 +101,7 @@ export default function Home() {
           title={t.determinism.title}
           description={t.determinism.description}
           instruction={t.determinism.instruction}
+          withCard={false}
         >
           <HashComparator initialA="Привет" initialB="Hello" />
         </Section>
@@ -108,6 +112,7 @@ export default function Home() {
           title={t.dataValidity.title}
           description={t.dataValidity.description}
           instruction={t.dataValidity.instruction}
+          withCard={false}
         >
           <DataValidityPlayground />
         </Section>
@@ -118,6 +123,7 @@ export default function Home() {
           title={t.miningGame.title}
           description={t.miningGame.description}
           instruction={t.miningGame.instruction}
+          withCard={false}
         >
           <MiningGame />
         </Section>
@@ -128,20 +134,23 @@ export default function Home() {
           title={t.block.title}
           description={t.block.description}
           instruction="Change the data to anything you want to store in Block. Then find the Nonce. Or dont waste your time and click Mine and fix the Block!"
+          withCard={false}
         >
-          <BlockWithData
-            size="large"
-            blockNumber={blocks[0].index}
-            prevHash={blocks[0].prevHash}
-            initialData={typeof blocks[0].data === 'string' ? blocks[0].data : JSON.stringify(blocks[0].data)}
-            initialNonce={blocks[0].nonce}
-            initialHash={blocks[0].hash}
-            miningNonce={miningBlock === blockExampleNumber ? miningNonce : undefined}
-            onDataChange={(data) => recalculateBlockHash(blockExampleNumber, data)}
-            onNonceChange={(nonce) => updateNonce(blockExampleNumber, nonce)}
-            onMineClick={() => mineBlockAtIndex(blockExampleNumber)}
-            isMining={miningBlock === blockExampleNumber}
-          />
+          <CardBackground className="flex flex-col items-center justify-center p-4 w-full">
+            <BlockWithData
+              size="large"
+              blockNumber={blocks[0].index}
+              prevHash={blocks[0].prevHash}
+              initialData={typeof blocks[0].data === 'string' ? blocks[0].data : JSON.stringify(blocks[0].data)}
+              initialNonce={blocks[0].nonce}
+              initialHash={blocks[0].hash}
+              miningNonce={miningBlock === blockExampleNumber ? miningNonce : undefined}
+              onDataChange={(data) => recalculateBlockHash(blockExampleNumber, data)}
+              onNonceChange={(nonce) => updateNonce(blockExampleNumber, nonce)}
+              onMineClick={() => mineBlockAtIndex(blockExampleNumber)}
+              isMining={miningBlock === blockExampleNumber}
+            />
+          </CardBackground>
         </Section>
 
         {/* The Chain */}
@@ -175,7 +184,11 @@ export default function Home() {
 
 
 
-function Section({ id, title, description, instruction, layout = 'horizontal', children }: { id: string, title: string, description: string, instruction?: string, layout?: 'vertical' | 'horizontal' | undefined, children: React.ReactNode }) {
+function Section({ id, title, description, instruction, layout = 'horizontal', withCard = true, children }: { id: string, title: string, description: string, instruction?: string, layout?: 'vertical' | 'horizontal' | undefined, withCard?: boolean, children: React.ReactNode }) {
+  const cardClasses = withCard
+    ? "bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 flex items-center justify-center min-h-[400px]"
+    : "flex items-center justify-center min-h-[400px]";
+
   if (layout === 'horizontal') {
     return (
       <section id={id} className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center min-h-[60vh]">
@@ -188,14 +201,14 @@ function Section({ id, title, description, instruction, layout = 'horizontal', c
           </p>
           {instruction && <InteractionGuide text={instruction} />}
         </div>
-        <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 flex items-center justify-center min-h-[400px]">
+        <div className={cardClasses}>
           {children}
         </div>
       </section>
     );
   } else {
     return (
-      <section className="max-w-7xl mx-auto px-6 space-y-8">
+      <section id={id} className="max-w-7xl mx-auto px-6 space-y-8">
         <div className="space-y-6 max-w-3xl mx-auto text-center">
           <h3 className="text-3xl font-heading font-bold text-slate-900">
             <Highlight>{title}</Highlight>
@@ -205,7 +218,7 @@ function Section({ id, title, description, instruction, layout = 'horizontal', c
           </p>
           {instruction && <InteractionGuide text={instruction} />}
         </div>
-        <div className="bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 flex items-center justify-center min-h-[400px]">
+        <div className={cardClasses}>
           {children}
         </div>
       </section>

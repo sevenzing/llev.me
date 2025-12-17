@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Block } from "@/lib/types";
 import { mockedBlockList } from "@/lib/mockData";
 import { calculateBlockHash, mineBlock } from "@/lib/blockchain";
@@ -110,6 +110,21 @@ export function useSingleBlockchain(initialBlocks: Block[]) {
             setBlocks(updatedBlocks);
         }
     }, [blocks, propagateChanges]);
+
+    // Initialize/hydrate chain on mount to ensure valid hashes
+    useEffect(() => {
+        const hydrate = async () => {
+            if (blocks.length > 0) {
+                const needsHydration = blocks.some(b => b.hash === "");
+                if (needsHydration) {
+                    const genesis = blocks[0];
+                    const hydratedBlocks = await propagateChanges(blocks, genesis.index, genesis.hash);
+                    setBlocks(hydratedBlocks);
+                }
+            }
+        };
+        hydrate();
+    }, []);
 
     return {
         blocks,

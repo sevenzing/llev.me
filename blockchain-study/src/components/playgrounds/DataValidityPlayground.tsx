@@ -5,6 +5,7 @@ import { useHash } from "@/hooks/useHash";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { RotateCcw } from "lucide-react";
+import { CardBackground } from "@/components/ui/CardBackground";
 
 export function DataValidityPlayground() {
     const { t } = useLanguage();
@@ -20,7 +21,7 @@ export function DataValidityPlayground() {
     };
 
     return (
-        <div className="p-6 bg-white rounded-xl shadow-lg border border-slate-200 w-full max-w-md mx-auto relative group">
+        <CardBackground className="p-6 w-full max-w-md mx-auto relative group">
             <div className="space-y-4">
                 <div>
                     <div className="flex justify-between items-center mb-1">
@@ -65,6 +66,6 @@ export function DataValidityPlayground() {
                     </div>
                 </div>
             </div>
-        </div>
+        </CardBackground>
     );
 }

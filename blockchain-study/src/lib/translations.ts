@@ -94,14 +94,14 @@ export const translations = {
         // Network
         network: {
             title: "The Network",
-            description: "A **Blockchain** isn't stored in one place. It's distributed across thousands of computers, we call them **Nodes**. They can send new **Block** over the network, but they can't change existing blocks. If one **Node** tries to cheat, the others just reject it.",
+            description: "A **Blockchain** isn't stored in one place. It's distributed across thousands of computers, we call them **Nodes**. They can send new **Blocks** over the network, but they can't change existing blocks. If one **Node** tries to cheat (change existing blocks or produce invalid **Block**), the others just reject this synchronization attempt. If **Block** is valid, they will tell everyone they know about that.",
             clickNode: "Click a node to broadcast",
         },
         // Keys
         keys: {
             title: "Keys & Signatures",
             description: "To own funds on blockchain you need a **Wallet**. A wallet is an application that stores pair of keys: **Private Key** and **Public Key**. **Private key** allows you to sign **Data** (we also call it **Message**) providing **Signature** as result. **Signature** is similar to **Hash** but it can be generated only using **Private Key**. **Public Key** allows anyone to verify your **Signature**. Algorithm of signing and verifying is mathematically complicated and was design in such way, that noone expect you can provide **Signature** from your private key and everyone in world can easly verify **Signature** using initial **Data**, **Signature** and **Public Key**!",
-            instruction: "Generate a wallet. Copy the Private Key to sign a message. Then copy the Public Key and Signature to verify it!"
+            instruction: "Generate a wallet, add message and sign it. Change something in message, see that signature is invalid now"
         },
     },
 

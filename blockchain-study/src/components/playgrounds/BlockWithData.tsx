@@ -80,17 +80,19 @@ export function BlockWithData({
     const sizeClasses = {
         small: {
             container: "w-64",
-            text: "text-xs",
-            input: "text-xs px-2 py-1",
-            button: "text-xs px-3 py-1.5",
-            spacing: "space-y-2"
+            text: "text-sm",
+            input: "text-sm px-2 py-1",
+            button: "text-sm px-3 py-1.5",
+            spacing: "space-y-2",
+            hash: "text-xs"
         },
         large: {
             container: "w-80",
-            text: "text-sm",
-            input: "text-sm px-3 py-2",
-            button: "text-sm px-4 py-2",
-            spacing: "space-y-3"
+            text: "text-md",
+            input: "text-md px-3 py-2",
+            button: "text-md px-4 py-2",
+            spacing: "space-y-3",
+            hash: "text-sm"
         }
     };
 
@@ -98,7 +100,7 @@ export function BlockWithData({
 
     return (
         <motion.div
-            className={`${classes.container} ${classes.spacing} bg-white/60 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-5 font-mono ring-1 ring-white/50 relative group`}
+            className={`${classes.container} ${classes.spacing} bg-white rounded-3xl shadow-lg border border-slate-200 p-5 font-mono relative group`}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -116,6 +118,17 @@ export function BlockWithData({
             <div className={classes.spacing}>
                 {/* ... inputs ... */}
                 <div>
+                    <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Data</label>
+                    <textarea
+                        value={data}
+                        onChange={(e) => setData(e.target.value)}
+                        rows={2}
+                        className={`w-full border border-slate-200 rounded-xl ${classes.input} bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all shadow-inner placeholder:text-slate-400 resize-none`}
+                        placeholder="Enter block data..."
+                    />
+                </div>
+
+                <div>
                     <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Nonce</label>
                     <input
                         type="number"
@@ -123,25 +136,14 @@ export function BlockWithData({
                         onChange={(e) => onNonceChange?.(parseInt(e.target.value) || 0)}
                         onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         disabled={isMining}
-                        className={`w-full border rounded-xl ${classes.input} ${isMining ? 'bg-slate-100/50 text-slate-400' : 'bg-white/50 text-slate-700'} border-white/40 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all shadow-inner`}
-                    />
-                </div>
-
-                <div>
-                    <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Data</label>
-                    <input
-                        type="text"
-                        value={data}
-                        onChange={(e) => setData(e.target.value)}
-                        className={`w-full border border-white/40 rounded-xl ${classes.input} bg-white/50 backdrop-blur-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all shadow-inner placeholder:text-slate-400`}
-                        placeholder="Enter block data..."
+                        className={`w-full border rounded-xl ${classes.input} ${isMining ? 'bg-slate-100 text-slate-400' : 'bg-white text-slate-700'} border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all shadow-inner`}
                     />
                 </div>
 
                 <div>
                     <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Prev Hash</label>
                     <div
-                        className={`w-full border border-white/30 rounded-xl ${classes.input} bg-slate-50/50 backdrop-blur-sm text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap shadow-inner`}
+                        className={`w-full border border-slate-200 rounded-xl ${classes.input} ${classes.hash} bg-slate-50 text-slate-500 break-all shadow-inner`}
                     >
                         {prevHash || '\u00A0'}
                     </div>
@@ -150,9 +152,9 @@ export function BlockWithData({
                 <div>
                     <label className={`block text-slate-500 font-semibold mb-1.5 ml-1 ${classes.text}`}>Hash</label>
                     <div
-                        className={`w-full border border-white/30 rounded-xl ${classes.input} ${isMining ? 'bg-yellow-100/40 text-yellow-700 animate-pulse' :
+                        className={`w-full border border-slate-200 rounded-xl ${classes.input} ${classes.hash} ${isMining ? 'bg-yellow-100/40 text-yellow-700 animate-pulse' :
                             isValid ? 'bg-emerald-50/40 text-emerald-700' : 'bg-red-50/40 text-red-700'
-                            } backdrop-blur-sm font-bold overflow-hidden text-ellipsis whitespace-nowrap shadow-inner`}
+                            } font-bold break-all shadow-inner`}
                     >
                         {(isMining ? miningHash : displayHash) || '\u00A0'}
                     </div>

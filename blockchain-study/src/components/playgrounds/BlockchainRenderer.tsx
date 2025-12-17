@@ -2,6 +2,7 @@
 
 import { Block } from "@/lib/types";
 import { BlockWithData } from "./BlockWithData";
+import { AddBlockGhost } from "./AddBlockGhost";
 import { ArrowRight, Plus } from "lucide-react";
 
 interface BlockchainRendererProps {
@@ -16,6 +17,7 @@ interface BlockchainRendererProps {
     miningBlock?: number | null;
     miningNonce?: number;
     uniqueKey: string;
+    size: 'small' | 'large';
 }
 
 export function BlockchainRenderer({
@@ -29,11 +31,12 @@ export function BlockchainRenderer({
     onAddBlock,
     miningBlock,
     miningNonce,
-    uniqueKey
+    uniqueKey,
+    size,
 }: BlockchainRendererProps) {
     const layoutClasses = orientation === 'horizontal'
         ? scrollable
-            ? 'flex-row overflow-x-auto overflow-y-hidden pb-8 px-4 justify-start items-start w-full no-scrollbar'
+            ? 'flex-row overflow-x-auto overflow-y-hidden pt-2 pb-4 px-4 justify-start items-start w-full'
             : 'flex-row flex-wrap gap-8 justify-center items-start'
         : 'flex-col gap-4 items-center';
 
@@ -57,7 +60,7 @@ export function BlockchainRenderer({
                             initialHash={block.hash}
                             miningNonce={miningBlock === index ? miningNonce : undefined}
                             hashDisplay="full"
-                            size="small"
+                            size={size}
                             onDataChange={(data) => onDataChange?.(index, data)}
                             onNonceChange={(nonce) => onNonceChange?.(index, nonce)}
                             onMineClick={onMineClick ? () => onMineClick(index) : undefined}
@@ -86,14 +89,7 @@ export function BlockchainRenderer({
 
             {/* Ghost Block for Adding */}
             {orientation === 'horizontal' && onAddBlock && (
-                <div
-                    onClick={onAddBlock}
-                    className="w-64 h-[340px] border-2 border-dashed border-slate-300 rounded-2xl flex items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-white/40 hover:shadow-lg transition-all group relative flex-shrink-0"
-                >
-                    <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
-                        <Plus className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" strokeWidth={3} />
-                    </div>
-                </div>
+                <AddBlockGhost onClick={onAddBlock} size={size} />
             )}
         </div>
     );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { CardBackground } from "@/components/ui/CardBackground";
 
 export function DataDemo() {
     const { t } = useLanguage();
@@ -15,7 +16,7 @@ export function DataDemo() {
         .join(' ');
 
     return (
-        <div className="w-full max-w-md mx-auto space-y-4">
+        <CardBackground className="p-6 w-full max-w-md mx-auto space-y-4">
             <div>
                 <label className="block text-sm font-medium text-slate-500 mb-1">{t.data.inputLabel}</label>
                 <textarea
@@ -38,6 +39,6 @@ export function DataDemo() {
                     {t.data.size}: {encoded.length}
                 </div>
             </div>
-        </div>
+        </CardBackground>
     );
 }

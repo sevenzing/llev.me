@@ -63,7 +63,7 @@ test.describe('Network Playground', () => {
 
         // Check we have 2 blocks now (Block #1)
         // Scope to network section
-        await expect(network.getByText('Block #1')).toBeVisible();
+        await expect(network.getByText('Block #1', { exact: true })).toBeVisible();
 
         // Take screenshot of unmined state
         await expect(network).toHaveScreenshot('network-node-a-added-block.png', {

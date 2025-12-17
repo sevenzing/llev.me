@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useHash } from "@/hooks/useHash";
 import { useDebounce } from "@/hooks/useDebounce";
 import { cn } from "@/lib/utils";
+import { CardBackground } from "@/components/ui/CardBackground";
 
 export function HashPlayground() {
     const [input, setInput] = useState("Hello World");
@@ -12,7 +13,7 @@ export function HashPlayground() {
     const hash = useHash(debouncedInput);
 
     return (
-        <div className="p-6 bg-white rounded-xl shadow-lg border border-slate-200 w-full max-w-md mx-auto">
+        <CardBackground className="p-6 w-full max-w-md mx-auto">
             <h3 className="text-lg font-heading font-bold mb-4 text-slate-800">SHA-256 Hash Generator</h3>
 
             <div className="space-y-4">
@@ -46,6 +47,6 @@ export function HashPlayground() {
                     </div>
                 </div>
             </div>
-        </div>
+        </CardBackground>
     );
 }

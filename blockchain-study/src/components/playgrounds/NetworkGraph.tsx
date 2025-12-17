@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNetwork } from "@/hooks/useNetwork";
+import { CardBackground } from "../ui/CardBackground";
 
 interface NetworkGraphProps {
     network: ReturnType<typeof useNetwork>;
@@ -65,7 +66,12 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
     };
 
     return (
-        <div className="w-full space-y-4 select-none">
+        // className=""
+        // <div className="w-full p-4 my-1 space-y-4 select-none bg-slate-100 rounded-2xl border border-slate-200 shadow-inner sticky top-32 min-h-[400px]">
+        <CardBackground className="space-y-4 p-4 w-full sticky top-32 min-h-[400px] select-none my-1">
+            <h3 className="text-lg font-bold">
+                Network
+            </h3>
             <div
                 ref={containerRef}
                 className="relative w-full h-96 bg-white/30 backdrop-blur-xl rounded-3xl border border-white/40 shadow-inner overflow-hidden ring-1 ring-white/30"
@@ -195,7 +201,7 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                 Click to select • Drag to move • Double-click & drag to connect
             </p>
 
-            <div className="flex flex-col gap-3 items-center justify-between bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-white/40 shadow-sm">
+            <div className="flex flex-col gap-3 items-center justify-between bg-white/40 backdrop-blur-md py-4 rounded-2xl border border-white/40 shadow-sm">
                 <div className="flex gap-3">
                     <button
                         onClick={network.addNode}
@@ -203,12 +209,6 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                     >
                         + Add Node
                     </button>
-                    {/* <button
-                        onClick={network.addBlock}
-                        className="px-4 py-2 bg-blue-500/90 hover:bg-blue-600/90 text-white rounded-xl transition-all text-xs font-bold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 backdrop-blur-sm border border-white/20"
-                    >
-                        + Add Block
-                    </button> */}
                     <button
                         onClick={() => network.propagateChain(network.selectedNode)}
                         disabled={network.isSyncing}
@@ -219,6 +219,6 @@ export function NetworkGraph({ network }: NetworkGraphProps) {
                 </div>
 
             </div>
-        </div>
+        </CardBackground>
     );
 }

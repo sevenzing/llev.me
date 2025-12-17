@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHash } from "@/hooks/useHash";
+import { CardBackground } from "@/components/ui/CardBackground";
 
 export function HashComparator({ initialA, initialB }: { initialA: string; initialB: string }) {
     const [inputA, setInputA] = useState(initialA);
@@ -12,7 +13,7 @@ export function HashComparator({ initialA, initialB }: { initialA: string; initi
     const isEqual = hashA === hashB;
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-6 bg-white/30 backdrop-blur-xl rounded-3xl border border-white/40 shadow-xl">
+        <CardBackground className="w-full max-w-4xl mx-auto p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
                 {/* Device A */}
                 <div className="space-y-4">
@@ -96,6 +97,6 @@ export function HashComparator({ initialA, initialB }: { initialA: string; initi
             <div className="mt-8 flex justify-center">
                 <div className={`h-1 w-full rounded-full transition-colors duration-500 ${isEqual ? 'bg-emerald-400/50' : 'bg-rose-400/50'}`} />
             </div>
-        </div>
+        </CardBackground>
     );
 }
