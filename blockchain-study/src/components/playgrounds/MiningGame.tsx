@@ -6,7 +6,7 @@ import { calculateBlockHash } from "@/lib/blockchain";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CardBackground } from "@/components/ui/CardBackground";
 
-const MAX_ATTEMPTS_BEFORE_HINT = 5;
+const MAX_ATTEMPTS_BEFORE_HINT = 3;
 
 export function MiningGame() {
     const { t } = useLanguage();
@@ -96,7 +96,7 @@ export function MiningGame() {
                         />
                     )}
 
-                    <div className="p-4 space-y-6 relative z-10">
+                    <div className="p-6 space-y-6 relative z-10">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-3">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-inner ${isGolden ? 'bg-yellow-400 text-yellow-900' : 'bg-slate-200 text-slate-500'}`}>

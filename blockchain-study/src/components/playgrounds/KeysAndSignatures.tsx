@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Key, Lock, Trash2, Plus, PenTool, CheckCircle2, AlertCircle, Smartphone } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { Phone } from '../ui/Phone';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocaleByLanguage, getHour12UsageByLanguage } from '@/lib/translations';
 
 const ec = new EC('secp256k1');
 
@@ -23,6 +25,7 @@ export function KeysAndSignatures() {
     // Identity State
     const [privateKey, setPrivateKey] = useState('');
     const [publicKey, setPublicKey] = useState('');
+    const { t, language } = useLanguage();
 
     // Messages State
     const [messages, setMessages] = useState<Message[]>([]);
@@ -59,19 +62,21 @@ export function KeysAndSignatures() {
     }, []);
 
     const addMessage = () => {
-        const date = new Date().toLocaleString('en-US', {
+        const timestamp = new Date();
+        const date = timestamp.toLocaleString(getLocaleByLanguage(language), {
             month: 'short',
             day: 'numeric',
             hour: 'numeric',
             minute: 'numeric',
-            hour12: true
+            second: '2-digit',
+            hour12: getHour12UsageByLanguage(language),
         });
 
         const newMessage: Message = {
             id: uuidv4(),
-            data: `Pay 50 coins to Bob at ${date}`,
+            data: t.keys.newMessageTemplate(date),
             signature: "",
-            timestamp: Date.now()
+            timestamp: timestamp.getTime()
         };
         setMessages([...messages, newMessage]);
     };
@@ -137,10 +142,10 @@ export function KeysAndSignatures() {
 
                             {/* Private Key */}
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                                     <Lock size={10} /> Private Key
                                 </label>
-                                <div className="w-full bg-red-50 border border-red-100 rounded-xl p-3 font-mono text-[10px] text-red-800 break-all leading-tight shadow-sm">
+                                <div className="text-[11px] w-full bg-red-50 border border-red-100 rounded-xl p-3 font-mono  text-red-800 break-all leading-tight shadow-sm">
                                     {privateKey ? `0x${privateKey}` : "Generating..."}
                                 </div>
                                 <div className="text-[9px] text-red-400 font-medium pl-1">
@@ -150,10 +155,10 @@ export function KeysAndSignatures() {
 
                             {/* Public Key */}
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <label className="text-[12px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                                     <PenTool size={10} /> Public Key
                                 </label>
-                                <div className="w-full bg-emerald-50 border border-emerald-100 rounded-xl p-3 font-mono text-[10px] text-emerald-800 break-all leading-tight shadow-sm">
+                                <div className="text-[11px] w-full bg-emerald-50 border border-emerald-100 rounded-xl p-3 font-mono text-emerald-800 break-all leading-tight shadow-sm">
                                     {publicKey ? toAddress(publicKey) : "Generating..."}
                                 </div>
                                 <div className="text-[9px] text-emerald-500 font-medium pl-1">

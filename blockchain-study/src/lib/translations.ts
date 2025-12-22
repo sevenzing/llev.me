@@ -8,6 +8,8 @@ export const translations = {
             block: "Block",
             chain: "Chain",
             network: "Network",
+            keys: "Keys",
+            transactions: "Transactions",
         },
 
         // Intro (New)
@@ -20,8 +22,8 @@ export const translations = {
         // Data
         data: {
             title: "The Data",
-            description: "Everything starts with **Data**. Think of it as information. In our toy blockchain, we use simple text strings to represent **Data**, like \"Hello World\". Information about your bank account, your transactions - all of it is **Data**. While traditional systems store data on specific servers, a Blockchain stores copies of this **Data** on thousands of different computers around the world to ensure it cannot be changed. How? We will see in a moment!",
-            instruction: "Type anything in the box. See how it's just raw information. Computers see this as a sequence of bytes.",
+            description: "Everything starts with **Data**. Think of it as information. In our toy blockchain, we use simple text strings to represent **Data**, like \"Hello World\". Information about your bank account, your transactions - all of it is **Data**. While traditional systems store **Data** on specific servers, a Blockchain stores copies of this **Data** on thousands of different computers around the world to ensure it can't be changed. How? We will see in a moment!",
+            instruction: "Type anything in the box. See how it's just raw information. Computers see this as a sequence of bytes (zeros and ones).",
             inputLabel: "Data Input",
             size: "Size (bytes)",
             placeholder: "Type your data here...",
@@ -30,9 +32,9 @@ export const translations = {
         // Hashing
         hashing: {
             title: "The Hash",
-            description: "The **Hash** is a digital fingerprint of **Data**. Hash generator converts any input (no matter how large) into a unique, fixed-length string. If you change even a single comma in the **Data**, the **Hash** changes completely. This process is one-way: you cannot reverse the hash to retrieve the original data.",
+            description: "The **Hash** is a digital fingerprint of **Data**. Hash generator converts any input (no matter how large) into a unique, fixed-length string. If you change even a single comma in the **Data**, the **Hash** changes completely. This process is one-way: you can't reverse the hash to retrieve the original data.",
             inputLabel: "Data Input",
-            outputLabel: "Hash Output (256-bit)",
+            outputLabel: "Hash Output (256-bit or 32 bytes or 64 HEX characters)",
             placeholder: "Type something here...",
             emptyState: "Start typing...",
         },
@@ -101,7 +103,23 @@ export const translations = {
         keys: {
             title: "Keys & Signatures",
             description: "To own funds on blockchain you need a **Wallet**. A wallet is an application that stores pair of keys: **Private Key** and **Public Key**. **Private key** allows you to sign **Data** (we also call it **Message**) providing **Signature** as result. **Signature** is similar to **Hash** but it can be generated only using **Private Key**. **Public Key** allows anyone to verify your **Signature**. Algorithm of signing and verifying is mathematically complicated and was design in such way, that noone expect you can provide **Signature** from your private key and everyone in world can easly verify **Signature** using initial **Data**, **Signature** and **Public Key**!",
-            instruction: "Generate a wallet, add message and sign it. Change something in message, see that signature is invalid now"
+            instruction: "Generate a wallet, add message and sign it. Change something in message, see that signature is invalid now",
+            newMessageTemplate: (date: string) => `Pay 50 coins to Bob at ${date}`,
+        },
+        // Transactions
+        transactions: {
+            title: "Signed Transactions",
+            description: "Now we know how to sign data. Let's see how it's used in real blockchain transactions! A transaction is simply a record of value moving from one wallet to another. To make it official, the sender must sign the transaction with their **Private Key**. If anyone tries to change the amount or the receiver after it was signed, the **Signature** will become invalid. Finally, we calculate the **Transaction Hash** — a unique fingerprint of the entire transaction, including the **Signature**. This **Hash** is used to identify the transaction and prevent double-spending.",
+            instruction: "Create a transaction, sign it, and then try to change the amount. Watch the signature fail!",
+            from: "From (Public Key)",
+            to: "To (Recipient Address)",
+            amount: "Amount (Coins)",
+            fee: "Fee",
+            signature: "Signature",
+            txHash: "Transaction Hash",
+            statusValid: "Valid Signature",
+            statusInvalid: "INVALID SIGNATURE",
+            sign: "Sign Transaction",
         },
     },
 
@@ -115,6 +133,7 @@ export const translations = {
             chain: "Цепь",
             network: "Сеть",
             keys: "Ключи",
+            transactions: "Транзакции",
         },
 
         // Hero
@@ -212,7 +231,23 @@ export const translations = {
         keys: {
             title: "Ключи и Подписи",
             description: "Чтобы владеть средствами в блокчейне, вам нужен **Кошелек**. Кошелек — это просто пара ключей: **Приватный ключ** (для подписи транзакций) и **Публичный ключ** (для их проверки).",
-            instruction: "Создайте кошелек. Скопируйте Приватный ключ для подписи. Затем скопируйте Публичный ключ и Подпись для проверки!"
+            instruction: "Создайте кошелек. Скопируйте Приватный ключ для подписи. Затем скопируйте Публичный ключ и Подпись для проверки!",
+            newMessageTemplate: (date: string) => `Заплатить Ивану 50 монет. Дата: ${date}`,
+        },
+        // Transactions
+        transactions: {
+            title: "Подписанные Транзакции",
+            description: "Теперь мы знаем, как подписывать данные. Давайте посмотрим, как это используется в реальных транзакциях! Транзакция — это запись о перемещении ценности из одного кошелька в другой. Чтобы сделать её официальной, отправитель должен подписать её своим **Приватным Ключом**. Если кто-то попытается изменить сумму или получателя после подписи, **Подпись** станет недействительной. В завершение мы вычисляем **Хеш Транзакции** — уникальный отпечаток всей транзакции, включая **Подпись**. Именно этот хеш попадает в блок.",
+            instruction: "Создайте транзакцию, подпишите её, а затем попробуйте изменить сумму. Смотрите, как подпись ломается!",
+            from: "От кого (Публичный Ключ)",
+            to: "Кому (Адрес получателя)",
+            amount: "Сумма (Монеты)",
+            fee: "Комиссия",
+            signature: "Подпись",
+            txHash: "Хеш Транзакции",
+            statusValid: "Подпись Верна",
+            statusInvalid: "ПОДПИСЬ НЕВЕРНА",
+            sign: "Подписать Транзакцию",
         },
     },
 } as const;
@@ -220,3 +255,25 @@ export const translations = {
 export type Language = 'en' | 'ru';
 
 export type TranslationKeys = typeof translations.en;
+
+export function getLocaleByLanguage(language: Language) {
+    switch (language) {
+        case 'en':
+            return 'en-US';
+        case 'ru':
+            return 'ru-RU';
+        default:
+            return 'en-US';
+    }
+}
+
+export function getHour12UsageByLanguage(language: Language) {
+    switch (language) {
+        case 'en':
+            return true;
+        case 'ru':
+            return false;
+        default:
+            return true;
+    }
+}

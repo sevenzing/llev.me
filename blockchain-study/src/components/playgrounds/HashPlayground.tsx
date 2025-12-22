@@ -6,11 +6,13 @@ import { useHash } from "@/hooks/useHash";
 import { useDebounce } from "@/hooks/useDebounce";
 import { cn } from "@/lib/utils";
 import { CardBackground } from "@/components/ui/CardBackground";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function HashPlayground() {
     const [input, setInput] = useState("Hello World");
     const debouncedInput = useDebounce(input, 300);
     const hash = useHash(debouncedInput);
+    const { t } = useLanguage();
 
     return (
         <CardBackground className="p-6 w-full max-w-md mx-auto">
@@ -18,19 +20,19 @@ export function HashPlayground() {
 
             <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-slate-500 mb-1">Data Input</label>
+                    <label className="block text-sm font-medium text-slate-500 mb-1">{t.hashing.inputLabel}</label>
                     <textarea
                         value={input}
                         onChange={(e) => {
                             setInput(e.target.value)
                         }}
                         className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-sm h-24 resize-none"
-                        placeholder="Type something here..."
+                        placeholder={t.hashing.placeholder}
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-slate-500 mb-1">Hash Output (256-bit)</label>
+                    <label className="block text-sm font-medium text-slate-500 mb-1">{t.hashing.outputLabel}</label>
                     <div className="relative overflow-hidden bg-slate-100 rounded-lg p-3 border border-slate-200 font-mono text-xs break-all text-slate-600 min-h-[3rem] flex items-center">
                         <AnimatePresence mode="wait">
                             <motion.span
@@ -41,7 +43,7 @@ export function HashPlayground() {
                                 transition={{ duration: 0.15 }}
                                 className="block w-full"
                             >
-                                {hash || <span className="text-slate-400 italic">Start typing...</span>}
+                                {hash || <span className="text-slate-400 italic">{t.hashing.emptyState}</span>}
                             </motion.span>
                         </AnimatePresence>
                     </div>

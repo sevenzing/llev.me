@@ -12,13 +12,27 @@ import { NetworkPlayground } from "@/components/playgrounds/NetworkPlayground";
 import { useSingleBlockchain } from "@/hooks/useSingleBlockchain";
 import { calculateBlockHash } from "@/lib/blockchain";
 import { KeysAndSignatures } from "@/components/playgrounds/KeysAndSignatures";
+import { TransactionPlayground } from "@/components/playgrounds/TransactionPlayground";
 import { DataValidityPlayground } from "@/components/playgrounds/DataValidityPlayground";
 import { DataDemo } from "@/components/playgrounds/DataDemo";
 import { CardBackground } from "@/components/ui/CardBackground";
+import Snowfall from "react-snowfall";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
   const { language, setLanguage, t } = useLanguage();
+  const params = useSearchParams();
   const blockExampleNumber = 711;
+  const showSnow = params.get("snow") === "true";
   const { blocks, miningBlock, miningNonce, mineBlockAtIndex, recalculateBlockHash, updateNonce } = useSingleBlockchain([
     {
       index: blockExampleNumber,
@@ -31,6 +45,12 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#f5f5f7] text-slate-900 font-sans selection:bg-blue-500/30 relative overflow-hidden">
+      {showSnow && <Snowfall color="#dee4fd" style={{
+        position: 'fixed',
+        width: '100vw',
+        height: '100vh',
+      }} />}
+
       {/* Mesh Gradient Background */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-60">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/30 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
@@ -176,6 +196,17 @@ export default function Home() {
           layout="vertical"
         >
           <KeysAndSignatures />
+        </Section>
+
+        {/* Transactions */}
+        <Section
+          id="transactions"
+          title={t.transactions.title}
+          description={t.transactions.description}
+          instruction={t.transactions.instruction}
+          layout="horizontal"
+        >
+          <TransactionPlayground />
         </Section>
       </div>
     </main>
