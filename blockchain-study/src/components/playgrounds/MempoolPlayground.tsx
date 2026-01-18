@@ -9,7 +9,7 @@ import { MinerNode } from './MinerNode';
 import { BlockWithTransactions } from './BlockWithTransactions';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { calculateBlockHash, mineBlock } from '@/lib/blockchain';
-import { BlockWithData } from './BlockWithData';
+import { BlockchainRenderer } from './BlockchainRenderer';
 
 const MAX_TX_PER_BLOCK = 3;
 
@@ -161,45 +161,15 @@ export function MempoolPlayground() {
                             <div className="w-12 h-1 bg-blue-500 rounded-full" />
                         </div>
 
-                        <div className="flex overflow-x-auto no-scrollbar pb-12 px-4 justify-start lg:justify-center items-start gap-8 min-h-[400px]">
-                            {blockchain.map((block, index) => (
-                                <div key={block.hash || index} className="relative flex items-center shrink-0">
-                                    {block.index === 0 ? (
-                                        <div className="flex flex-col items-center gap-4">
-                                            <BlockWithData
-                                                blockNumber={0}
-                                                prevHash="0"
-                                                initialData={block.data as string}
-                                                initialNonce={block.nonce}
-                                                initialHash={block.hash}
-                                                size="small"
-                                                readOnly={true}
-                                                rows={3}
-                                                fixedHeight={true}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <BlockWithTransactions
-                                            blockNumber={block.index}
-                                            prevHash={block.prevHash}
-                                            transactions={block.data as Transaction[]}
-                                            nonce={block.nonce}
-                                            hash={block.hash}
-                                            size="small"
-                                            fixedHeight={true}
-                                        />
-                                    )}
-
-                                    {index < blockchain.length - 1 && (
-                                        <div className="ml-4 text-slate-300 mt-12">
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M5 12h14" />
-                                                <path d="m12 5 7 7-7 7" />
-                                            </svg>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                        <div className="w-full">
+                            <BlockchainRenderer
+                                blocks={blockchain}
+                                orientation="horizontal"
+                                scrollable={true}
+                                uniqueKey="mempool-blockchain"
+                                size="small"
+                                onRemoveBlock={() => setBlockchain(prev => prev.slice(0, -1))}
+                            />
                         </div>
                     </motion.div>
                 )}

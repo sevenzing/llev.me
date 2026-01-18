@@ -11,6 +11,7 @@ export const translations = {
             keys: "Keys",
             transactions: "Transactions",
             mempool: "Mempool",
+            ecosystem: "Final",
         },
 
         // Intro (New)
@@ -143,6 +144,28 @@ export const translations = {
             transactionsSaved: "Transactions Saved",
             initialBalances: "Initial Account Balances",
         },
+        // Ecosystem (Final)
+        ecosystem: {
+            title: "Live Ecosystem",
+            description: "Welcome to the living blockchain! Here, everything you've learned comes together. You have a **Wallet**, a **Network** of Nodes, and a real-time **Blockchain**. \n\nWhen you send a transaction, it goes to your selected **Node**. If the node is mining, it will eventually include your transaction in a new **Block**. Use **Auto Sync** to see how new blocks propagate through the network automatically, or do it manually to see how consensus works.",
+            instruction: "Try to send coins from Alice to Bob. Mine the block on Node A. See how other nodes become 'Out of Sync' until you propagate the changes!",
+            networkStatus: "Network Status",
+            syncNetwork: "Sync Network",
+            autoSync: "Auto Sync",
+            networkView: "Network View",
+            statusOk: "ALL NODES SYNCED",
+            statusWarning: "NETWORK OUT OF SYNC",
+            blocks: "blocks",
+            transactions: "transactions",
+            allowInvalid: "CHEAT MODE",
+            cheatMode: "CHEAT MODE",
+            autoMine: "AUTO MINE",
+            invalidTx: "Invalid transaction",
+            rejected: "Rejected ✗",
+            accepted: "Accepted ✓",
+            acceptedInvalid: "Accepted INVALID TX ⚠",
+            invalid: "Invalid ✗",
+        },
     },
 
     ru: {
@@ -157,6 +180,7 @@ export const translations = {
             keys: "Ключи",
             transactions: "Транзакции",
             mempool: "Мемпул",
+            ecosystem: "Финал",
         },
 
         // Hero
@@ -292,6 +316,28 @@ export const translations = {
             blocksProduced: "Блоков произведено",
             transactionsSaved: "Транзакций сохранено",
             initialBalances: "Начальные балансы аккаунтов",
+        },
+        // Ecosystem (Final)
+        ecosystem: {
+            title: "Живая Экосистема",
+            description: "Добро пожаловать в живой блокчейн! Здесь всё, чему вы научились, объединяется. У вас есть **Кошелек**, **Сеть** узлов и **Блокчейн** в реальном времени. \n\nКогда вы отправляете транзакцию, она попадает в выбранный **Узел**. Если узел майнит, он включит вашу транзакцию в новый **Блок**. Используйте **Авто-синхронизацию**, чтобы увидеть, как новые блоки распространяются по сети автоматически, или делайте это вручную, чтобы понять, как работает консенсус.",
+            instruction: "Попробуйте отправить монеты от Алисы Бобу. Намайните блок на Узле А. Посмотрите, как другие узлы 'выпадают из синхронизации', пока вы не распространите изменения!",
+            networkStatus: "Статус сети",
+            syncNetwork: "Синхронизировать сеть",
+            autoSync: "Авто-синхронизация",
+            networkView: "Вид сети",
+            statusOk: "СЕТЬ СИНХРОНИЗИРОВАНА",
+            statusWarning: "СЕТЬ НЕ СИНХРОНИЗИРОВАНА",
+            blocks: "блоков",
+            transactions: "транзакций",
+            allowInvalid: "ЧИТ-РЕЖИМ",
+            cheatMode: "ЧИТ-РЕЖИМ",
+            autoMine: "АВТО-МАЙНИНГ",
+            invalidTx: "Некорректная транзакция",
+            rejected: "Отклонено ✗",
+            accepted: "Принято ✓",
+            acceptedInvalid: "Принято INVALID TX ⚠",
+            invalid: "Ошибка ✗",
         },
     },
 } as const;

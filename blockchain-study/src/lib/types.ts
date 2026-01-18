@@ -43,5 +43,6 @@ export interface SyncFeedback {
     id: number;
     nodeId: string;
     accepted: boolean;
+    isWarning?: boolean;
     timestamp: number;
 }

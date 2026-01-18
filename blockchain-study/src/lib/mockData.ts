@@ -4,7 +4,7 @@ export function mockedGenesisBlock(): Block {
     return {
         index: 0,
         data: "Genesis",
-        hash: "000073d85df97757bd4c0f801b4c633b6e61105dd43a99780f6ae5c202a6fd6e",
+        hash: "0000c45ddaf06cf82fa53fa3308e5dd4b1905d4c197093c9b6c4d551f30c23c3",
         prevHash: "0000000000000000000000000000000000000000000000000000000000000000",
         nonce: 10689
     };

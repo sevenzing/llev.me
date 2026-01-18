@@ -54,7 +54,7 @@ export function NetworkPlayground({ t }: NetworkPlaygroundProps) {
             <div className="grid lg:grid-cols-[350px_1fr] gap-8 items-start relative">
                 {/* Network Graph */}
 
-                <NetworkGraph network={network} />
+                <NetworkGraph network={network} showExtraControls={false} />
 
 
                 {/* Selected Node's Blockchain */}

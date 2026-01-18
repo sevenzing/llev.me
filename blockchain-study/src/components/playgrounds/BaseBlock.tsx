@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from "framer-motion";
+import { Trash2 } from "lucide-react";
 import { hashIsValid } from "@/lib/blockchain";
 
 interface BaseBlockProps {
@@ -18,6 +19,8 @@ interface BaseBlockProps {
     isMining?: boolean;
     miningHash?: string;
     readOnly?: boolean;
+    onMineClick?: () => void;
+    onClose?: () => void;
 }
 
 export function BaseBlock({
@@ -33,7 +36,9 @@ export function BaseBlock({
     fixedHeight = false,
     isMining = false,
     miningHash,
-    readOnly = false
+    readOnly = false,
+    onMineClick,
+    onClose
 }: BaseBlockProps) {
     const isValid = propIsValid !== undefined ? propIsValid : hashIsValid(hash);
 
@@ -76,7 +81,51 @@ export function BaseBlock({
                 {/* Main Content Area (Data or Transactions) */}
                 <div className="flex-1 flex flex-col min-h-0 min-w-0">
                     <label className={`${classes.text} block text-slate-500 font-semibold mb-1 ml-1`}>{dataTitle}</label>
-                    {dataContent}
+                    <div className="flex-1 flex flex-col min-h-0">
+                        {dataContent}
+                    </div>
+                    <div className="flex gap-2 items-stretch mt-2">
+                        {onMineClick && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onMineClick();
+                                }}
+                                disabled={isMining}
+                                className={`flex-[3] backdrop-blur-md text-white font-bold rounded-xl py-1.5 text-xs transition-all disabled:from-slate-400/50 disabled:to-slate-500/50 disabled:cursor-not-allowed shadow-lg active:scale-[0.98] border border-white/20 flex items-center justify-center gap-2 ${isMining
+                                    ? 'bg-slate-400/50 from-slate-400/50 to-slate-500/50'
+                                    : isValid
+                                        ? 'bg-emerald-500/80 hover:bg-emerald-600 shadow-emerald-500/20'
+                                        : 'bg-gradient-to-r from-blue-500/90 to-indigo-600/90 hover:from-blue-600 hover:to-indigo-700 shadow-blue-500/20 hover:shadow-blue-500/40'
+                                    }`}
+                            >
+                                {isMining ? (
+                                    <>
+                                        <svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Mining...
+                                    </>
+                                ) : (
+                                    <>{isValid ? '✓ Mined' : '⛏ Mine Block'}</>
+                                )}
+                            </button>
+                        )}
+
+                        {onClose && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onClose();
+                                }}
+                                className={`flex-1 px-2 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-200 transition-all py-1.5`}
+                                title="Remove Block"
+                            >
+                                <Trash2 className="w-5 h-5" strokeWidth={2} />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="space-y-2 mt-4">
@@ -117,6 +166,7 @@ export function BaseBlock({
                         </div>
                     </div>
                 </div>
+
             </div>
         </motion.div>
     );

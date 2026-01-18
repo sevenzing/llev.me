@@ -26,6 +26,7 @@ export function useNetwork() {
     const [syncMessages, setSyncMessages] = useState<SyncMessage[]>([]);
     const [syncFeedback, setSyncFeedback] = useState<SyncFeedback[]>([]);
     const [isSyncing, setIsSyncing] = useState(false);
+    const [autoSync, setAutoSync] = useState(false);
     const [draggingFrom, setDraggingFrom] = useState<string | null>(null);
     const [dragTarget, setDragTarget] = useState<string | null>(null);
     const [movingNode, setMovingNode] = useState<string | null>(null);
@@ -391,6 +392,7 @@ export function useNetwork() {
         syncMessages,
         syncFeedback,
         isSyncing,
+        autoSync,
         draggingFrom,
         dragTarget,
         movingNode,
@@ -404,6 +406,7 @@ export function useNetwork() {
         setDraggingFrom,
         setDragTarget,
         setMovingNode,
+        setAutoSync,
         selectNode,
         handleSync,
         propagateChain,

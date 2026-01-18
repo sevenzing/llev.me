@@ -14,6 +14,7 @@ import { calculateBlockHash } from "@/lib/blockchain";
 import { KeysAndSignatures } from "@/components/playgrounds/KeysAndSignatures";
 import { TransactionPlayground } from "@/components/playgrounds/TransactionPlayground";
 import { MempoolPlayground } from "@/components/playgrounds/MempoolPlayground";
+import { EcosystemPlayground } from "@/components/playgrounds/EcosystemPlayground";
 import { DataValidityPlayground } from "@/components/playgrounds/DataValidityPlayground";
 import { DataDemo } from "@/components/playgrounds/DataDemo";
 import { CardBackground } from "@/components/ui/CardBackground";
@@ -71,6 +72,7 @@ function HomeContent() {
               <a href="#block" className="hover:text-blue-600 transition-colors">{t.nav.block}</a>
               <a href="#chain" className="hover:text-blue-600 transition-colors">{t.nav.chain}</a>
               <a href="#network" className="hover:text-blue-600 transition-colors">{t.nav.network}</a>
+              <a href="#ecosystem" className="hover:text-blue-600 transition-colors">{t.nav.ecosystem}</a>
             </nav>
             <button
               onClick={() => setLanguage(language === 'en' ? 'ru' : 'en')}
@@ -219,6 +221,9 @@ function HomeContent() {
         >
           <MempoolPlayground />
         </Section>
+
+        {/* Final Ecosystem */}
+        <EcosystemPlayground />
       </div>
     </main>
   );

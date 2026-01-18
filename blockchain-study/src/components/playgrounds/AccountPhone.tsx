@@ -1,32 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ec as EC } from 'elliptic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Send, Wallet, RefreshCcw, ChevronLeft, ChevronRight, Activity, AlertTriangle, X, Check } from 'lucide-react';
 import { Phone } from '../ui/Phone';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Transaction } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
-
-const ec = new EC('secp256k1');
-
-// Predefined accounts for the demo
-const ACCOUNTS = [
-    { name: 'Alice', color: 'bg-rose-500', icon: '👩‍🦰', privateKey: "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725" },
-    { name: 'Bob', color: 'bg-sky-500', icon: '👨‍💼', privateKey: "2b9e6f2a3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f" },
-    { name: 'Charlie', color: 'bg-emerald-500', icon: '🧔', privateKey: "3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d" }
-];
+import { ACCOUNTS, ec } from "@/lib/constants";
 
 interface AccountPhoneProps {
     onSendTransaction: (tx: Transaction) => void;
+    balances?: Record<string, number>;
 }
 
-export function AccountPhone({ onSendTransaction }: AccountPhoneProps) {
+export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps) {
     const { t } = useLanguage();
     const [currentAccountIdx, setCurrentAccountIdx] = useState(0);
     const [recipient, setRecipient] = useState(ACCOUNTS[1].name); // Default to Bob
-    const [amount, setAmount] = useState('10');
+    const [amount, setAmount] = useState((Math.floor(Math.random() * 9) + 1).toString());
     const [fee, setFee] = useState('0.1');
     const [isSending, setIsSending] = useState(false);
     const [signature, setSignature] = useState('');
@@ -89,7 +81,19 @@ export function AccountPhone({ onSendTransaction }: AccountPhoneProps) {
         }
     };
 
+    const [balanceWarning, setBalanceWarning] = useState(false);
+
     const handleSendClick = () => {
+        const amountNum = parseFloat(amount) || 0;
+        const feeNum = parseFloat(fee) || 0;
+        const total = amountNum + feeNum;
+        const currentBalance = balances ? (balances[activeAccount.name] || 0) : Infinity;
+
+        if (total > currentBalance && !balanceWarning) {
+            setBalanceWarning(true);
+            return;
+        }
+
         if (!signature) {
             setShowWarning(true);
         } else {
@@ -131,8 +135,8 @@ export function AccountPhone({ onSendTransaction }: AccountPhoneProps) {
 
             // Randomize inputs after send
             setTimeout(() => {
-                setAmount((Math.floor(Math.random() * 90) + 5).toString());
-                setFee((Math.random() * 0.9 + 0.1).toFixed(2));
+                setAmount((Math.floor(Math.random() * 9) + 1).toString());
+                setFee((Math.random() * 0.09 + 0.01).toFixed(2));
                 setSignature('');
                 setIsSending(false);
             }, 800);
@@ -161,7 +165,7 @@ export function AccountPhone({ onSendTransaction }: AccountPhoneProps) {
     };
 
     return (
-        <div className="w-full lg:w-auto flex flex-col gap-4">
+        <div className="lg flex flex-col gap-4">
             <div className="flex items-center justify-between px-1">
                 <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">
                     Wallet App
@@ -211,6 +215,51 @@ export function AccountPhone({ onSendTransaction }: AccountPhoneProps) {
                                 </div>
                             </motion.div>
                         )}
+
+                        {balanceWarning && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 z-50 bg-slate-900/90 flex items-center justify-center p-4"
+                            >
+                                <div className="bg-white rounded-2xl p-4 shadow-2xl w-full max-w-xs space-y-4 border border-amber-100">
+                                    <div className="flex flex-col items-center text-center gap-2">
+                                        <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-500 mb-1">
+                                            <AlertTriangle size={24} />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 text-lg leading-tight">Insufficient Balance</h3>
+                                        <p className="text-xs text-slate-500">
+                                            {activeAccount.name} only has {balances?.[activeAccount.name] || 0} coins. You are trying to send {(parseFloat(amount) || 0) + (parseFloat(fee) || 0)} coins.
+                                        </p>
+                                        <div className="bg-amber-50 p-2 rounded-lg border border-amber-100 w-full">
+                                            <p className="text-[10px] font-medium text-amber-600">
+                                                On a real blockchain, this transaction would be rejected by nodes.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            onClick={() => setBalanceWarning(false)}
+                                            className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1"
+                                        >
+                                            <X size={14} /> Cancel
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setBalanceWarning(false);
+                                                if (!signature) setShowWarning(true);
+                                                else handleSend(true);
+                                            }}
+                                            className="py-2 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1"
+                                        >
+                                            <Check size={14} /> Send Anyway
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
                     </AnimatePresence>
                 }
             >
@@ -245,8 +294,15 @@ export function AccountPhone({ onSendTransaction }: AccountPhoneProps) {
 
                                 <div className="relative z-10 space-y-1">
                                     <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{t.mempool.phoneTitle}</p>
-                                    <h3 className="text-2xl font-black text-white flex items-center gap-2">
-                                        {activeAccount.icon} {activeAccount.name}
+                                    <h3 className="text-2xl font-black text-white flex items-center justify-between w-full">
+                                        <div className="flex items-center gap-2">
+                                            {activeAccount.icon} {activeAccount.name}
+                                        </div>
+                                        {balances && (
+                                            <div className="text-sm font-bold bg-white/20 px-2 py-0.5 rounded-lg backdrop-blur-sm">
+                                                {balances[activeAccount.name] || 0} <small className="text-[10px] opacity-70">COINS</small>
+                                            </div>
+                                        )}
                                     </h3>
                                 </div>
 
