@@ -6,7 +6,7 @@ export function mockedGenesisBlock(): Block {
         data: "Genesis",
         hash: "000073d85df97757bd4c0f801b4c633b6e61105dd43a99780f6ae5c202a6fd6e",
         prevHash: "0000000000000000000000000000000000000000000000000000000000000000",
-        nonce: 56066
+        nonce: 10689
     };
 }
 

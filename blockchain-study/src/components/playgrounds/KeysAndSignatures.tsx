@@ -305,36 +305,44 @@ function MessageItem({
                         placeholder="Type message..."
                     />
 
-                    <div className="flex items-center gap-3 h-8">
-                        <div className={`flex-1 p-2 rounded-lg border font-mono text-[10px] h-full overflow-hidden relative items-center flex ${hasSignature
-                            ? isValid
-                                ? 'bg-emerald-50/50 border-emerald-100 text-emerald-700'
-                                : 'bg-red-50/50 border-red-100 text-red-700'
-                            : 'bg-slate-50 border-slate-100 text-slate-400 italic'
-                            }`}>
-                            <div className="truncate w-full">
-                                {message.signature || "Unsigned"}
-                            </div>
+
+                    <div className="flex-1 space-y-3 min-w-0">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-shrink-0">
+                            Signature
                         </div>
 
-                        {/* Fixed Width Button Container to preventing jumping */}
-                        <div className="w-[88px] flex-shrink-0">
-                            {!hasSignature || !isValid ? (
-                                <button
-                                    onClick={onSign}
-                                    className={`w-full h-8 rounded-lg font-bold text-xs text-white shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap ${hasSignature
-                                        ? 'bg-red-500 hover:bg-red-600'
-                                        : 'bg-slate-900 hover:bg-slate-800'
-                                        }`}
-                                >
-                                    <PenTool size={12} />
-                                    {hasSignature ? "Re-sign" : "Sign"}
-                                </button>
-                            ) : (
-                                <div className="w-full h-8 bg-emerald-100 text-emerald-700 rounded-lg font-bold text-xs border border-emerald-200 flex items-center justify-center gap-1.5 whitespace-nowrap">
-                                    <CheckCircle2 size={14} /> Signed
+                        <div className="flex items-center gap-3 h-8">
+                            <div className={`flex-1 p-2 rounded-lg border font-mono text-[10px] h-full overflow-hidden relative items-center flex ${hasSignature
+                                ? isValid
+                                    ? 'bg-emerald-50/50 border-emerald-100 text-emerald-700'
+                                    : 'bg-red-50/50 border-red-100 text-red-700'
+                                : 'bg-slate-50 border-slate-100 text-slate-400 italic'
+                                }`}>
+                                <div className="truncate w-full">
+                                    {message.signature || "Unsigned"}
                                 </div>
-                            )}
+                            </div>
+
+                            {/* Fixed Width Button Container to preventing jumping */}
+                            <div className="w-[88px] flex-shrink-0">
+                                {!hasSignature || !isValid ? (
+                                    <button
+                                        onClick={onSign}
+                                        className={`w-full h-8 rounded-lg font-bold text-xs text-white shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap ${hasSignature
+                                            ? 'bg-red-500 hover:bg-red-600'
+                                            : 'bg-slate-900 hover:bg-slate-800'
+                                            }`}
+                                    >
+                                        <PenTool size={12} />
+                                        {hasSignature ? "Re-sign" : "Sign"}
+                                    </button>
+                                ) : (
+                                    <div className="w-full h-8 bg-emerald-100 text-emerald-700 rounded-lg font-bold text-xs border border-emerald-200 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                                        <CheckCircle2 size={14} /> Signed
+                                    </div>
+                                )}
+                            </div>
+
                         </div>
                     </div>
                 </div>

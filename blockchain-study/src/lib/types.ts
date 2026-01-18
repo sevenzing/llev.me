@@ -6,12 +6,24 @@ export interface Node {
     blockchain: Block[];
 }
 
+export interface Transaction {
+    id: string;
+    from: string;
+    to: string;
+    amount: number;
+    fee: number;
+    signature: string;
+    hash: string;
+    isValid?: boolean;
+}
+
 export interface Block {
     index: number;
-    data: any; // Can be string or JSON object (for transactions)
+    data: any; // Can be string or Transaction[]
     hash: string;
     prevHash: string;
     nonce: number;
+    timestamp?: number;
 }
 
 export interface Connection {

@@ -10,7 +10,7 @@ export async function calculateBlockHash(
     prevHash: string
 ): Promise<string> {
     const dataString = typeof data === 'string' ? data : JSON.stringify(data);
-    const str = blockNumber + dataString + prevHash + nonce;
+    const str = blockNumber + nonce + dataString + prevHash;
     const msgBuffer = new TextEncoder().encode(str);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));

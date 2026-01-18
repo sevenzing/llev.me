@@ -13,6 +13,7 @@ import { useSingleBlockchain } from "@/hooks/useSingleBlockchain";
 import { calculateBlockHash } from "@/lib/blockchain";
 import { KeysAndSignatures } from "@/components/playgrounds/KeysAndSignatures";
 import { TransactionPlayground } from "@/components/playgrounds/TransactionPlayground";
+import { MempoolPlayground } from "@/components/playgrounds/MempoolPlayground";
 import { DataValidityPlayground } from "@/components/playgrounds/DataValidityPlayground";
 import { DataDemo } from "@/components/playgrounds/DataDemo";
 import { CardBackground } from "@/components/ui/CardBackground";
@@ -38,7 +39,7 @@ function HomeContent() {
       index: blockExampleNumber,
       nonce: 0,
       data: "Hello world!",
-      prevHash: "b493ac361a9149c04f813695aee84fc7a39b3d2a83987294e4a5346f7ec4cfb5",
+      prevHash: "0000ac361a9149c04f813695aee84fc7a39b3d2a83987294e4a5346f7ec4cfb4",
       hash: "5bfc4ce7f6435a4e49278938a2d3b93a7cf48eea596318f40c9419a163ca394b"
     }
   ]);
@@ -198,7 +199,6 @@ function HomeContent() {
           <KeysAndSignatures />
         </Section>
 
-        {/* Transactions */}
         <Section
           id="transactions"
           title={t.transactions.title}
@@ -207,6 +207,17 @@ function HomeContent() {
           layout="horizontal"
         >
           <TransactionPlayground />
+        </Section>
+
+        {/* Mempool & Mining */}
+        <Section
+          id="mempool"
+          title={t.mempool.title}
+          description={t.mempool.description}
+          instruction={t.mempool.instruction}
+          layout="vertical"
+        >
+          <MempoolPlayground />
         </Section>
       </div>
     </main>
@@ -227,7 +238,7 @@ function Section({ id, title, description, instruction, layout = 'horizontal', w
           <h3 className="text-3xl font-heading font-bold text-slate-900">
             <Highlight>{title}</Highlight>
           </h3>
-          <p className="text-lg text-slate-600 leading-relaxed">
+          <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-wrap">
             <Highlight>{description}</Highlight>
           </p>
           {instruction && <InteractionGuide text={instruction} />}
@@ -244,7 +255,7 @@ function Section({ id, title, description, instruction, layout = 'horizontal', w
           <h3 className="text-3xl font-heading font-bold text-slate-900">
             <Highlight>{title}</Highlight>
           </h3>
-          <p className="text-lg text-slate-600 leading-relaxed">
+          <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-wrap">
             <Highlight>{description}</Highlight>
           </p>
           {instruction && <InteractionGuide text={instruction} />}

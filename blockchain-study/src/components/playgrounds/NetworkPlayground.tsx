@@ -45,7 +45,7 @@ export function NetworkPlayground({ t }: NetworkPlaygroundProps) {
 
             {/* Description */}
             <div className="space-y-6 max-w-4xl mx-auto text-center">
-                <p className="text-lg text-slate-600 leading-relaxed">
+                <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-wrap">
                     <Highlight>{t.network.description}</Highlight>
                 </p>
                 <InteractionGuide text="Click on any Node to see its blockchain. Try to change data in one node and try to sync the network! Try to add new Blocks, mine and sync the network. Try to cheat and see what will happen!" />

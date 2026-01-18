@@ -10,6 +10,7 @@ export const translations = {
             network: "Network",
             keys: "Keys",
             transactions: "Transactions",
+            mempool: "Mempool",
         },
 
         // Intro (New)
@@ -22,7 +23,7 @@ export const translations = {
         // Data
         data: {
             title: "The Data",
-            description: "Everything starts with **Data**. Think of it as information. In our toy blockchain, we use simple text strings to represent **Data**, like \"Hello World\". Information about your bank account, your transactions - all of it is **Data**. While traditional systems store **Data** on specific servers, a Blockchain stores copies of this **Data** on thousands of different computers around the world to ensure it can't be changed. How? We will see in a moment!",
+            description: "Everything starts with **Data**. Think of it as information.\n\nIn our toy blockchain, we use simple text strings to represent **Data**, like `\"Hello World\"`. Information about your bank account, your transactions - all of it is **Data**. While traditional systems store **Data** on specific servers, a Blockchain stores copies of this **Data** on thousands of different computers around the world to ensure it can't be changed. How? We will see in a moment!",
             instruction: "Type anything in the box. See how it's just raw information. Computers see this as a sequence of bytes (zeros and ones).",
             inputLabel: "Data Input",
             size: "Size (bytes)",
@@ -32,7 +33,7 @@ export const translations = {
         // Hashing
         hashing: {
             title: "The Hash",
-            description: "The **Hash** is a digital fingerprint of **Data**. Hash generator converts any input (no matter how large) into a unique, fixed-length string. If you change even a single comma in the **Data**, the **Hash** changes completely. This process is one-way: you can't reverse the hash to retrieve the original data.",
+            description: "The **Hash** is a digital fingerprint of **Data**.\nHash generator converts any input (no matter how large) into a unique, fixed-length string. If you change even a single comma in the **Data**, the **Hash** changes completely. This process is one-way: you can't reverse the hash to retrieve the original data.",
             inputLabel: "Data Input",
             outputLabel: "Hash Output (256-bit or 32 bytes or 64 HEX characters)",
             placeholder: "Type something here...",
@@ -42,13 +43,13 @@ export const translations = {
         determinism: {
             title: "Determinism",
             description: "The same input always produces the same **Hash**. It doesn't matter if you're in New York or Moscow, using a phone or a supercomputer, today or tomorrow.",
-            instruction: "Type the EXACT same text in both boxes (e.g. 'Hello'). Watch the equality sign light up green!"
+            instruction: "Type the EXACT same text in both boxes (e.g. `Hello`). Watch the equality sign light up green!"
         },
 
         // Data Validity (New)
         dataValidity: {
             title: "Data Validity",
-            description: "In the blockchain world, we consider **Data** to be valid if its **Hash** starts with N zeros. In our toy example N = 4. Only valid data can be stored in **Blockchain**. But how do we make any data valid? To do this, we add a random number after the data and change it until the **Hash** is valid.",
+            description: "In the blockchain world, we consider **Data** to be valid if its **Hash** starts with `N` zeros. In our toy example `N = 4`. Only valid data can be stored in **Blockchain**. But how do we make any data valid? To do this, we add a random number after the data and change it until the **Hash** is valid.",
             instruction: "Try changing the number at the end of the text. The hash will likely turn red (invalid). Try to find another number that makes it green (valid)!",
             inputLabel: "Data + Random Number",
             outputLabel: "Resulting Hash"
@@ -57,7 +58,7 @@ export const translations = {
         // Mining Game
         miningGame: {
             title: "The Mining Game",
-            description: "In **Blockchain** we call this special number a **Nonce**. For convenience let's split **Nonce** and our usefull **Data** into two fields - two parts of block. So in order to prove that block is valid we need to find a **Nonce** that makes the **Hash** start with '0000'. We call this process **Proof of Work** or **Mining**.",
+            description: "In **Blockchain** we call this special number a **Nonce**. For convenience let's split **Nonce** and our usefull **Data** into two fields - two parts of block. \nSo in order to prove that block is valid we need to find a **Nonce** that makes the **Hash** start with `0000`. We call this process **Proof of Work** or **Mining**.",
             instruction: "Let's play Mining game! Try to find such Nonce that makes the Hash start with '0000'. After 5 invalid attempt you will get a hint, click on it",
             statusTitle: "The Mining Game",
             statusSuccess: "VALID NONCE FOUND!",
@@ -74,7 +75,7 @@ export const translations = {
         // Block
         block: {
             title: "The Block",
-            description: "A **Block** is just a container of some fields (e.g. **Data** and **Nonce**). All fields in **Block** is used to calculate its **Hash**. But remember, to participate in **Blockchain** block has to be valid. Therefore, as a **Miner** I want to find such **Nonce** that makes **Hash** starting with 4 zeros.",
+            description: "A **Block** is just a container of some fields (e.g. **Data**, **Nonce** and **Prev Hash**). All fields in **Block** is used to calculate its **Hash**. But remember, to participate in **Blockchain** block has to be valid. \nTherefore, as a **Miner** I want to find such **Nonce** that makes **Hash** starting with `0000`.",
             nonce: "Nonce",
             data: "Data",
             prevHash: "Prev Hash",
@@ -89,7 +90,7 @@ export const translations = {
         // Chain
         chain: {
             title: "The Chain",
-            description: "You might note that block has field \"Prev Hash\". This is **Hash** of previous block. This field also affects the final **Hash** of a **Block**. This is how we can connect blocks into the **Chain** or **Blockchain**!",
+            description: "You might note that block has field **Prev Hash**. This is **Hash** of previous block. This field also affects the final **Hash** of a **Block**. This is how we can connect blocks into the **Chain** or **Blockchain**!",
             instruction: "Mine all blocks to fix the Chain. Change data in Block #0. See how it breaks all blocks. Well, to change data in chain you need to mine everything after it!"
         },
 
@@ -102,14 +103,14 @@ export const translations = {
         // Keys
         keys: {
             title: "Keys & Signatures",
-            description: "To own funds on blockchain you need a **Wallet**. A wallet is an application that stores pair of keys: **Private Key** and **Public Key**. **Private key** allows you to sign **Data** (we also call it **Message**) providing **Signature** as result. **Signature** is similar to **Hash** but it can be generated only using **Private Key**. **Public Key** allows anyone to verify your **Signature**. Algorithm of signing and verifying is mathematically complicated and was design in such way, that noone expect you can provide **Signature** from your private key and everyone in world can easly verify **Signature** using initial **Data**, **Signature** and **Public Key**!",
+            description: "To own funds on blockchain you need a **Wallet**. A wallet is an application that stores pair of keys: **Private Key** and **Public Key**. \n\n**Private key** allows you to sign **Data** (we also call it **Message**) providing **Signature** as result. **Signature** is similar to **Hash** but it can be generated only using **Private Key**. **Public Key** allows anyone to verify your **Signature**.\n\nAlgorithm of signing and verifying is mathematically complicated and was design in such way, that noone expect you can provide **Signature** from your private key and everyone in world can easly verify **Signature** using **Data** itself and **Public Key**!",
             instruction: "Generate a wallet, add message and sign it. Change something in message, see that signature is invalid now",
             newMessageTemplate: (date: string) => `Pay 50 coins to Bob at ${date}`,
         },
         // Transactions
         transactions: {
             title: "Signed Transactions",
-            description: "Now we know how to sign data. Let's see how it's used in real blockchain transactions! A transaction is simply a record of value moving from one wallet to another. To make it official, the sender must sign the transaction with their **Private Key**. If anyone tries to change the amount or the receiver after it was signed, the **Signature** will become invalid. Finally, we calculate the **Transaction Hash** — a unique fingerprint of the entire transaction, including the **Signature**. This **Hash** is used to identify the transaction and prevent double-spending.",
+            description: "Now we know how to sign data. Let's see how it's used in real blockchain transactions!\n\nA transaction is simply a record of value moving from one wallet to another. To make it official, the sender must sign the transaction with their **Private Key**. If anyone tries to change the amount or the receiver after it was signed, the **Signature** will become invalid.\n\nFinally, we calculate the **Transaction Hash** — a unique fingerprint of the entire transaction, including the **Signature**. This **Hash** is used to identify the transaction and prevent double-spending.",
             instruction: "Create a transaction, sign it, and then try to change the amount. Watch the signature fail!",
             from: "From (Public Key)",
             to: "To (Recipient Address)",
@@ -120,6 +121,27 @@ export const translations = {
             statusValid: "Valid Signature",
             statusInvalid: "INVALID SIGNATURE",
             sign: "Sign Transaction",
+        },
+
+        // Mempool
+        mempool: {
+            title: "Mempool & Mining",
+            description: "Transactions don't go directly into the blockchain. First, they enter a waiting area called the **Mempool**. Miners look at this queue and pick transactions to include in the next block. Usually, they sort them by **Fee** — the more you pay, the faster your transaction is processed. If a transaction has an invalid signature, the Miner will simply ignore it.",
+            instruction: "Send transactions from different accounts. Watch them accumulate in the Queue. Then, click 'Mine' to see the Miner pick the best ones and create a new block!",
+            phoneTitle: "My Wallet",
+            queueTitle: "Mempool Queue",
+            minerTitle: "Miner Node",
+            sync: "Sync Wallet",
+            send: "Send",
+            sign: "Sign",
+            accounts: "Accounts",
+            emptyQueue: "No transactions in queue",
+            mineButton: "Mine New Block",
+            showChain: "Show Blockchain",
+            hideChain: "Hide Blockchain",
+            blocksProduced: "Blocks Produced",
+            transactionsSaved: "Transactions Saved",
+            initialBalances: "Initial Account Balances",
         },
     },
 
@@ -134,6 +156,7 @@ export const translations = {
             network: "Сеть",
             keys: "Ключи",
             transactions: "Транзакции",
+            mempool: "Мемпул",
         },
 
         // Hero
@@ -152,7 +175,7 @@ export const translations = {
         // Data
         data: {
             title: "Данные",
-            description: "Всё начинается с **Данных**. В нашем игрушечном блокчейне мы используем простые строки, например \"Привет Мир\" или \"Транзакция: Алиса платит Бобу 10$\". Но в реальности этими данными может быть что угодно: финансовый реестр, медицинская запись или даже цифровое произведение искусства.",
+            description: "Всё начинается с **Данных**. В нашем игрушечном блокчейне мы используем простые строки, например \"Привет Мир\" или \"Транзакция: Алиса платит Бобу 10$\".\n\nНо в реальности этими данными может быть что угодно: финансовый реестр, медицинская запись или даже цифровое произведение искусства.",
             instruction: "Напишите что-нибудь в поле. Посмотрите, что это просто сырая информация. Компьютеры видят это как последовательность байтов.",
             inputLabel: "Ввод данных",
             size: "Размер (байт)",
@@ -162,7 +185,7 @@ export const translations = {
         // Hashing
         hashing: {
             title: "Цифровой отпечаток",
-            description: "В основе блокчейна лежит **Хеш**. Думайте о нём как о цифровом отпечатке пальца. Если вы измените хотя бы одну запятую в данных, отпечаток полностью изменится.",
+            description: "В основе блокчейна лежит **Хеш**. Думайте о нём как о цифровом отпечатке пальца.\n\nЕсли вы измените хотя бы одну запятую в данных, отпечаток полностью изменится.",
             inputLabel: "Ввод данных",
             outputLabel: "Хеш (256 бит)",
             placeholder: "Введите что-нибудь...",
@@ -248,6 +271,27 @@ export const translations = {
             statusValid: "Подпись Верна",
             statusInvalid: "ПОДПИСЬ НЕВЕРНА",
             sign: "Подписать Транзакцию",
+        },
+
+        // Mempool
+        mempool: {
+            title: "Мемпул и Майнинг",
+            description: "Транзакции не попадают в блокчейн мгновенно. Сначала они оказываются в листе ожидания — **Мемпуле**. Майнеры просматривают эту очередь и выбирают транзакции для включения в следующий блок. Обычно они сортируют их по **Комиссии** — чем больше вы платите, тем быстрее пройдет платеж. Если подпись неверна, майнер просто проигнорирует такую транзакцию.",
+            instruction: "Отправляйте транзакции с разных аккаунтов. Следите, как они копятся в очереди. Затем нажмите 'Майнить', чтобы майнер выбрал лучшие и создал новый блок!",
+            phoneTitle: "Мой Кошелек",
+            queueTitle: "Очередь (Мемпул)",
+            minerTitle: "Узел Майнера",
+            sync: "Синхронизировать",
+            send: "Отправить",
+            sign: "Подписать",
+            accounts: "Аккаунты",
+            emptyQueue: "В очереди пусто",
+            mineButton: "Добыть блок",
+            showChain: "Показать блокчейн",
+            hideChain: "Скрыть блокчейн",
+            blocksProduced: "Блоков произведено",
+            transactionsSaved: "Транзакций сохранено",
+            initialBalances: "Начальные балансы аккаунтов",
         },
     },
 } as const;

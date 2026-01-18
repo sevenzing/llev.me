@@ -4,9 +4,10 @@ import { cn } from '@/lib/utils'; // Assuming you have a utils file for merging 
 interface PhoneProps {
     children: React.ReactNode;
     className?: string;
+    overlay?: React.ReactNode;
 }
 
-export function Phone({ children, className }: PhoneProps) {
+export function Phone({ children, className, overlay }: PhoneProps) {
     return (
         <div className={`w-full max-w-[20rem] h-[38rem] bg-slate-900 rounded-[2.5rem] p-3 shadow-2xl border-4 border-slate-800 ring-4 ring-slate-900/50 relative overflow-hidden ${className || ''}`}>
             {/* Dynamic Island / Notch */}
@@ -14,6 +15,7 @@ export function Phone({ children, className }: PhoneProps) {
 
             {/* Screen Content */}
             <div className="bg-slate-50 w-full h-full rounded-[2rem] overflow-hidden flex flex-col pt-8 pb-4 px-3 relative">
+                {overlay}
                 <div className="flex-1 space-y-4 overflow-y-auto overflow-x-hidden no-scrollbar">
                     {children}
                 </div>
