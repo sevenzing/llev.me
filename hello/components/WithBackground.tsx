@@ -2,7 +2,7 @@ import PixelBlast from "./PixelBlast"
 
 export const WithBackground = ({ children }: { children: React.ReactNode }) => {
     return (
-        <div style={{ width: '100%', minHeight: '100vh', position: 'relative'}}>
+        <div style={{ width: '100%', minHeight: '100vh', height: '100dvh', position: 'relative' }}>
             <PixelBlast
                 variant="square"
                 pixelSize={4}

@@ -60,13 +60,13 @@ export default function Home() {
     useEffect(() => {
         if (searchStateRaw) {
             fetch(`/api/stateInfo?s=${searchStateRaw}`)
-            .then((res) => res.json())
-            .then((data) => {
-                handleStateInfo(data);
-            })
-            .catch((err) => {
-                console.error(err)
-            })
+                .then((res) => res.json())
+                .then((data) => {
+                    handleStateInfo(data);
+                })
+                .catch((err) => {
+                    console.error(err)
+                })
         }
     }, [searchStateRaw]);
 
@@ -100,12 +100,13 @@ export default function Home() {
                 handleStateInfo(data);
             })
             .catch((err) => {
-                console.error(err)})
+                console.error(err)
+            })
     }
 
     const handleStateInfo = (data: any) => {
         if (data.achievements) {
-            let newAchStorage = {...achStorage};
+            let newAchStorage = { ...achStorage };
             for (const key in data.achievements) {
                 if (!(data.achievements[key].id in achStorage)) {
                     handleNewAchievement(data.achievements[key]);
@@ -131,7 +132,7 @@ export default function Home() {
     }
 
     const onAchievementClose = (id: number) => {
-        let newAchStorage = {...achStorage};
+        let newAchStorage = { ...achStorage };
         delete newAchStorage[id];
         setSetAchStorage(newAchStorage);
         setState({});
@@ -147,54 +148,65 @@ export default function Home() {
     const noTextShadow = '0 0 0px';
 
     return (
-    <WithBackground>
-        {/* Header */}
-        <Flex flexDir="column" className="main" h="100%" gap={1}>
-        <Flex justifyContent="flex-end" h="16">
-            <HStack spacing="2" mr={["2", "8"]}>
-                <IconButton className="pointer-events-auto" size="sm" colorScheme="gray" aria-label="Refresh" icon={<RepeatIcon />} onClick={handleRefreshPressed}></IconButton>
-                <IconButton className="pointer-events-auto" size="sm" colorScheme="gray" aria-label="Toggle dark mode" icon={<SunIcon />} onClick={handleChangeColorMode} />
-            </HStack>
-        </Flex>
-        
-        {/* Main content */}
-            <Flex flex={1} flexDir="column" alignItems="center" justifyContent="space-evenly" h="100%">
-                <Flex flexDir="column" justifyContent="center" alignItems="center" gap="5">
-                    <Flex textShadow={textShadow} fontSize={["4xl", "5xl"]}>
-                        <PressableText text="hello " id={1} size={2.3} state={state} onLetterPressed={onLetterPressed} />
-                        <Text as="span" textShadow={noTextShadow}>
-                            <PressableText text="👋" id={2} size={2.5} checkBoxLeftOffset={0.4} state={state} onLetterPressed={onLetterPressed} />
-                        </Text>
-                        <PressableText text=" i'm" id={3} size={2.3} state={state} onLetterPressed={onLetterPressed} />
-                    </Flex>
-                    <Flex fontSize="5xl" flexDir="column" overflow="hidden" h="4rem" alignItems={["center"]} mt={["0.5rem"]}>
-                        <IM text="😼Lev" isFirst bg="orange.100" id={4} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                        <IM text="💻Web3 dev" bg="red.100" id={5} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                        <IM text="😎Hedonist" bg="blue.100" id={6} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                        <IM text="✨Dreamer" bg="green.100" id={7} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
-                    </Flex>
-                    <Flex wrap="wrap" justifyContent="center">
-                        <Flex><PressableText text="press a letter and " id={8} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
-                        <Flex><PressableText text="customize this site!" id={9} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
-                    </Flex>
+        <WithBackground>
+            {/* Header */}
+            <Flex flexDir="column" className="main" h="100%" gap={1}>
+                <Flex justifyContent="flex-end" h="16">
+                    <HStack spacing="2" mr={["2", "8"]}>
+                        <IconButton className="pointer-events-auto" size="sm" colorScheme="gray" aria-label="Refresh" icon={<RepeatIcon />} onClick={handleRefreshPressed}></IconButton>
+                        <IconButton className="pointer-events-auto" size="sm" colorScheme="gray" aria-label="Toggle dark mode" icon={<SunIcon />} onClick={handleChangeColorMode} />
+                    </HStack>
                 </Flex>
-                <Flex p={5} fontFamily="'Inter Variable', sans-serif" overflowY="auto" maxH={500}>
-                    {achStorage && <Achievements onAchievementClose={onAchievementClose} achievements={Object.values(achStorage)}/>}
-                </Flex>
-            </Flex>
-            {/* Bottom links */}
-            <Flex justifyContent="center" alignItems="center" marginBottom="1rem">
-                <HStack spacing="6">
-                    <Text><PressableText text="links:" id={10} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Text>
-                    <Link isExternal onClick={handleSocialClick} href="https://github.com/sevenzing" aria-label="github"><SocialGithub boxSize="20px" /></Link>
-                    <Link isExternal onClick={handleSocialClick} href="https://instagram.com/llevchiks/" aria-label="instagram"><SocialInstagram boxSize="20px" /></Link>
-                    <Link isExternal onClick={handleSocialClick} href="https://linkedin.com/in/lymarenkolev/" aria-label="linkedin"><SocialLinkedin boxSize="20px" /></Link>
-                </HStack>
-            </Flex>
-        </Flex>
-        
 
-    </WithBackground>
+                {/* Main content */}
+                <Flex flex={1} flexDir="column" alignItems="center" justifyContent="flex-start" h="100%" pt={["5vh", "10vh"]} gap={8}>
+                    <Box
+                        className="pointer-events-auto"
+                        backdropFilter="blur(3px)"
+                        bg={useColorModeValue('rgba(255, 255, 255, 0.2)', 'rgba(0, 0, 0, 0.2)')}
+                        borderRadius="3xl"
+                        p={[2, 4]}
+                        border="1px solid"
+                        borderColor={useColorModeValue('whiteAlpha.300', 'whiteAlpha.200')}
+                        boxShadow="2xl"
+                    >
+                        <Flex flexDir="column" justifyContent="center" alignItems="center" gap="5">
+                            <Flex textShadow={textShadow} fontSize={["4xl", "5xl"]}>
+                                <PressableText text="hello " id={1} size={2.3} state={state} onLetterPressed={onLetterPressed} />
+                                <Text as="span" textShadow={noTextShadow}>
+                                    <PressableText text="👋" id={2} size={2.5} checkBoxLeftOffset={0.4} state={state} onLetterPressed={onLetterPressed} />
+                                </Text>
+                                <PressableText text=" i'm" id={3} size={2.3} state={state} onLetterPressed={onLetterPressed} />
+                            </Flex>
+                            <Flex fontSize="5xl" flexDir="column" overflow="hidden" h="4rem" alignItems={["center"]} mt={["0.5rem"]}>
+                                <IM text="😼Lev" isFirst bg="orange.100" id={4} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                                <IM text="💻Web3 dev" bg="red.100" id={5} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                                <IM text="😎Hedonist" bg="blue.100" id={6} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                                <IM text="✨Dreamer" bg="green.100" id={7} size={2.3} checkBoxLeftOffset={0.2} checkBoxTopOffset={-0.4} state={state} onLetterPressed={onLetterPressed} zIndex={50} />
+                            </Flex>
+                            <Flex wrap="wrap" justifyContent="center">
+                                <Flex><PressableText text="press a letter and " id={8} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
+                                <Flex><PressableText text="customize this site!" id={9} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Flex>
+                            </Flex>
+                        </Flex>
+                    </Box>
+                    <Flex p={5} fontFamily="'Inter Variable', sans-serif" overflowY="auto" maxH={500}>
+                        {achStorage && <Achievements onAchievementClose={onAchievementClose} achievements={Object.values(achStorage)} />}
+                    </Flex>
+                </Flex>
+                {/* Bottom links */}
+                <Flex justifyContent="center" alignItems="center" marginBottom="1rem">
+                    <HStack spacing="6">
+                        <Text><PressableText text="links:" id={10} size={0.8} state={state} onLetterPressed={onLetterPressed} /></Text>
+                        <Link isExternal style={{ pointerEvents: "auto" }} onClick={handleSocialClick} href="https://github.com/sevenzing" aria-label="github"><SocialGithub boxSize="20px" /></Link>
+                        <Link isExternal style={{ pointerEvents: "auto" }} onClick={handleSocialClick} href="https://instagram.com/llevchiks/" aria-label="instagram"><SocialInstagram boxSize="20px" /></Link>
+                        <Link isExternal style={{ pointerEvents: "auto" }} onClick={handleSocialClick} href="https://linkedin.com/in/lymarenkolev/" aria-label="linkedin"><SocialLinkedin boxSize="20px" /></Link>
+                    </HStack>
+                </Flex>
+            </Flex>
+
+
+        </WithBackground>
     )
 }
 

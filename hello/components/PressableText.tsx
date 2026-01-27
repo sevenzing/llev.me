@@ -2,12 +2,12 @@ import { mulberry32 } from "@/utils/random";
 import { getValueFromState } from "@/utils/state";
 import { Text } from "@chakra-ui/react";
 
-export type PressableProps = { 
-  text: string, 
-  id: number, 
-  size: number, 
-  state: any, 
-  onLetterPressed: (id: number, index: number) => void 
+export type PressableProps = {
+  text: string,
+  id: number,
+  size: number,
+  state: any,
+  onLetterPressed: (id: number, index: number) => void
   checkBoxTopOffset?: number,
   checkBoxLeftOffset?: number,
   disabled?: boolean,
