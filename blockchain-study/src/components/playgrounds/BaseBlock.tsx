@@ -18,6 +18,7 @@ interface BaseBlockProps {
     fixedHeight?: boolean;
     isMining?: boolean;
     miningHash?: string;
+    miningNonce?: number;
     readOnly?: boolean;
     onMineClick?: () => void;
     onClose?: () => void;
@@ -36,6 +37,7 @@ export function BaseBlock({
     fixedHeight = false,
     isMining = false,
     miningHash,
+    miningNonce,
     readOnly = false,
     onMineClick,
     onClose
@@ -142,7 +144,7 @@ export function BaseBlock({
                             />
                         ) : (
                             <div className={`w-full border border-slate-200 rounded-xl px-2 py-1 ${classes.text} bg-slate-50 text-slate-500 font-mono shadow-inner`}>
-                                {nonce}
+                                {isMining && miningNonce !== undefined ? miningNonce : nonce}
                             </div>
                         )}
                     </div>

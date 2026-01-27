@@ -108,6 +108,7 @@ export function EcosystemPlayground() {
                                 onNonceChange={(idx, nonce) => ecosystem.handleBlockNonceChange?.(ecosystem.selectedNode, idx, nonce)}
                                 miningBlock={ecosystem.miningBlock?.nodeId === ecosystem.selectedNode ? ecosystem.miningBlock.blockIndex : null}
                                 miningNonce={ecosystem.miningNonce}
+                                miningHash={ecosystem.miningHash}
                                 validateTransaction={ecosystem.validateTransaction}
                             />
                         </div>

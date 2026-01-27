@@ -39,6 +39,7 @@ export function useEcosystem() {
     const [movingNode, setMovingNode] = useState<string | null>(null);
     const [miningBlock, setMiningBlock] = useState<{ nodeId: string; blockIndex: number } | null>(null);
     const [miningNonce, setMiningNonce] = useState<number>(0);
+    const [miningHash, setMiningHash] = useState<string>("");
     const [allowInvalid, setAllowInvalid] = useState(false);
     const [autoMine, setAutoMine] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -251,6 +252,7 @@ export function useEcosystem() {
         const block = node.blockchain[blockIndex];
         setMiningBlock({ nodeId, blockIndex });
         setMiningNonce(0);
+        setMiningHash("");
 
         try {
             // Validate all transactions in the block before mining
@@ -278,7 +280,10 @@ export function useEcosystem() {
                 block.index,
                 block.data,
                 block.prevHash,
-                (currentNonce) => setMiningNonce(currentNonce)
+                (currentNonce, currentHash) => {
+                    setMiningNonce(currentNonce);
+                    setMiningHash(currentHash);
+                }
             );
 
             setNodes(prev => prev.map(n => {
@@ -548,6 +553,7 @@ export function useEcosystem() {
         movingNode,
         miningBlock,
         miningNonce,
+        miningHash,
         allowInvalid,
         autoMine,
         error,

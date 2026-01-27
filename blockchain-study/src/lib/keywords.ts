@@ -16,6 +16,7 @@ export const KEYWORDS: Record<string, KeywordTarget> = {
     "chain": { scroll: "chain", highlight: "connect blocks into the Chain" },
     "blockchain": { scroll: "chain", highlight: "Chain or Blockchain" },
     "nodes": { scroll: "network", highlight: "computers, we call them Nodes" },
+    "node": { scroll: "network", highlight: "computers, we call them Nodes" },
     "wallet": { scroll: "keys", highlight: "you need a Wallet" },
     "private key": { scroll: "keys", highlight: "Private Key and Public Key" },
     "public key": { scroll: "keys", highlight: "Private Key and Public Key" },
@@ -25,6 +26,7 @@ export const KEYWORDS: Record<string, KeywordTarget> = {
     "transactions": { scroll: "transactions", highlight: "official, the sender must sign" },
     "mempool": { scroll: "mempool", highlight: "area called the Mempool" },
     "fee": { scroll: "mempool", highlight: "usually, they sort them by Fee" },
+    "network": { scroll: "network", highlight: "The Network" },
 
     // Russian
     "данных": { scroll: "data", highlight: "Всё начинается с Данных" },

@@ -19,6 +19,7 @@ interface BlockWithTransactionsProps {
     onMineClick?: () => void;
     isMining?: boolean;
     miningHash?: string;
+    miningNonce?: number;
     blockIndex?: number;
     blockchain?: any[];
     onRemoveBlock?: () => void;
@@ -37,6 +38,7 @@ export function BlockWithTransactions({
     onRemoveBlock,
     isMining,
     miningHash,
+    miningNonce,
     validateTransaction,
     blockchain,
     blockIndex
@@ -112,11 +114,12 @@ export function BlockWithTransactions({
                                     </div>
                                 </div>
 
-                                {/* Error Tooltip */}
+                                {/* Error Overlay (replaces tooltip to avoid clipping) */}
                                 {!isValid && status?.reason && (
-                                    <div className="absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[9px] py-1.5 px-2 rounded shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity z-[100] whitespace-nowrap pointer-events-none border border-white/10 ring-1 ring-black/5">
-                                        {status.reason}
-                                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 -translate-y-1" />
+                                    <div className="absolute inset-0 bg-red-600/95 backdrop-blur-[1px] flex items-center justify-center p-2 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 pointer-events-none shadow-lg">
+                                        <span className="text-white text-[10px] font-bold text-center leading-tight uppercase tracking-wider">
+                                            {status.reason}
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -140,6 +143,7 @@ export function BlockWithTransactions({
             onClose={onRemoveBlock}
             isMining={isMining}
             miningHash={miningHash}
+            miningNonce={miningNonce}
         />
     );
 }

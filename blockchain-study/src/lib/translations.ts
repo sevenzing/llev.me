@@ -147,7 +147,7 @@ export const translations = {
         // Ecosystem (Final)
         ecosystem: {
             title: "Live Ecosystem",
-            description: "Welcome to the living blockchain! Here, everything you've learned comes together. You have a **Wallet**, a **Network** of Nodes, and a real-time **Blockchain**. \n\nWhen you send a transaction, it goes to your selected **Node**. If the node is mining, it will eventually include your transaction in a new **Block**. Use **Auto Sync** to see how new blocks propagate through the network automatically, or do it manually to see how consensus works.",
+            description: "Welcome to the living blockchain! Here, everything you've learned comes together. You have a **Wallet**, a **Network** of Nodes, and a real-time **Blockchain**. \n\nWhen you send a transaction, it goes to your selected **Node**. If the node is mining, it will eventually include your transaction in a new **Block**. Use `AUTO SYNC` to see how new blocks propagate through the network automatically, or do it manually to see how consensus works.",
             instruction: "Try to send coins from Alice to Bob. Mine the block on Node A. See how other nodes become 'Out of Sync' until you propagate the changes!",
             networkStatus: "Network Status",
             syncNetwork: "Sync Network",

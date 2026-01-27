@@ -17,6 +17,7 @@ interface BlockchainRendererProps {
     onAddBlock?: () => void;
     miningBlock?: number | null;
     miningNonce?: number;
+    miningHash?: string;
     uniqueKey: string;
     size: 'small' | 'large';
     reverse?: boolean;
@@ -34,6 +35,7 @@ export function BlockchainRenderer({
     onAddBlock,
     miningBlock,
     miningNonce,
+    miningHash,
     uniqueKey,
     size,
     reverse = false,
@@ -74,7 +76,8 @@ export function BlockchainRenderer({
                                     onMineClick={onMineClick ? () => onMineClick(index) : undefined}
                                     onRemoveBlock={isLastBlock && index > 0 && onRemoveBlock ? () => onRemoveBlock() : undefined}
                                     isMining={miningBlock === index}
-                                    miningHash={miningBlock === index ? (miningNonce?.toString() || '') : undefined}
+                                    miningHash={miningBlock === index ? miningHash : undefined}
+                                    miningNonce={miningBlock === index ? miningNonce : undefined}
                                     validateTransaction={validateTransaction}
                                     blockchain={blocks}
                                     blockIndex={index}
