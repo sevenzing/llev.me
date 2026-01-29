@@ -175,7 +175,7 @@ export function MiningGame() {
                             <div className="bg-slate-100/50 rounded-lg p-3 border border-dashed border-slate-300 text-center">
                                 <p className="text-xs text-slate-500 mb-1">{t.miningGame.explanation}</p>
                                 <code className="text-xs font-mono text-slate-700 bg-white px-2 py-1 rounded border border-slate-200 block overflow-x-auto">
-                                    Hash("<span className="font-bold text-blue-600">{data}</span>" + "<span className="font-bold text-purple-600">{nonce}</span>")
+                                    Hash(&quot;<span className="font-bold text-blue-600">{data}</span>&quot; + &quot;<span className="font-bold text-purple-600">{nonce}</span>&quot;)
                                 </code>
                             </div>
 

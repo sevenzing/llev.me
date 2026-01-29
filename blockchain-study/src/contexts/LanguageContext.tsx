@@ -94,7 +94,7 @@ function LanguageProviderInner({ children }: { children: ReactNode }) {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
     return (
-        <Suspense fallback={<>{children}</>}>
+        <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
             <LanguageProviderInner>{children}</LanguageProviderInner>
         </Suspense>
     );
