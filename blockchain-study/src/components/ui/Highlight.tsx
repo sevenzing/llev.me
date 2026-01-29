@@ -9,53 +9,27 @@ export function Highlight({ children }: { children: string }) {
     const parts = children.split(/(\*\*.*?\*\*|`.*?`)/g);
 
     const handleKeywordClick = (content: string) => {
-        const target = KEYWORDS[content.toLowerCase()];
-        if (!target) return;
+        const targetId = KEYWORDS[content.toLowerCase()];
+        if (!targetId) return;
 
-        const section = document.getElementById(target.scroll);
+        const section = document.getElementById(targetId);
         if (!section) return;
 
-        // 1. Try to find the specific text to highlight within the section first
-        const walk = document.createTreeWalker(section, NodeFilter.SHOW_TEXT, null);
-        let textNode;
-        let targetElement: HTMLElement | null = null;
-
-        while (textNode = walk.nextNode()) {
-            const parent = textNode.parentElement;
-            if (parent && parent.textContent?.includes(target.highlight)) {
-                targetElement = parent;
-                // Keep looking for a more specific match (smaller container)
-                if (parent.tagName === 'SPAN' || parent.tagName === 'B' || parent.tagName === 'STRONG' || parent.tagName === 'CODE') {
-                    break;
-                }
-            }
-        }
-
-        // If we found a specific match in a span, try to get the whole sentence/paragraph for better context
-        if (targetElement && (targetElement.tagName === 'SPAN' || targetElement.tagName === 'B' || targetElement.tagName === 'STRONG')) {
-            const p = targetElement.closest('p, li, h1, h2, h3, h4');
-            if (p && p.textContent?.includes(target.highlight)) {
-                targetElement = p as HTMLElement;
-            }
-        }
-
-        const finalTarget = targetElement || section;
-
-        // 2. Scroll the specific element into the middle of the screen
-        finalTarget.scrollIntoView({
+        // Scroll the section into the middle of the screen
+        section.scrollIntoView({
             behavior: 'smooth',
-            block: 'center',
+            block: 'start', // Align to top because we have fixed header offset handled in CSS
             inline: 'nearest'
         });
 
-        // 3. Trigger the highlight flash
+        // Trigger the highlight flash on the section
         setTimeout(() => {
-            finalTarget.classList.remove('highlight-flash');
-            void (finalTarget as HTMLElement).offsetWidth; // Force reflow
-            finalTarget.classList.add('highlight-flash');
+            section.classList.remove('highlight-flash');
+            void (section as HTMLElement).offsetWidth; // Force reflow
+            section.classList.add('highlight-flash');
 
             setTimeout(() => {
-                finalTarget.classList.remove('highlight-flash');
+                section.classList.remove('highlight-flash');
             }, 2000);
         }, 300); // Wait for scroll to be mostly done
     };

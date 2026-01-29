@@ -157,7 +157,7 @@ export function MempoolPlayground() {
                         className="pt-8 space-y-6"
                     >
                         <div className="flex flex-col items-center gap-2">
-                            <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Miner's Blockchain Ledger</h4>
+                            <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">{t.mempool.ledgerTitle}</h4>
                             <div className="w-12 h-1 bg-blue-500 rounded-full" />
                         </div>
 

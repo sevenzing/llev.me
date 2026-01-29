@@ -56,7 +56,7 @@ export function MempoolQueue({ transactions, onRemove }: MempoolQueueProps) {
                                     {/* Hover Tooltip for Invalid */}
                                     {!tx.isValid && (
                                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] py-1 px-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                                            Unsigned Transaction
+                                            {t.mempool.unsignedTx}
                                             <div className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
                                         </div>
                                     )}
@@ -106,7 +106,7 @@ export function MempoolQueue({ transactions, onRemove }: MempoolQueueProps) {
                         <Info size={12} />
                     </div>
                     <p className="text-[9px] font-medium text-slate-500 leading-tight">
-                        Transactions are sorted by <b>Fee</b>. High fees get prioritized by miners.
+                        {t.mempool.feeTip}
                     </p>
                 </div>
             </div>

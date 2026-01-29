@@ -20,7 +20,9 @@ import { DataDemo } from "@/components/playgrounds/DataDemo";
 import { CardBackground } from "@/components/ui/CardBackground";
 import Snowfall from "react-snowfall";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { Menu, X, Link as LinkIcon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   return (
@@ -32,6 +34,7 @@ export default function Home() {
 
 function HomeContent() {
   const { language, setLanguage, t } = useLanguage();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const params = useSearchParams();
   const blockExampleNumber = 711;
   const showSnow = params.get("snow") === "true";
@@ -44,6 +47,40 @@ function HomeContent() {
       hash: "5bfc4ce7f6435a4e49278938a2d3b93a7cf48eea596318f40c9419a163ca394b"
     }
   ]);
+
+  const navLinks = [
+    { href: "#data", label: t.nav.data },
+    { href: "#hashing", label: t.nav.hashing },
+    { href: "#determinism", label: t.nav.determinism },
+    { href: "#validity", label: t.nav.validity },
+    { href: "#block", label: t.nav.block },
+    { href: "#chain", label: t.nav.chain },
+    { href: "#network", label: t.nav.network },
+    { href: "#keys", label: t.nav.keys },
+    { href: "#transactions", label: t.nav.transactions },
+    { href: "#mempool", label: t.nav.mempool },
+    { href: "#ecosystem", label: t.nav.ecosystem },
+  ];
+
+  // Close menu when clicking a link
+  const handleLinkClick = (e: React.MouseEvent | null, href: string) => {
+    if (e) e.preventDefault();
+    setIsMenuOpen(false);
+
+    const targetId = href.replace('#', '');
+    const element = document.getElementById(targetId);
+
+    if (element) {
+      // Update URL without jump
+      window.history.pushState(null, '', href);
+
+      // Wait for menu closing animation to settle if it was mobile
+      const delay = isMenuOpen ? 300 : 0;
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }, delay);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#f5f5f7] text-slate-900 font-sans selection:bg-blue-500/30 relative overflow-hidden">
@@ -65,23 +102,64 @@ function HomeContent() {
           <h1 className="text-xl font-heading font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             {t.title}
           </h1>
+
           <div className="flex items-center gap-6">
-            <nav className="text-sm font-medium text-slate-600 space-x-4">
-              <a href="#data" className="hover:text-blue-600 transition-colors">{t.nav.data}</a>
-              <a href="#hashing" className="hover:text-blue-600 transition-colors">{t.nav.hashing}</a>
-              <a href="#block" className="hover:text-blue-600 transition-colors">{t.nav.block}</a>
-              <a href="#chain" className="hover:text-blue-600 transition-colors">{t.nav.chain}</a>
-              <a href="#network" className="hover:text-blue-600 transition-colors">{t.nav.network}</a>
-              <a href="#ecosystem" className="hover:text-blue-600 transition-colors">{t.nav.ecosystem}</a>
+            <nav className="hidden xl:flex text-[11px] font-black uppercase tracking-widest text-slate-500 items-center gap-4">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={(e) => handleLinkClick(e, link.href)}
+                  className="hover:text-blue-600 transition-colors whitespace-nowrap"
+                >
+                  {link.label}
+                </a>
+              ))}
             </nav>
-            <button
-              onClick={() => setLanguage(language === 'en' ? 'ru' : 'en')}
-              className="px-3 py-1 text-sm font-bold bg-white/50 hover:bg-white/80 backdrop-blur-md border border-white/40 rounded-lg transition-all shadow-sm"
-            >
-              {language === 'en' ? 'RU' : 'EN'}
-            </button>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'ru' : 'en')}
+                className="px-3 py-1.5 text-xs font-black bg-white/50 hover:bg-white/80 backdrop-blur-md border border-white/40 rounded-xl transition-all shadow-sm"
+              >
+                {language === 'en' ? 'RU' : 'EN'}
+              </button>
+
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="xl:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                aria-label="Toggle menu"
+              >
+                {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="xl:hidden bg-white border-b border-slate-100 overflow-hidden"
+            >
+              <nav className="flex flex-col p-6 gap-4">
+                {navLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => handleLinkClick(e, link.href)}
+                    className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <div className="pt-24 pb-32 space-y-32 relative z-10">
@@ -103,6 +181,7 @@ function HomeContent() {
           description={t.data.description}
           instruction={t.data.instruction}
           withCard={false}
+          onAnchorClick={handleLinkClick}
         >
           <DataDemo />
         </Section>
@@ -112,8 +191,9 @@ function HomeContent() {
           id="hashing"
           title={t.hashing.title}
           description={t.hashing.description}
-          instruction="Type anything in the box to the right. Watch how the Hash changes completely with even a single character difference!"
+          instruction={t.hashing.instruction}
           withCard={false}
+          onAnchorClick={handleLinkClick}
         >
           <HashPlayground />
         </Section>
@@ -125,6 +205,7 @@ function HomeContent() {
           description={t.determinism.description}
           instruction={t.determinism.instruction}
           withCard={false}
+          onAnchorClick={handleLinkClick}
         >
           <HashComparator initialA="Привет" initialB="Hello" />
         </Section>
@@ -136,6 +217,7 @@ function HomeContent() {
           description={t.dataValidity.description}
           instruction={t.dataValidity.instruction}
           withCard={false}
+          onAnchorClick={handleLinkClick}
         >
           <DataValidityPlayground />
         </Section>
@@ -147,6 +229,7 @@ function HomeContent() {
           description={t.miningGame.description}
           instruction={t.miningGame.instruction}
           withCard={false}
+          onAnchorClick={handleLinkClick}
         >
           <MiningGame />
         </Section>
@@ -156,8 +239,9 @@ function HomeContent() {
           id="block"
           title={t.block.title}
           description={t.block.description}
-          instruction="Change the data to anything you want to store in Block. Then find the Nonce. Or dont waste your time and click Mine and fix the Block!"
+          instruction={t.block.instruction}
           withCard={false}
+          onAnchorClick={handleLinkClick}
         >
           <CardBackground className="flex flex-col items-center justify-center p-4 w-full">
             <BlockWithData
@@ -183,20 +267,22 @@ function HomeContent() {
           description={t.chain.description}
           instruction="Mine all blocks to fix the Chain. Change data in Block #0. See how it breaks all blocks. Well, to change data in chain you need to mine everything after it!"
           layout="vertical"
+          onAnchorClick={handleLinkClick}
         >
           <SingleBlockchainPlayground orientation="horizontal" numberOfBlocks={3} />
         </Section>
 
         {/* Distributed */}
-        <NetworkPlayground t={t} />
+        <NetworkPlayground t={t} onAnchorClick={handleLinkClick} />
 
         {/* Keys */}
         <Section
           id="keys"
           title={t.keys.title}
           description={t.keys.description}
-          instruction="Generate a wallet. Copy the Private Key to sign a message. Then copy the Public Key and Signature to verify it!"
+          instruction={t.keys.instruction}
           layout="vertical"
+          onAnchorClick={handleLinkClick}
         >
           <KeysAndSignatures />
         </Section>
@@ -207,6 +293,7 @@ function HomeContent() {
           description={t.transactions.description}
           instruction={t.transactions.instruction}
           layout="horizontal"
+          onAnchorClick={handleLinkClick}
         >
           <TransactionPlayground />
         </Section>
@@ -218,12 +305,13 @@ function HomeContent() {
           description={t.mempool.description}
           instruction={t.mempool.instruction}
           layout="vertical"
+          onAnchorClick={handleLinkClick}
         >
           <MempoolPlayground />
         </Section>
 
         {/* Final Ecosystem */}
-        <EcosystemPlayground />
+        <EcosystemPlayground onAnchorClick={handleLinkClick} />
       </div>
     </main>
   );
@@ -231,18 +319,32 @@ function HomeContent() {
 
 
 
-function Section({ id, title, description, instruction, layout = 'horizontal', withCard = true, children }: { id: string, title: string, description: string, instruction?: string, layout?: 'vertical' | 'horizontal' | undefined, withCard?: boolean, children: React.ReactNode }) {
+function Section({ id, title, description, instruction, layout = 'horizontal', withCard = true, onAnchorClick, children }: { id: string, title: string, description: string, instruction?: string, layout?: 'vertical' | 'horizontal' | undefined, withCard?: boolean, onAnchorClick?: (e: React.MouseEvent, href: string) => void, children: React.ReactNode }) {
   const cardClasses = withCard
     ? "bg-white/40 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-xl ring-1 ring-white/40 flex items-center justify-center min-h-[400px]"
     : "flex items-center justify-center min-h-[400px]";
+
+  const TitleWithAnchor = (
+    <div className="group flex items-center gap-3 relative">
+      <h3 className="text-3xl font-heading font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+        <Highlight>{title}</Highlight>
+      </h3>
+      <a
+        href={`#${id}`}
+        onClick={(e) => onAnchorClick?.(e, `#${id}`)}
+        className="opacity-0 group-hover:opacity-100 p-2 text-blue-500 hover:text-blue-700 transition-all transform translate-x-[-10px] group-hover:translate-x-0"
+        aria-label={`Link to ${title}`}
+      >
+        <LinkIcon size={20} />
+      </a>
+    </div>
+  );
 
   if (layout === 'horizontal') {
     return (
       <section id={id} className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center min-h-[60vh]">
         <div className="space-y-6">
-          <h3 className="text-3xl font-heading font-bold text-slate-900">
-            <Highlight>{title}</Highlight>
-          </h3>
+          {TitleWithAnchor}
           <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-wrap">
             <Highlight>{description}</Highlight>
           </p>
@@ -256,10 +358,8 @@ function Section({ id, title, description, instruction, layout = 'horizontal', w
   } else {
     return (
       <section id={id} className="max-w-7xl mx-auto px-6 space-y-8">
-        <div className="space-y-6 max-w-3xl mx-auto text-center">
-          <h3 className="text-3xl font-heading font-bold text-slate-900">
-            <Highlight>{title}</Highlight>
-          </h3>
+        <div className="space-y-6 max-w-3xl mx-auto text-center flex flex-col items-center">
+          {TitleWithAnchor}
           <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-wrap">
             <Highlight>{description}</Highlight>
           </p>

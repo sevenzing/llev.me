@@ -168,7 +168,7 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
         <div className="lg flex flex-col gap-4">
             <div className="flex items-center justify-between px-1">
                 <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    Wallet App
+                    {t.mempool.phoneTitle}
                 </h4>
             </div>
 
@@ -187,13 +187,13 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
                                         <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-500 mb-1">
                                             <AlertTriangle size={24} />
                                         </div>
-                                        <h3 className="font-bold text-slate-800 text-lg leading-tight">Unsigned Transaction</h3>
+                                        <h3 className="font-bold text-slate-800 text-lg leading-tight">{t.mempool.unsignedTx}</h3>
                                         <p className="text-xs text-slate-500">
-                                            Are you sure you want to submit a transaction without a signature?
+                                            {t.mempool.unsignedTxConfirm}
                                         </p>
                                         <div className="bg-red-50 p-2 rounded-lg border border-red-100 w-full">
                                             <p className="text-[10px] font-medium text-red-600">
-                                                Miners will likely reject it because the signature is missing.
+                                                {t.mempool.unsignedTxWarning}
                                             </p>
                                         </div>
                                     </div>
@@ -203,13 +203,13 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
                                             onClick={() => setShowWarning(false)}
                                             className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1"
                                         >
-                                            <X size={14} /> Cancel
+                                            <X size={14} /> {t.nav.cancel}
                                         </button>
                                         <button
                                             onClick={() => handleSend(false)}
                                             className="py-2 px-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1"
                                         >
-                                            <Check size={14} /> Send Anyway
+                                            <Check size={14} /> {t.mempool.sendAnyway}
                                         </button>
                                     </div>
                                 </div>
@@ -228,13 +228,17 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
                                         <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-500 mb-1">
                                             <AlertTriangle size={24} />
                                         </div>
-                                        <h3 className="font-bold text-slate-800 text-lg leading-tight">Insufficient Balance</h3>
+                                        <h3 className="font-bold text-slate-800 text-lg leading-tight">{t.mempool.insufficientBalance}</h3>
                                         <p className="text-xs text-slate-500">
-                                            {activeAccount.name} only has {balances?.[activeAccount.name] || 0} coins. You are trying to send {(parseFloat(amount) || 0) + (parseFloat(fee) || 0)} coins.
+                                            {t.mempool.insufficientBalanceDesc(
+                                                activeAccount.name,
+                                                balances?.[activeAccount.name] || 0,
+                                                (parseFloat(amount) || 0) + (parseFloat(fee) || 0)
+                                            )}
                                         </p>
                                         <div className="bg-amber-50 p-2 rounded-lg border border-amber-100 w-full">
                                             <p className="text-[10px] font-medium text-amber-600">
-                                                On a real blockchain, this transaction would be rejected by nodes.
+                                                {t.mempool.insufficientBalanceWarning}
                                             </p>
                                         </div>
                                     </div>
@@ -244,7 +248,7 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
                                             onClick={() => setBalanceWarning(false)}
                                             className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1"
                                         >
-                                            <X size={14} /> Cancel
+                                            <X size={14} /> {t.nav.cancel}
                                         </button>
                                         <button
                                             onClick={() => {
@@ -254,7 +258,7 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
                                             }}
                                             className="py-2 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1"
                                         >
-                                            <Check size={14} /> Send Anyway
+                                            <Check size={14} /> {t.mempool.sendAnyway}
                                         </button>
                                     </div>
                                 </div>
@@ -268,7 +272,7 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
                     <div className="flex items-center justify-between px-1 mb-2">
                         <div className="flex items-center gap-1.5 font-bold text-slate-400 text-[10px] tracking-tight">
                             <Activity size={10} className="text-blue-500" />
-                            CONNECTED TO BLOCKCHAIN
+                            {t.mempool.connected}
                         </div>
                     </div>
 
@@ -329,7 +333,7 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
                     {/* Transaction Form */}
                     <div className="flex-1 space-y-3 pt-2">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Recipient</label>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">{t.transactions.to}</label>
                             <div className="flex gap-2">
                                 {ACCOUNTS.map(acc => (
                                     <button
@@ -351,7 +355,7 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
 
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Amount</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">{t.transactions.amount}</label>
                                 <input
                                     type="number"
                                     value={amount}
@@ -360,7 +364,7 @@ export function AccountPhone({ onSendTransaction, balances }: AccountPhoneProps)
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Fee</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">{t.transactions.fee}</label>
                                 <input
                                     type="number"
                                     value={fee}

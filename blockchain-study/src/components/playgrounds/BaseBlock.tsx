@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from "framer-motion";
 import { Trash2 } from "lucide-react";
 import { hashIsValid } from "@/lib/blockchain";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BaseBlockProps {
     blockNumber: number;
@@ -42,6 +43,7 @@ export function BaseBlock({
     onMineClick,
     onClose
 }: BaseBlockProps) {
+    const { t } = useLanguage();
     const isValid = propIsValid !== undefined ? propIsValid : hashIsValid(hash);
 
     const sizeClasses = {
@@ -71,12 +73,12 @@ export function BaseBlock({
             <div className="flex flex-col flex-1 justify-between">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <span className={`${classes.title} font-bold text-slate-700 tracking-wide`}>Block #{blockNumber}</span>
+                    <span className={`${classes.title} font-bold text-slate-700 tracking-wide`}>{t.block.blockNumber}{blockNumber}</span>
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border backdrop-blur-md shadow-sm ${isValid
                         ? 'bg-emerald-400/20 text-emerald-700 border-emerald-400/30'
                         : 'bg-red-400/20 text-red-700 border-red-400/30'
                         }`}>
-                        {isValid ? '✓ Valid' : '✗ Invalid'}
+                        {isValid ? `✓ ${t.miningGame.valid}` : `✗ ${t.miningGame.invalid}`}
                     </span>
                 </div>
 
@@ -107,10 +109,10 @@ export function BaseBlock({
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                         </svg>
-                                        Mining...
+                                        {t.block.mining}
                                     </>
                                 ) : (
-                                    <>{isValid ? '✓ Mined' : '⛏ Mine Block'}</>
+                                    <>{isValid ? `✓ ${t.block.signed}` : `⛏ ${t.block.mine}`}</>
                                 )}
                             </button>
                         )}
@@ -121,7 +123,7 @@ export function BaseBlock({
                                     e.stopPropagation();
                                     onClose();
                                 }}
-                                className={`flex-1 px-2 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-200 transition-all py-1.5`}
+                                className={`flex-1 px-2 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-200 transition-all`}
                                 title="Remove Block"
                             >
                                 <Trash2 className="w-5 h-5" strokeWidth={2} />
@@ -132,7 +134,7 @@ export function BaseBlock({
 
                 <div className="space-y-2 mt-4">
                     <div>
-                        <label className={`${classes.text} block text-slate-500 font-semibold mb-1 ml-1`}>Nonce</label>
+                        <label className={`${classes.text} block text-slate-500 font-semibold mb-1 ml-1`}>{t.block.nonce}</label>
                         {onNonceChange ? (
                             <input
                                 type="number"
@@ -150,14 +152,14 @@ export function BaseBlock({
                     </div>
 
                     <div>
-                        <label className={`${classes.text} block text-slate-500 font-semibold mb-1 ml-1`}>Prev Hash</label>
+                        <label className={`${classes.text} block text-slate-500 font-semibold mb-1 ml-1`}>{t.block.prevHash}</label>
                         <div className={`w-full border border-slate-200 rounded-xl px-2 py-1 ${classes.text} bg-slate-50 text-slate-500 font-mono truncate shadow-inner`}>
                             {prevHash || '0'}
                         </div>
                     </div>
 
                     <div>
-                        <label className={`${classes.text} block text-slate-500 font-semibold mb-1 ml-1`}>Hash</label>
+                        <label className={`${classes.text} block text-slate-500 font-semibold mb-1 ml-1`}>{t.block.hash}</label>
                         <div
                             className={`w-full border border-slate-200 rounded-xl px-2 py-1 ${classes.text} font-mono break-all shadow-inner ${isMining ? 'bg-yellow-100/40 text-yellow-700 animate-pulse' :
                                 isValid ? 'bg-emerald-50/40 text-emerald-700' : 'bg-red-50/40 text-red-700'

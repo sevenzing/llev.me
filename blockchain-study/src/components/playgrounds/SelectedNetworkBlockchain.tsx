@@ -2,6 +2,7 @@
 
 import { CardBackground } from "../ui/CardBackground";
 import { BlockchainRenderer } from "./BlockchainRenderer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SelectedNetworkBlockchainProps {
     selectedNode: string | null;
@@ -28,17 +29,19 @@ export function SelectedNetworkBlockchain({
     miningNonce,
     scrollable
 }: SelectedNetworkBlockchainProps) {
+    const { t } = useLanguage();
+
     if (!selectedNode) {
         return (
             <div className="text-center text-slate-500 py-8">
-                Select a node to view its blockchain
+                {t.network.selectNode}
             </div>
         );
     }
 
     return (
         <CardBackground className="space-y-4 min-w-0 h-full">
-            <h3 className="text-lg font-bold pt-4 px-4">Node {selectedNode}'s Blockchain</h3>
+            <h3 className="text-lg font-bold pt-4 px-4">{t.network.nodeChain(selectedNode)}</h3>
             <div className="pl-4">
                 <BlockchainRenderer
                     blocks={blockchain}

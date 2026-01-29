@@ -7,6 +7,7 @@ import { hashIsValid } from "@/lib/blockchain";
 import { AlertCircle, CheckCircle } from 'lucide-react';
 
 import { BaseBlock } from "./BaseBlock";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BlockWithTransactionsProps {
     blockNumber: number;
@@ -43,6 +44,7 @@ export function BlockWithTransactions({
     blockchain,
     blockIndex
 }: BlockWithTransactionsProps) {
+    const { t } = useLanguage();
     const sizeClasses = {
         small: {
             text: "text-sm",
@@ -55,7 +57,7 @@ export function BlockWithTransactions({
     };
 
     const classes = sizeClasses[size];
-    const dataTitle = `Transactions (${transactions.length})`;
+    const dataTitle = t.block.transactionsTitle(transactions.length);
 
     const [txStatuses, setTxStatuses] = React.useState<Record<string, { valid: boolean; reason?: string }>>({});
 
@@ -73,7 +75,7 @@ export function BlockWithTransactions({
             <div className={`${classes.txList} overflow-y-auto no-scrollbar border border-slate-100 rounded-xl bg-slate-50/50 p-2 space-y-2 shadow-inner flex-1`}>
                 {transactions.length === 0 ? (
                     <div className={`${classes.text} text-slate-300 italic text-left py-2 px-1`}>
-                        No transactions
+                        {t.block.noTransactions}
                     </div>
                 ) : (
                     transactions.map((tx, idx) => {
@@ -108,9 +110,9 @@ export function BlockWithTransactions({
                                     </div>
                                     <div className="flex flex-col items-end">
                                         <span className={`text-[10px] font-bold ${isValid ? 'text-slate-700' : 'text-red-700'}`}>
-                                            {tx.amount} <small className="text-[8px] opacity-60">COINS</small>
+                                            {tx.amount} <small className="text-[8px] opacity-60 uppercase">{t.nav.transactions}</small>
                                         </span>
-                                        <span className="text-[8px] font-medium text-slate-400">Fee: {tx.fee}</span>
+                                        <span className="text-[8px] font-medium text-slate-400">{t.transactions.fee}: {tx.fee}</span>
                                     </div>
                                 </div>
 

@@ -126,10 +126,10 @@ export function MinerNode({ onMine, isMining, blockCount, txMined, showChain, on
 
                         <div className="text-center space-y-1">
                             <h3 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">
-                                {isMining ? t.block.mining : 'Node Idle'}
+                                {isMining ? t.block.mining : t.mempool.nodeIdle}
                             </h3>
                             {isMining && (
-                                <p className="text-[10px] font-bold text-blue-500 font-mono">Searching valid nonce...</p>
+                                <p className="text-[10px] font-bold text-blue-500 font-mono">{t.mempool.searchingNonce}</p>
                             )}
                         </div>
                     </div>

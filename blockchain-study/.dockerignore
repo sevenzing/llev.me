@@ -1,0 +1,15 @@
+node_modules
+.next
+.swc
+out
+build
+test-results
+playwright-report
+Dockerfile
+.dockerignore
+.gitignore
+README.md
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store

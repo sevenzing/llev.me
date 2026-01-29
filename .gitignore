@@ -1,1 +1,7 @@
-*/.DS_Store
+.DS_Store
+node_modules
+.next
+playwright-report
+test-results
+next-env.d.ts
+tsconfig.tsbuildinfo

@@ -11,7 +11,7 @@ interface AddBlockGhostProps {
 export function AddBlockGhost({ onClick, size = 'small' }: AddBlockGhostProps) {
     const isSmall = size === 'small';
     const dimensions = isSmall
-        ? "w-64 h-[447.5px]"
+        ? "w-64 h-[430.5px]"
         : "w-80 h-[547.5px]";
 
     return (

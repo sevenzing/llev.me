@@ -6,6 +6,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { hashIsValid, calculateBlockHash } from "@/lib/blockchain";
 import { Trash2 } from "lucide-react";
 import { BaseBlock } from "./BaseBlock";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BlockWithDataProps {
     blockNumber?: number;
@@ -44,6 +45,7 @@ export function BlockWithData({
     rows = 2,
     fixedHeight = false
 }: BlockWithDataProps) {
+    const { t } = useLanguage();
     const [data, setData] = useState(initialData);
     const nonce = isMining && miningNonce !== undefined ? miningNonce : initialNonce;
     const hash = initialHash;
@@ -76,7 +78,7 @@ export function BlockWithData({
         ? `${hash.slice(0, 6)}...${hash.slice(-4)}`
         : hash;
 
-    const dataTitle = "Data"
+    const dataTitle = t.block.data
     const dataContent = (
         <div className="flex-1 flex flex-col">
             <textarea
@@ -85,7 +87,7 @@ export function BlockWithData({
                 rows={rows}
                 disabled={readOnly}
                 className={`w-full border border-slate-200 rounded-xl px-2 py-1 text-sm ${readOnly ? 'bg-slate-50 text-slate-500' : 'bg-white text-slate-700'} focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/30 transition-all shadow-inner placeholder:text-slate-400 resize-none flex-1`}
-                placeholder="Enter block data..."
+                placeholder={t.block.dataPlaceholder}
             />
         </div>
     )

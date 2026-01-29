@@ -211,7 +211,7 @@ export function NetworkGraph({ network, showExtraControls = true }: NetworkGraph
                 })}
             </div>
             <p className="text-xs text-slate-500 font-medium text-center">
-                Click to select • Drag to move • Double-click & drag to connect
+                {t.network.legend}
             </p>
 
             <div className="flex flex-col gap-4 bg-white/60 backdrop-blur-md p-5 rounded-3xl border border-white/40 shadow-sm transition-all duration-300">
@@ -221,21 +221,21 @@ export function NetworkGraph({ network, showExtraControls = true }: NetworkGraph
                         onClick={network.addNode}
                         className="px-6 py-2.5 bg-white/80 hover:bg-white text-purple-700 border border-purple-200 rounded-2xl transition-all text-xs font-black shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
                     >
-                        Add Node
+                        {t.network.addNode}
                     </button>
                     <button
                         onClick={() => network.propagateChain(network.selectedNode)}
                         disabled={network.isSyncing}
                         className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed transition-all text-xs font-black shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:translate-y-0 border border-emerald-400"
                     >
-                        {network.isSyncing ? 'Syncing...' : 'Sync Network'}
+                        {network.isSyncing ? t.network.syncing : t.network.syncNetwork}
                     </button>
                     {showExtraControls && (
                         <button
                             onClick={network.stealMoney}
                             className="px-6 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-2xl transition-all text-xs font-black shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm flex items-center gap-2"
                         >
-                            <ZapOff size={14} /> Steal Money
+                            <ZapOff size={14} /> {t.network.stealMoney}
                         </button>
                     )}
                 </div>

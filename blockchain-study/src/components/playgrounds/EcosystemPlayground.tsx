@@ -10,9 +10,9 @@ import { BlockchainRenderer } from './BlockchainRenderer';
 import { Highlight } from '../ui/Highlight';
 import { InteractionGuide } from '../ui/InteractionGuide';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, ShieldAlert, Zap, ZapOff, Info } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Zap, ZapOff, Info, Link as LinkIcon } from 'lucide-react';
 
-export function EcosystemPlayground() {
+export function EcosystemPlayground({ onAnchorClick }: { onAnchorClick?: (e: React.MouseEvent, href: string) => void }) {
     const { t } = useLanguage();
     const ecosystem = useEcosystem();
 
@@ -41,10 +41,20 @@ export function EcosystemPlayground() {
 
     return (
         <section id="ecosystem" className="max-w-[1400px] mx-auto px-4 py-12 space-y-8">
-            <div className="text-center space-y-4">
-                <h2 className="text-4xl font-heading font-bold text-slate-900">
-                    <Highlight>{t.ecosystem.title}</Highlight>
-                </h2>
+            <div className="text-center space-y-4 flex flex-col items-center">
+                <div className="group flex items-center gap-3 relative">
+                    <h2 className="text-4xl font-heading font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                        <Highlight>{t.ecosystem.title}</Highlight>
+                    </h2>
+                    <a
+                        href="#ecosystem"
+                        onClick={(e) => onAnchorClick?.(e, "#ecosystem")}
+                        className="opacity-0 group-hover:opacity-100 p-2 text-blue-500 hover:text-blue-700 transition-all transform translate-x-[-10px] group-hover:translate-x-0"
+                        aria-label="Link to Ecosystem section"
+                    >
+                        <LinkIcon size={24} />
+                    </a>
+                </div>
                 <div className="max-w-3xl mx-auto">
                     <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-wrap">
                         <Highlight>{t.ecosystem.description}</Highlight>
@@ -87,7 +97,7 @@ export function EcosystemPlayground() {
                     <div className="flex flex-col gap-2 px-1">
                         <div className="flex items-center justify-between">
                             <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                                Node {ecosystem.selectedNode} Inspector
+                                {t.ecosystem.nodeInspector(ecosystem.selectedNode)}
                             </h4>
                             <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
                                 <span className="flex items-center gap-1"><Info size={10} /> {ecosystem.selectedBlockchain.length} {t.ecosystem.blocks}</span>
