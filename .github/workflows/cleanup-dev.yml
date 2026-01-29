@@ -1,0 +1,40 @@
+name: Cleanup Dev Stand
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_name:
+        description: 'Name of the deployment to remove (e.g., blockchain-study-abcdef12)'
+        required: true
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy scripts to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "scripts/*"
+          target: "/root/"
+
+      - name: Cleanup on Server via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            chmod +x /root/scripts/*.sh
+            /root/scripts/cleanup-stand.sh ${{ github.event.inputs.deploy_name }}
+
+      - name: Notification
+        run: |
+          echo "### Cleanup Successful! :wastebasket:" >> $GITHUB_STEP_SUMMARY
+          echo "Deployment removed: ${{ github.event.inputs.deploy_name }}" >> $GITHUB_STEP_SUMMARY
