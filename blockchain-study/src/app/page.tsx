@@ -358,7 +358,7 @@ function Section({ id, title, description, instruction, layout = 'horizontal', w
   } else {
     return (
       <section id={id} className="max-w-7xl mx-auto px-6 space-y-8">
-        <div className="space-y-6 max-w-3xl mx-auto text-center flex flex-col items-center">
+        <div className="space-y-6 max-w-4xl mx-auto text-center flex flex-col items-center">
           {TitleWithAnchor}
           <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-wrap">
             <Highlight>{description}</Highlight>

@@ -148,8 +148,8 @@ export const en = {
     // Mempool
     mempool: {
         title: "Mempool & Mining",
-        description: "Transactions don't go directly into the blockchain. First, they enter a waiting area called the **Mempool**. Miners look at this queue and pick transactions to include in the next block. Usually, they sort them by **Fee** — the more you pay, the faster your transaction is processed. If a transaction has an invalid signature, the Miner will simply ignore it.",
-        instruction: "Send transactions from different accounts. Watch them accumulate in the Queue. Then, click 'Mine' to see the Miner pick the best ones and create a new block!",
+        description: "Transactions don't go directly into the blockchain. First, they enter a waiting area called the **Mempool**. Miners look at this queue and pick transactions to include in the next block. Usually, they sort them by **Fee** — the more you pay, the faster your transaction is processed. If a transaction has an invalid signature, the Miner will simply ignore it. \n\nCheck the blockchain at the bottom of the page to see your transactions being added!",
+        instruction: "Send transactions from different accounts. Watch them accumulate in the Queue. Try to send an invalid transaction (e.g. from an account with no balance) and see how the miner ignores it! When ready, click 'Mine' to create a new block.",
         phoneTitle: "My Wallet",
         queueTitle: "Mempool Queue",
         minerTitle: "Miner Node",
@@ -174,14 +174,14 @@ export const en = {
         connected: "CONNECTED TO BLOCKCHAIN",
         nodeIdle: "Node Idle",
         searchingNonce: "Searching valid nonce...",
-        feeTip: "Transactions are sorted by **Fee**. High fees get prioritized by miners.",
+        feeTip: "Transactions are sorted by Fee. High fees get prioritized by miners.",
         ledgerTitle: "Miner's Blockchain Ledger",
     },
     // Ecosystem (Final)
     ecosystem: {
         title: "Live Ecosystem",
         description: "Welcome to the living blockchain! Here, everything you've learned comes together. You have a **Wallet**, a **Network** of Nodes, and a real-time **Blockchain**. \n\nWhen you send a transaction, it goes to your selected **Node**. If the node is mining, it will eventually include your transaction in a new **Block**. Use `AUTO SYNC` to see how new blocks propagate through the network automatically, or do it manually to see how consensus works.",
-        instruction: "Try to send coins from Alice to Bob. Mine the block on Node A. See how other nodes become 'Out of Sync' until you propagate the changes!",
+        instruction: "Try to send coins from Alice to Bob. Mine the block on Node A. See how other nodes become 'Out of Sync' until you propagate the changes by pressing the `Sync Network` button. You can also try to mine blocks on multiple nodes to see how they fork!",
         networkStatus: "Network Status",
         syncNetwork: "Sync Network",
         autoSync: "Auto Sync",

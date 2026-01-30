@@ -55,7 +55,7 @@ export function EcosystemPlayground({ onAnchorClick }: { onAnchorClick?: (e: Rea
                         <LinkIcon size={24} />
                     </a>
                 </div>
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-4xl mx-auto">
                     <p className="text-lg text-slate-600 leading-relaxed whitespace-pre-wrap">
                         <Highlight>{t.ecosystem.description}</Highlight>
                     </p>
@@ -78,13 +78,17 @@ export function EcosystemPlayground({ onAnchorClick }: { onAnchorClick?: (e: Rea
                         <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">
                             {t.ecosystem.networkView}
                         </h4>
-                        <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold border transition-colors ${isNetworkSynced
-                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                            : 'bg-amber-50 text-amber-600 border-amber-100 animate-pulse'
-                            }`}>
-                            {isNetworkSynced ? <ShieldCheck size={12} /> : <ShieldAlert size={12} />}
-                            {isNetworkSynced ? t.ecosystem.statusOk : t.ecosystem.statusWarning}
-                        </div>
+                        {isNetworkSynced ? (
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold border transition-colors bg-emerald-50 text-emerald-600 border-emerald-100">
+                                <ShieldCheck size={12} />
+                                {t.ecosystem.statusOk}
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full text-[10px] bg-red-100 text-red-600 font-bold border-2 border-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                                <div className="w-2 h-2 rounded-full bg-red-600" />
+                                {t.ecosystem.statusWarning}
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex-1 relative min-h-0">
