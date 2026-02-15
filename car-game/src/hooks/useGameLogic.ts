@@ -23,6 +23,20 @@ import { createNegativeImage } from "../utils/image";
 import { mulberry32 } from "../utils/random";
 import { codeRunner, createGameContext } from "../utils/codeRunner";
 
+// Performance monitoring constants
+const PERFORMANCE_CONFIG = {
+  targetFPS: 120,
+  lowPerformanceThreshold: 90, // FPS threshold to trigger adaptive speed
+  frameTimeHistorySize: 60, // Number of frames to track for average FPS
+  adaptiveSpeedMultiplier: 2, // How much to increase internal speed when performance is low
+  checkInterval: 100, // Check performance every N frames
+  recoveryThreshold: 45, // FPS threshold to start recovering normal speed
+  speedRecoveryRate: 0.95, // How quickly to recover normal speed (0.95 = 5% recovery per frame)
+  criticalPerformanceThreshold: 30, // FPS threshold for critical performance mode
+  criticalSpeedMultiplier: 3, // Speed multiplier for critical performance
+  frameSkipThreshold: 10, // FPS threshold to start skipping frames
+};
+
 const initialGameState: GameState = {
   currentLane: 2,
   targetX: calculateLaneXForCar(2),
@@ -56,6 +70,12 @@ const initialGameState: GameState = {
   coins: [],
   coinsCollected: 0,
   nextCoinTrailSpawn: 80,
+  userData: {},
+  // Performance monitoring
+  currentFPS: 60,
+  adaptiveSpeedMultiplier: 1,
+  isLowPerformanceMode: false,
+  frameTimes: [],
 };
 
 export const useGameLogic = (seed?: number, userCode?: string) => {
@@ -70,6 +90,77 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
   const randomRef = useRef<() => number>(() => Math.random());
   const gameStateRef = useRef(gameState);
   const userCodeFrameCounterRef = useRef<number>(0);
+
+
+
+  // Performance monitoring functions
+  const updatePerformanceMetrics = useCallback((deltaTime: number, currentFrameTimes: number[]) => {
+    const newFrameTimes = [...currentFrameTimes, deltaTime];
+    if (newFrameTimes.length < 5) {
+      return { avgFPS: 60, newFrameTimes };
+    }
+    
+    // Keep only the last N frame times
+    if (newFrameTimes.length > PERFORMANCE_CONFIG.frameTimeHistorySize) {
+      newFrameTimes.shift();
+    }
+    
+    // Calculate average FPS
+    const avgFrameTime = newFrameTimes.reduce((a: number, b: number) => a + b, 0) / newFrameTimes.length;
+    const avgFPS = 1000 / avgFrameTime;
+    
+    return { avgFPS, newFrameTimes };
+  }, []);
+
+  const adjustGameSpeedForPerformance = useCallback((avgFPS: number, gameState: GameState) => {
+    const currentMultiplier = gameState.adaptiveSpeedMultiplier;
+    const isLowPerformance = gameState.isLowPerformanceMode;
+    
+    if (avgFPS < PERFORMANCE_CONFIG.criticalPerformanceThreshold) {
+      // Critical performance mode
+      if (currentMultiplier !== PERFORMANCE_CONFIG.criticalSpeedMultiplier) {
+        console.error(`Critical performance detected. Avg FPS: ${avgFPS.toFixed(1)}. Using maximum speed boost.`);
+        return {
+          adaptiveSpeedMultiplier: PERFORMANCE_CONFIG.criticalSpeedMultiplier,
+          isLowPerformanceMode: true,
+        };
+      }
+    } else if (avgFPS < PERFORMANCE_CONFIG.lowPerformanceThreshold && !isLowPerformance) {
+      // Enter low performance mode
+      console.warn(`Low performance detected. Avg FPS: ${avgFPS.toFixed(1)}. Increasing internal game speed.`);
+      return {
+        adaptiveSpeedMultiplier: PERFORMANCE_CONFIG.adaptiveSpeedMultiplier,
+        isLowPerformanceMode: true,
+      };
+    } else if (avgFPS > PERFORMANCE_CONFIG.recoveryThreshold && isLowPerformance) {
+      // Start recovering normal speed
+      const newMultiplier = Math.max(
+        1,
+        currentMultiplier * PERFORMANCE_CONFIG.speedRecoveryRate
+      );
+      
+      // Check if we've fully recovered
+      if (newMultiplier <= 1.1) {
+        console.log(`Performance recovered. Avg FPS: ${avgFPS.toFixed(1)}. Returning to normal speed.`);
+        return {
+          adaptiveSpeedMultiplier: 1,
+          isLowPerformanceMode: false,
+        };
+      } else {
+        return {
+          adaptiveSpeedMultiplier: newMultiplier,
+          isLowPerformanceMode: true,
+        };
+      }
+    }
+    
+    return null; // No changes needed
+  }, []);
+
+  // Helper function to get effective game speed with adaptive multiplier
+  const getEffectiveGameSpeed = useCallback((gameState: GameState) => {
+    return gameState.gameSpeed * gameState.adaptiveSpeedMultiplier;
+  }, []);
 
   const resetRandomGenerator = useCallback(() => {
     randomRef.current = mulberry32(seed ?? Date.now());
@@ -153,8 +244,12 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       nextObstacleSpawn: 100,
       nextBonusSpawn: 300,
       nextCoinTrailSpawn: 80,
-      coins: [],
+        coins: [],
       coinsCollected: 0,
+      adaptiveSpeedMultiplier: 1,
+      isLowPerformanceMode: false,
+      frameTimes: [],
+      userData: {},
     });
   }, [difficulty]);
 
@@ -369,7 +464,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     return gameState.obstacles
       .map((obstacle) => ({
         ...obstacle,
-        y: obstacle.y + gameState.gameSpeed * obstacle.movingSpeed,
+        y: obstacle.y + getEffectiveGameSpeed(gameState) * obstacle.movingSpeed,
       }))
       .filter((obstacle) => obstacle.y < CANVAS_CONFIG.height)
       .filter((obstacle) => {
@@ -379,14 +474,14 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           Date.now() - (obstacle.fadeStartTime || 0) >= FADE_OUT_DURATION;
         return !isFadingOut;
       });
-  }, []);
+  }, [getEffectiveGameSpeed]);
 
   const updateBonuses = useCallback(
     (gameState: GameState) => {
       return gameState.bonuses
         .map((bonus) => ({
           ...bonus,
-          y: bonus.y + gameState.gameSpeed * bonus.config.movingSpeed,
+          y: bonus.y + getEffectiveGameSpeed(gameState) * bonus.config.movingSpeed,
         }))
         .map((bonus) => {
           if (bonus.config.isReversable) {
@@ -410,7 +505,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         })
         .filter((bonus) => bonus.y < CANVAS_CONFIG.height);
     },
-    [images, getReversedImageName],
+    [images, getReversedImageName, getEffectiveGameSpeed],
   );
 
   const updateActiveBonuses = useCallback(() => {
@@ -573,6 +668,10 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
             } else if (executionResult.moveDirection === "right") {
               moveCarRight();
             }
+            setGameState((prev) => ({
+              ...prev,
+              userData: executionResult.userData,
+            }));
           } else if (executionResult.result === "error") {
             if (executionResult.isTimeout) {
               handleCodeError(
@@ -612,6 +711,8 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
 
       // Reset user code frame counter
       userCodeFrameCounterRef.current = 0;
+
+
 
       // Clear any previous errors
       setCodeError(null);
@@ -663,12 +764,12 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
 
   // Helper to update/move coins
   const updateCoins = useCallback(
-    (coins: Coin[], gameSpeed: number): Coin[] => {
+    (coins: Coin[], gameState: GameState): Coin[] => {
       return coins
-        .map((coin) => ({ ...coin, y: coin.y + gameSpeed * coin.movingSpeed }))
+        .map((coin) => ({ ...coin, y: coin.y + getEffectiveGameSpeed(gameState) * coin.movingSpeed }))
         .filter((coin) => coin.y < CANVAS_CONFIG.height);
     },
-    [],
+    [getEffectiveGameSpeed],
   );
 
   // Helper to check coin collision
@@ -710,10 +811,30 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     (currentTime: number) => {
       if (!gameState.isRunning) return;
 
+      // Calculate delta time for performance monitoring
+      const deltaTime = currentTime - lastTimeRef.current;
       lastTimeRef.current = currentTime;
+
+      // Update performance metrics and adjust speed if needed
+      const { avgFPS, newFrameTimes } = updatePerformanceMetrics(deltaTime, gameState.frameTimes);
+      let performanceAdjustments = null;
+      if (gameState.frameCount % PERFORMANCE_CONFIG.checkInterval === 0) {
+        performanceAdjustments = adjustGameSpeedForPerformance(avgFPS, gameState);
+      }
 
       setGameState((prev) => {
         const newState = { ...prev };
+
+        // Update performance metrics in game state
+        newState.currentFPS = avgFPS;
+        newState.frameTimes = newFrameTimes;
+        
+        // Apply performance adjustments if any
+        if (performanceAdjustments) {
+          newState.adaptiveSpeedMultiplier = performanceAdjustments.adaptiveSpeedMultiplier;
+          newState.isLowPerformanceMode = performanceAdjustments.isLowPerformanceMode;
+        }
+
         // Update car position
         newState.carX += (newState.targetX - newState.carX) * 0.2;
 
@@ -722,7 +843,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           GAME_CONFIG.laneDashLength + GAME_CONFIG.laneDashGap;
         newState.roadLineOffset =
           (newState.roadLineOffset +
-            newState.gameSpeed * newState.roadSpeedMultiplier) %
+            getEffectiveGameSpeed(newState) * newState.roadSpeedMultiplier) %
           laneSegmentHeight;
 
         // Update frame count
@@ -753,10 +874,10 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           newState.nextBonusSpawn = newState.frameCount + newFrequency;
         }
 
-        // Update obstacles with consistent speed
+        // Update obstacles with consistent speed (including adaptive speed multiplier)
         newState.obstacles = updateObstacles(newState);
 
-        // Update bonuses with consistent speed
+        // Update bonuses with consistent speed (including adaptive speed multiplier)
         newState.bonuses = updateBonuses(newState);
 
         // Check collisions
@@ -781,8 +902,8 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           }
         });
 
-        // Update score
-        newState.score += newState.gameSpeed;
+        // Update score (adjusted for adaptive speed to maintain fair scoring)
+        newState.score += getEffectiveGameSpeed(newState);
         newState.publicScore = newState.score / 100;
 
         // Update active bonuses
@@ -814,7 +935,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         }
 
         // Move coins
-        newState.coins = updateCoins(newState.coins, newState.gameSpeed);
+        newState.coins = updateCoins(newState.coins, newState);
 
         // Check coin collisions
         const { updatedCoins, collectedCount } = checkCoinCollisions(
@@ -865,6 +986,9 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       spawnCoinTrail,
       checkCoinCollisions,
       updateCoins,
+      updatePerformanceMetrics,
+      adjustGameSpeedForPerformance,
+      getEffectiveGameSpeed,
     ],
   );
 

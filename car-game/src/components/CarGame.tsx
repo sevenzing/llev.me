@@ -10,9 +10,10 @@ import {
 import { loadUserCode, saveUserCode, shouldUpdateToNewVersion, getInitialCode, getSuperAICode } from "../utils/codePersistence";
 import { getURLState, updateURLState } from "../utils/urlState";
 import styles from "../styles/Game.module.css";
-import MonacoEditor from "@monaco-editor/react";
 import { errorToast } from "./ErrorToast";
 import { CustomTooltip } from "./CustomTooltip";
+import { CodeEditor } from "./CodeEditor";
+import { PerformanceIndicator } from "./PerformanceIndicator";
 
 const MIN_GAME_WIDTH = 450;
 const MIN_CODE_WIDTH = 530;
@@ -292,6 +293,7 @@ export const CarGame: React.FC = () => {
           images={images}
           onClick={handleCanvasClick}
         />
+        <PerformanceIndicator gameState={gameState} />
       </div>
     </>
   );
@@ -361,21 +363,13 @@ export const CarGame: React.FC = () => {
                 </button>
               </CustomTooltip>
             </div>
-            <MonacoEditor
-              height="100%"
-              defaultLanguage="typescript"
-              theme="vs-dark"
-              value={userCode}
-              onChange={handleCodeChange}
-              options={{
-                fontSize: 16,
-                minimap: { enabled: false },
-                wordWrap: "on",
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                readOnly: gameState.isRunning,
-              }}
+            <CodeEditor
+              userCode={userCode}
+              handleCodeChange={handleCodeChange}
+              gameState={gameState}
             />
+
+            
             <GameAllControls
               gameState={gameState}
               selectedDifficulty={selectedDifficulty}

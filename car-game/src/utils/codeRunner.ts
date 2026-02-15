@@ -1,89 +1,24 @@
 import type { GameState } from "../types/game";
 import { CAR_DIMENSIONS, USER_CODE_CONFIG } from "../constants/gameConstants";
 import * as ts from "typescript";
+import * as helpers from "./gameHelpers";
+import type { Context, MoveDirection } from "@/types/public/game";
 
-// Types for the code runner
-export interface Context {
-  player: {
-    lane: number;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    invincibility: {
-      isActive: boolean;
-      framesLeft: number;
-      itersLeft: number;
-    };
-  };
-  obstacles: Array<{
-    lane: number;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    movingSpeed: number;
-    collision: {
-      pixelsToCollision: number | null;
-      framesToCollision: number | null;
-      itersToCollision: number | null;
-    };
-  }>;
-  bonuses: Array<{
-    lane: number;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    type: string;
-    isReversed: boolean;
-    movingSpeed: number;
-    collision: {
-      pixelsToCollision: number | null;
-      framesToCollision: number | null;
-      itersToCollision: number | null;
-    };
-  }>;
-  coins: Array<{
-    lane: number;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    movingSpeed: number;
-    trailId: string;
-    collision: {
-      pixelsToCollision: number | null;
-      framesToCollision: number | null;
-      itersToCollision: number | null;
-    };
-  }>;
-  gameState: {
-    score: number;
-    lives: number;
-    gameSpeed: number;
-    frameCount: number;
-    nextInterationInFrames: number;
-    laneCount: number;
-    coinsCollected: number;
-  };
-  userData: Record<string, any>;
-}
 
-export type MoveDirection = "left" | "right" | null;
 
 export type ExecutionResult =
   | {
-      result: "success";
-      moveDirection: MoveDirection;
-      executionTime: number;
-    }
+    result: "success";
+    moveDirection: MoveDirection;
+    executionTime: number;
+    userData: Record<string, any>;
+  }
   | {
-      result: "error";
-      error: string | null;
-      executionTime: number;
-      isTimeout: boolean;
-    };
+    result: "error";
+    error: string | null;
+    executionTime: number;
+    isTimeout: boolean;
+  };
 
 // Safe wrapper for user code execution
 class SafeCodeRunner {
@@ -111,6 +46,8 @@ class SafeCodeRunner {
         warn: console.warn,
         error: console.error,
       },
+      // Game helper functions
+      ...helpers,
     };
   }
 
@@ -145,7 +82,8 @@ class SafeCodeRunner {
       // Create a new Function constructor with a safe context
       const safeContext = this.createSafeContext();
 
-      const transpiledCode = transpileTypeScript(code);
+      const strippedCode = stripImports(code);
+      const transpiledCode = transpileTypeScript(strippedCode);
 
       // Create the function
       const userFunction = new Function(
@@ -153,6 +91,7 @@ class SafeCodeRunner {
         "Math",
         "Array",
         "console",
+        ...Object.keys(helpers),
         `
         "use strict";
         ${transpiledCode}
@@ -181,6 +120,7 @@ class SafeCodeRunner {
             safeContext.Math,
             safeContext.Array,
             safeContext.console,
+            ...Object.values(helpers),
           );
           resolve(this.validateReturnValue(result));
         } catch (error) {
@@ -206,6 +146,7 @@ class SafeCodeRunner {
         result: "success",
         moveDirection,
         executionTime,
+        userData: context.userData,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
@@ -241,8 +182,6 @@ class SafeCodeRunner {
 // Export a singleton instance
 export const codeRunner = new SafeCodeRunner(); // Will use configurable timeout
 
-// Persistent userData object for user code
-let userData: Record<string, any> = {};
 
 export function createGameContext(gameState: GameState): Context {
   const carY = gameState.carY;
@@ -337,18 +276,31 @@ export function createGameContext(gameState: GameState): Context {
       laneCount: gameState.laneCount,
       coinsCollected: gameState.coinsCollected,
     },
-    userData,
+    userData: gameState.userData,
   };
-}
-
-// Allow user code to mutate userData
-export function resetUserData() {
-  userData = {};
 }
 
 function transpileTypeScript(tsCode: string): string {
   const result = ts.transpileModule(tsCode, {
-    compilerOptions: { module: ts.ModuleKind.ESNext },
+    compilerOptions: {
+      module: ts.ModuleKind.ESNext,
+      target: ts.ScriptTarget.ES2020,
+      removeComments: false
+    },
   });
   return result.outputText;
+}
+
+/**
+ * Strips ES module import statements from code.
+ * This allows user code to include imports for IntelliSense without causing runtime errors in the sandbox.
+ */
+function stripImports(code: string): string {
+  // Regex to match: import { ... } from '...'; or import ... from '...';
+  // Supports multi-line imports and various quote types
+  const importRegex = /^import\s+[\s\S]*?from\s+['"].*?['"]\s*;?/gm;
+  return code.replace(importRegex, (match) => {
+    // Replace with empty lines to preserve line numbers for error reporting
+    return match.split('\n').map(() => '').join('\n');
+  });
 }
