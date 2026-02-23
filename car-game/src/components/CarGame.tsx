@@ -22,7 +22,7 @@ const DEFAULT_GAME_WIDTH = 600;
 export const CarGame: React.FC = () => {
   // Initialize from URL state
   const initialURLState = getURLState();
-  
+
   // Add seed state and checkbox state
   const [seed, setSeed] = useState<number>(initialURLState.seed || 0);
   const [isSeedEnabled, setIsSeedEnabled] = useState<boolean>(initialURLState.seed !== null);
@@ -31,7 +31,7 @@ export const CarGame: React.FC = () => {
   const [isInitialCode, setIsInitialCode] = useState(true);
   const [gamePaneWidth, setGamePaneWidth] = useState(DEFAULT_GAME_WIDTH);
   const dragging = useRef(false);
-  
+
   const [secretClickCount, setSecretClickCount] = useState(0);
   const [lastSecretClickTime, setLastSecretClickTime] = useState(0);
   const SECRET_CLICK_TIMEOUT = 500; // 500ms between clicks
@@ -40,7 +40,7 @@ export const CarGame: React.FC = () => {
   // Load saved code on component mount
   useEffect(() => {
     const savedData = loadUserCode();
-    
+
     if (savedData) {
       // Check if we need to update to a new version
       if (savedData.isInitial && shouldUpdateToNewVersion(savedData.version)) {
@@ -48,7 +48,7 @@ export const CarGame: React.FC = () => {
         const newInitialCode = getInitialCode();
         setUserCode(newInitialCode);
         setIsInitialCode(true);
-        saveUserCode({code: newInitialCode, isInitial: true});
+        saveUserCode({ code: newInitialCode, isInitial: true });
       } else {
         // Load saved code
         setUserCode(savedData.code);
@@ -56,7 +56,7 @@ export const CarGame: React.FC = () => {
       }
     } else {
       // First time loading - save initial code
-      saveUserCode({code: getInitialCode(), isInitial: true});
+      saveUserCode({ code: getInitialCode(), isInitial: true });
     }
   }, []);
 
@@ -64,13 +64,13 @@ export const CarGame: React.FC = () => {
   const handleCodeChange = (value: string | undefined) => {
     const newCode = value ?? "";
     setUserCode(newCode);
-    
+
     // Check if this is still the initial code
     const isStillInitial = newCode === getInitialCode();
     setIsInitialCode(isStillInitial);
-    
+
     // Save to localStorage
-    saveUserCode({code: newCode, isInitial: isStillInitial});
+    saveUserCode({ code: newCode, isInitial: isStillInitial });
   };
 
   // Reset code to initial
@@ -80,7 +80,7 @@ export const CarGame: React.FC = () => {
       const initialCode = getInitialCode();
       setUserCode(initialCode);
       setIsInitialCode(true);
-      saveUserCode({code: initialCode, isInitial: true});
+      saveUserCode({ code: initialCode, isInitial: true });
     }
   };
 
@@ -108,32 +108,32 @@ export const CarGame: React.FC = () => {
   // Handle secret click
   const handleSecretClick = () => {
     const now = Date.now();
-    
+
     // Reset count if too much time has passed
     if (now - lastSecretClickTime > SECRET_CLICK_TIMEOUT) {
       setSecretClickCount(1);
       setLastSecretClickTime(now);
       return;
     }
-    
+
     const newCount = secretClickCount + 1;
     setSecretClickCount(newCount);
     setLastSecretClickTime(now);
-    
+
     // Check if secret is unlocked
     if (newCount >= SECRET_CLICKS_NEEDED) {
       // Only activate if current code is initial
       if (isInitialCode) {
         setUserCode(getSuperAICode());
         setIsInitialCode(false);
-        saveUserCode({code: getSuperAICode(), isInitial: false});
-        
+        saveUserCode({ code: getSuperAICode(), isInitial: false });
+
         // Show secret unlocked message
         setTimeout(() => {
           alert("🎉 SECRET UNLOCKED! 🎉\n\nYou've discovered the Super AI code!\nThis advanced AI will help you achieve incredible scores.\n\nTry running it now!");
         }, 100);
       }
-      
+
       // Reset secret count
       setSecretClickCount(0);
     }
@@ -305,6 +305,73 @@ export const CarGame: React.FC = () => {
     }
   }, [codeError]);
 
+  // Apply Twitch stream styles
+  useEffect(() => {
+    if (initialURLState.background === 'transparent') {
+      document.body.style.backgroundColor = 'transparent';
+      document.documentElement.style.backgroundColor = 'transparent';
+      // Add a global class for more complex overrides
+      document.body.classList.add('twitch-stream-mode');
+
+      // Inject transparency styles
+      const style = document.createElement('style');
+      style.id = 'twitch-transparency-styles';
+      style.innerHTML = `
+        html, body, #root, .App, 
+        .${styles.carGame}, .${styles.splitContainer}, .${styles.leftPane} {
+          background-color: transparent !important;
+          background: transparent !important;
+        }
+        canvas {
+          background-color: var(--road-color) !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    if (initialURLState.mainColor || initialURLState.roadColor) {
+      const color = initialURLState.mainColor;
+      const roadColor = initialURLState.roadColor;
+
+      // Calculate a darker version for hover (simple darkening)
+      let darker = color;
+      if (color && color.startsWith('#') && (color.length === 7 || color.length === 4)) {
+        const r = parseInt(color.length === 7 ? color.slice(1, 3) : color[1] + color[1], 16);
+        const g = parseInt(color.length === 7 ? color.slice(3, 5) : color[2] + color[2], 16);
+        const b = parseInt(color.length === 7 ? color.slice(5, 7) : color[3] + color[3], 16);
+        darker = `rgb(${Math.max(0, r - 40)}, ${Math.max(0, g - 40)}, ${Math.max(0, b - 40)})`;
+      }
+
+      const colorStyle = document.createElement('style');
+      colorStyle.id = 'twitch-color-styles';
+      let styleContent = ':root {';
+      if (color) {
+        styleContent += `
+          --primary-color: ${color} !important;
+          --primary-color-hover: ${darker} !important;
+          --primary: ${color} !important;
+          --primary-foreground: #ffffff !important;
+        `;
+      }
+      if (roadColor) {
+        styleContent += `
+          --road-color: ${roadColor} !important;
+        `;
+      }
+      styleContent += '}';
+      colorStyle.innerHTML = styleContent;
+      document.head.appendChild(colorStyle);
+    }
+
+    return () => {
+      document.body.style.backgroundColor = '';
+      document.documentElement.style.backgroundColor = '';
+      document.body.classList.remove('twitch-stream-mode');
+      document.getElementById('twitch-transparency-styles')?.remove();
+      document.getElementById('twitch-color-styles')?.remove();
+    };
+  }, [initialURLState.background, initialURLState.mainColor, initialURLState.roadColor]);
+
   return (
     <div className={isCodeOpen ? styles.splitContainer : styles.carGame}>
       {isCodeOpen ? (
@@ -333,18 +400,18 @@ export const CarGame: React.FC = () => {
             <div className={styles.codeTabHeader}>
               <div className={styles.fileNameContainer}>
                 <span>{DEFAULT_EDITOR_FILE_NAME}</span>
-                <div 
+                <div
                   className={styles.secretAnimation}
                   onClick={handleSecretClick}
                   title="Just a cute animation... or is it? 🤔"
                 >
-                  <img 
-                    src="/notepad.gif" 
-                    alt="Notepad and pencil animation" 
+                  <img
+                    src="/notepad.gif"
+                    alt="Notepad and pencil animation"
                   />
                 </div>
               </div>
-              <CustomTooltip 
+              <CustomTooltip
                 content={"Reset code to initial version"}
                 position="left"
                 delay={0}
@@ -355,10 +422,10 @@ export const CarGame: React.FC = () => {
                   disabled={isInitialCode}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                    <path d="M21 3v5h-5"/>
-                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-                    <path d="M3 21v-5h5"/>
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                    <path d="M21 3v5h-5" />
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                    <path d="M3 21v-5h5" />
                   </svg>
                 </button>
               </CustomTooltip>
@@ -369,7 +436,7 @@ export const CarGame: React.FC = () => {
               gameState={gameState}
             />
 
-            
+
             <GameAllControls
               gameState={gameState}
               selectedDifficulty={selectedDifficulty}

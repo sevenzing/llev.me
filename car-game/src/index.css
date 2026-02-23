@@ -12,6 +12,7 @@
   --primary-color-hover: #1d9248;
   --secondary-color: #7240cf;
   --secondary-color-hover: #582cab;
+  --road-color: #444444;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
