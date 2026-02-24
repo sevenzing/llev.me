@@ -107,6 +107,12 @@ export interface GameState {
   coins: Coin[];
   coinsCollected: number;
   nextCoinTrailSpawn: number;
+  userData: Record<string, any>;
+  // Performance monitoring
+  currentFPS: number;
+  adaptiveSpeedMultiplier: number;
+  isLowPerformanceMode: boolean;
+  frameTimes: number[];
 }
 
 export interface GameConfig {

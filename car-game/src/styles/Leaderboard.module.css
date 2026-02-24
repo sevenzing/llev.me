@@ -1,0 +1,378 @@
+/*
+ * Leaderboard card — positioned fixed, centered in the left free space.
+ * Game canvas is 400 px wide, centered at 50 vw.
+ * Left free space: 0 → (50vw - 200px). Center of that space ≈ 25vw - 100px.
+ * We translateX(-50%) so the card is centered on that point.
+ */
+.container {
+  position: fixed;
+  left: calc(25vw - 100px);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+
+  display: flex;
+  flex-direction: column;
+  width: 230px;
+  /* Match canvas height (500 px) exactly */
+  max-height: 500px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+
+  background: var(--panel-bg, #1e1e1e);
+  border: 1px solid var(--panel-border, #333333);
+  font-family: "Fira Mono", "Consolas", "Menlo", monospace;
+  font-size: 0.78rem;
+  color: #c0c0c0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 8px 7px 12px;
+  border-bottom: 1px solid var(--panel-border, #333333);
+  background: var(--panel-bg-header, #252525);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.title {
+  font-size: 0.82rem;
+  font-weight: bold;
+  color: #e0e0e0;
+  letter-spacing: 0.03em;
+}
+
+.sortButtons {
+  display: flex;
+  gap: 3px;
+}
+
+.sortBtn {
+  background: none;
+  border: 1px solid #444;
+  color: #888;
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.sortBtn:hover {
+  border-color: #666;
+  color: #ccc;
+}
+
+.sortActive {
+  border-color: var(--primary-color, #0981e9);
+  color: var(--primary-color, #0981e9);
+}
+
+.clearBtn {
+  background: none;
+  border: 1px solid #555;
+  color: #888;
+  font-size: 0.65rem;
+  padding: 2px 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.clearBtn:hover {
+  border-color: #c0392b;
+  color: #e74c3c;
+}
+
+.toggleBtn {
+  background: none;
+  border: none;
+  color: #777;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.toggleBtn:hover {
+  color: #ccc;
+}
+
+/* ── List ── */
+
+.list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 2px 0;
+}
+
+.empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: #555;
+  font-size: 0.75rem;
+}
+
+/* ── Row ── */
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 5px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.1s;
+  position: relative;
+}
+
+.row:hover {
+  background: var(--panel-bg-row-hover, #272727);
+}
+
+.rowLatest {
+  border-left: 2px solid var(--primary-color, #28bf5f);
+}
+
+.rank {
+  color: #555;
+  font-size: 0.68rem;
+  min-width: 18px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.entryMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* ── Top line: score ── */
+
+.entryTop {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+/* Meters — white, game-style bold */
+.scoreMeters {
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: bold;
+  letter-spacing: -0.02em;
+}
+
+/* Coins — yellow */
+.scoreCoins {
+  color: #f5c518;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.coinIcon {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.badges {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.badge {
+  font-size: 0.58rem;
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badgeEasy {
+  background: #1a4a1a;
+  color: #5cb85c;
+}
+
+.badgeNormal {
+  background: #1a3a5a;
+  color: #5bc0de;
+}
+
+.badgeHard {
+  background: #4a2a1a;
+  color: #f0ad4e;
+}
+
+.badgeInsane {
+  background: #4a1a1a;
+  color: #d9534f;
+}
+
+.badgeAuto {
+  background: #2a2a4a;
+  color: #9b9bde;
+}
+
+.badgeManual {
+  background: #2a2a2a;
+  color: #888;
+}
+
+.badgeLatest {
+  font-size: 0.58rem;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: color-mix(in srgb, var(--primary-color, #28bf5f) 20%, transparent);
+  color: var(--primary-color, #28bf5f);
+  border: 1px solid color-mix(in srgb, var(--primary-color, #28bf5f) 40%, transparent);
+  flex-shrink: 0;
+}
+
+/* ── Bottom line: name + date ── */
+
+.entryBottom {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.name {
+  color: #999;
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.15s, color 0.15s;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.name:hover {
+  color: #ddd;
+  border-bottom-color: #555;
+}
+
+.nameInput {
+  background: #333;
+  border: 1px solid #555;
+  color: #eee;
+  font-family: inherit;
+  font-size: 0.72rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  outline: none;
+  min-width: 0;
+  flex: 1;
+}
+
+.nameInput:focus {
+  border-color: var(--primary-color, #0981e9);
+}
+
+.date {
+  color: #444;
+  font-size: 0.65rem;
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Delete button ── */
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: transparent;
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 2px 3px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+  align-self: center;
+}
+
+.deleteBtnVisible {
+  color: #555;
+}
+
+.deleteBtn:hover {
+  color: #e74c3c;
+  background: #3a1a1a;
+}
+
+/* ── Collapsed strip ── */
+
+.collapsed {
+  position: fixed;
+  left: calc(25vw - 100px);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 5px;
+  border-radius: 8px;
+  background: var(--panel-bg, #1e1e1e);
+  border: 1px solid var(--panel-border, #333333);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.expandBtn {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.expandBtn:hover {
+  color: #ccc;
+}
+
+@media (max-width: 900px) {
+
+  .container,
+  .collapsed {
+    display: none;
+  }
+}

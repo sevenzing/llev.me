@@ -74,7 +74,7 @@
   cursor: pointer;
 }
 
-.difficultyRadio + .difficultyLabel::before {
+.difficultyRadio+.difficultyLabel::before {
   content: "";
   display: inline-block;
   width: 16px;
@@ -85,12 +85,12 @@
   transition: all 0.2s ease;
 }
 
-.difficultyRadio:checked + .difficultyLabel::before {
+.difficultyRadio:checked+.difficultyLabel::before {
   background-color: var(--primary-color);
   box-shadow: 0 0 8px rgba(58, 240, 124, 0.5);
 }
 
-.difficultyRadio:disabled + .difficultyLabel::before {
+.difficultyRadio:disabled+.difficultyLabel::before {
   border-color: #035503;
 }
 
@@ -176,6 +176,12 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+.autoEnabled {
+  background: var(--primary-color) !important;
+  color: white !important;
+  box-shadow: 0 0 8px var(--primary-color) !important;
+}
+
 .runCodeButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -193,32 +199,37 @@
   .codeItButton {
     display: none;
   }
+
   .buttonContainer {
     align-items: stretch;
     width: 100%;
   }
+
   .gameButton {
     width: 100%;
     font-size: 1rem;
     padding: 12px 0;
     min-width: 0;
   }
+
   .difficultySelector {
     gap: 6px;
     justify-content: space-between;
     width: 100%;
   }
+
   .difficultyOption {
     font-size: 0.95rem;
     padding: 4px 8px;
     flex: 1 1 40%;
     min-width: 80px;
   }
- 
+
   .gameButton {
     font-size: 0.95rem;
     padding: 10px 0;
   }
+
   .difficultyOption {
     font-size: 0.9rem;
     padding: 3px 4px;

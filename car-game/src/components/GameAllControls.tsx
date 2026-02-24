@@ -17,6 +17,7 @@ interface GameAllControlsProps {
   setSeed: (v: number) => void;
   userCode: string;
   handleRunCode: () => void;
+  isAutoModeEnabled: boolean;
 }
 
 export const GameAllControls: React.FC<GameAllControlsProps> = ({
@@ -32,6 +33,7 @@ export const GameAllControls: React.FC<GameAllControlsProps> = ({
   seed,
   setSeed,
   handleRunCode,
+  isAutoModeEnabled,
 }) => {
   const codeItControls = (
     <div className={styles.seedControls}>
@@ -68,6 +70,7 @@ export const GameAllControls: React.FC<GameAllControlsProps> = ({
         onStopGame={endGame}
         onCodeItClick={() => setIsCodeOpen((open: boolean) => !open)}
         isCodeOpen={isCodeOpen}
+        isAutoModeEnabled={isAutoModeEnabled}
       />
     </div>
   );

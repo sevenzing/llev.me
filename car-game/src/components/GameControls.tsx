@@ -12,6 +12,7 @@ interface GameControlsProps {
   onStopGame: () => void;
   onCodeItClick: () => void;
   isCodeOpen: boolean;
+  isAutoModeEnabled: boolean;
 }
 
 export const GameControls: React.FC<GameControlsProps> = ({
@@ -23,6 +24,7 @@ export const GameControls: React.FC<GameControlsProps> = ({
   onStopGame,
   onCodeItClick,
   isCodeOpen,
+  isAutoModeEnabled,
 }) => {
   return (
     <div className={styles.gameControls}>
@@ -55,13 +57,12 @@ export const GameControls: React.FC<GameControlsProps> = ({
         </button>
 
         <MovingBorderButton
-          className={`${styles.gameButton} ${styles.runCodeButton} p-3`}
+          className={`${styles.gameButton} ${styles.runCodeButton} p-3 ${isAutoModeEnabled ? styles.autoEnabled : ''}`}
           onClick={onRunCode}
-          disabled={gameState.isRunning}
           as={"button"}
           borderRadius="var(--radius)"
         >
-          AUTO
+          {isAutoModeEnabled ? "AUTO (ON)" : "AUTO"}
         </MovingBorderButton>
 
         <button

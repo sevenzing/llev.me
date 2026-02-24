@@ -2,14 +2,36 @@
 export interface URLState {
   codeOpen: boolean;
   seed: number | null;
+  background?: string;
+  mainColor?: string;
+  roadColor?: string;
 }
 
 // Get current URL state
 export function getURLState(): URLState {
   const urlParams = new URLSearchParams(window.location.search);
+  let mainColor = urlParams.get('mainColor') || undefined;
+  let roadColor = urlParams.get('roadColor') || undefined;
+
+  // Robust hex color handling: add # if missing and looks like hex
+  if (mainColor && !mainColor.startsWith('#')) {
+    if (/^[0-9A-F]{3}$/i.test(mainColor) || /^[0-9A-F]{6}$/i.test(mainColor)) {
+      mainColor = '#' + mainColor;
+    }
+  }
+
+  if (roadColor && !roadColor.startsWith('#')) {
+    if (/^[0-9A-F]{3}$/i.test(roadColor) || /^[0-9A-F]{6}$/i.test(roadColor)) {
+      roadColor = '#' + roadColor;
+    }
+  }
+
   return {
     codeOpen: urlParams.get('code') === 'true',
     seed: urlParams.get('seed') ? Number(urlParams.get('seed')) : null,
+    background: urlParams.get('background') || undefined,
+    mainColor,
+    roadColor,
   };
 }
 
@@ -26,17 +48,31 @@ export function updateURLState(state: Partial<URLState>): void {
       urlParams.delete('code');
     }
   }
-  
 
   // Update seed state
   if (state.seed !== undefined) {
     if (state.seed !== null) {
       urlParams.set('seed', state.seed.toString());
     } else {
-      urlParams.delete('seed'); 
+      urlParams.delete('seed');
     }
   }
-  
+
+  // Update background
+  if (state.background !== undefined) {
+    urlParams.set('background', state.background);
+  }
+
+  // Update mainColor
+  if (state.mainColor !== undefined) {
+    urlParams.set('mainColor', state.mainColor);
+  }
+
+  // Update roadColor
+  if (state.roadColor !== undefined) {
+    urlParams.set('roadColor', state.roadColor);
+  }
+
   // Update URL without reloading the page
   window.history.replaceState({}, '', url.toString());
 }
@@ -49,7 +85,7 @@ export function initializeURLState(): void {
   if (Object.keys(currentState).length === 0) {
     return;
   }
-  
+
   // URL state exists, ensure it's properly set
   updateURLState(currentState);
 } 

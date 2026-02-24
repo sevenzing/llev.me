@@ -23,6 +23,20 @@ import { createNegativeImage } from "../utils/image";
 import { mulberry32 } from "../utils/random";
 import { codeRunner, createGameContext } from "../utils/codeRunner";
 
+// Performance monitoring constants
+const PERFORMANCE_CONFIG = {
+  targetFPS: 120,
+  lowPerformanceThreshold: 90, // FPS threshold to trigger adaptive speed
+  frameTimeHistorySize: 60, // Number of frames to track for average FPS
+  adaptiveSpeedMultiplier: 2, // How much to increase internal speed when performance is low
+  checkInterval: 100, // Check performance every N frames
+  recoveryThreshold: 45, // FPS threshold to start recovering normal speed
+  speedRecoveryRate: 0.95, // How quickly to recover normal speed (0.95 = 5% recovery per frame)
+  criticalPerformanceThreshold: 30, // FPS threshold for critical performance mode
+  criticalSpeedMultiplier: 3, // Speed multiplier for critical performance
+  frameSkipThreshold: 10, // FPS threshold to start skipping frames
+};
+
 const initialGameState: GameState = {
   currentLane: 2,
   targetX: calculateLaneXForCar(2),
@@ -56,9 +70,22 @@ const initialGameState: GameState = {
   coins: [],
   coinsCollected: 0,
   nextCoinTrailSpawn: 80,
+  userData: {},
+  // Performance monitoring
+  currentFPS: 60,
+  adaptiveSpeedMultiplier: 1,
+  isLowPerformanceMode: false,
+  frameTimes: [],
 };
 
-export const useGameLogic = (seed?: number, userCode?: string) => {
+export interface GameCompleteData {
+  meters: number;
+  coins: number;
+  mode: "manual" | "auto";
+  difficulty: Difficulty;
+}
+
+export const useGameLogic = (seed?: number, userCode?: string, onGameComplete?: (data: GameCompleteData) => void) => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [difficulty, setDifficulty] = useState<Difficulty>("normal");
   const [selectedDifficulty, setSelectedDifficulty] =
@@ -70,6 +97,86 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
   const randomRef = useRef<() => number>(() => Math.random());
   const gameStateRef = useRef(gameState);
   const userCodeFrameCounterRef = useRef<number>(0);
+  const difficultyRef = useRef<Difficulty>("normal");
+  const onGameCompleteRef = useRef(onGameComplete);
+  const gameEndCallbackFiredRef = useRef(false);
+  // Synchronous "is game currently running" flag — set true in startGame, false in endGame.
+  // Checked by handleCodeError (async path) to discard stale error callbacks.
+  const isGameRunningRef = useRef(false);
+  // Incremented each startGame so stale async executeUserCode callbacks can self-discard.
+  const runIdRef = useRef(0);
+
+  // Keep refs in sync with current values
+  onGameCompleteRef.current = onGameComplete;
+
+  // Performance monitoring functions
+  const updatePerformanceMetrics = useCallback((deltaTime: number, currentFrameTimes: number[]) => {
+    const newFrameTimes = [...currentFrameTimes, deltaTime];
+    if (newFrameTimes.length < 5) {
+      return { avgFPS: 60, newFrameTimes };
+    }
+
+    // Keep only the last N frame times
+    if (newFrameTimes.length > PERFORMANCE_CONFIG.frameTimeHistorySize) {
+      newFrameTimes.shift();
+    }
+
+    // Calculate average FPS
+    const avgFrameTime = newFrameTimes.reduce((a: number, b: number) => a + b, 0) / newFrameTimes.length;
+    const avgFPS = 1000 / avgFrameTime;
+
+    return { avgFPS, newFrameTimes };
+  }, []);
+
+  const adjustGameSpeedForPerformance = useCallback((avgFPS: number, gameState: GameState) => {
+    const currentMultiplier = gameState.adaptiveSpeedMultiplier;
+    const isLowPerformance = gameState.isLowPerformanceMode;
+
+    if (avgFPS < PERFORMANCE_CONFIG.criticalPerformanceThreshold) {
+      // Critical performance mode
+      if (currentMultiplier !== PERFORMANCE_CONFIG.criticalSpeedMultiplier) {
+        console.error(`Critical performance detected. Avg FPS: ${avgFPS.toFixed(1)}. Using maximum speed boost.`);
+        return {
+          adaptiveSpeedMultiplier: PERFORMANCE_CONFIG.criticalSpeedMultiplier,
+          isLowPerformanceMode: true,
+        };
+      }
+    } else if (avgFPS < PERFORMANCE_CONFIG.lowPerformanceThreshold && !isLowPerformance) {
+      // Enter low performance mode
+      console.warn(`Low performance detected. Avg FPS: ${avgFPS.toFixed(1)}. Increasing internal game speed.`);
+      return {
+        adaptiveSpeedMultiplier: PERFORMANCE_CONFIG.adaptiveSpeedMultiplier,
+        isLowPerformanceMode: true,
+      };
+    } else if (avgFPS > PERFORMANCE_CONFIG.recoveryThreshold && isLowPerformance) {
+      // Start recovering normal speed
+      const newMultiplier = Math.max(
+        1,
+        currentMultiplier * PERFORMANCE_CONFIG.speedRecoveryRate
+      );
+
+      // Check if we've fully recovered
+      if (newMultiplier <= 1.1) {
+        console.log(`Performance recovered. Avg FPS: ${avgFPS.toFixed(1)}. Returning to normal speed.`);
+        return {
+          adaptiveSpeedMultiplier: 1,
+          isLowPerformanceMode: false,
+        };
+      } else {
+        return {
+          adaptiveSpeedMultiplier: newMultiplier,
+          isLowPerformanceMode: true,
+        };
+      }
+    }
+
+    return null; // No changes needed
+  }, []);
+
+  // Helper function to get effective game speed with adaptive multiplier
+  const getEffectiveGameSpeed = useCallback((gameState: GameState) => {
+    return gameState.gameSpeed * gameState.adaptiveSpeedMultiplier;
+  }, []);
 
   const resetRandomGenerator = useCallback(() => {
     randomRef.current = mulberry32(seed ?? Date.now());
@@ -155,6 +262,10 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       nextCoinTrailSpawn: 80,
       coins: [],
       coinsCollected: 0,
+      adaptiveSpeedMultiplier: 1,
+      isLowPerformanceMode: false,
+      frameTimes: [],
+      userData: {},
     });
   }, [difficulty]);
 
@@ -369,7 +480,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     return gameState.obstacles
       .map((obstacle) => ({
         ...obstacle,
-        y: obstacle.y + gameState.gameSpeed * obstacle.movingSpeed,
+        y: obstacle.y + getEffectiveGameSpeed(gameState) * obstacle.movingSpeed,
       }))
       .filter((obstacle) => obstacle.y < CANVAS_CONFIG.height)
       .filter((obstacle) => {
@@ -379,14 +490,14 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           Date.now() - (obstacle.fadeStartTime || 0) >= FADE_OUT_DURATION;
         return !isFadingOut;
       });
-  }, []);
+  }, [getEffectiveGameSpeed]);
 
   const updateBonuses = useCallback(
     (gameState: GameState) => {
       return gameState.bonuses
         .map((bonus) => ({
           ...bonus,
-          y: bonus.y + gameState.gameSpeed * bonus.config.movingSpeed,
+          y: bonus.y + getEffectiveGameSpeed(gameState) * bonus.config.movingSpeed,
         }))
         .map((bonus) => {
           if (bonus.config.isReversable) {
@@ -410,7 +521,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         })
         .filter((bonus) => bonus.y < CANVAS_CONFIG.height);
     },
-    [images, getReversedImageName],
+    [images, getReversedImageName, getEffectiveGameSpeed],
   );
 
   const updateActiveBonuses = useCallback(() => {
@@ -531,13 +642,33 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
     }
   }, [moveCarToLane]);
 
-  const endGame = useCallback(() => {
-    setGameState((prev) => ({
-      ...prev,
-      isRunning: false,
-      isAutoPlay: false,
-      isVisible: true,
-    }));
+  const endGame = useCallback((isNatural: boolean | React.MouseEvent | Event = false) => {
+    // Synchronously mark game as not running so stale game-loop frames and
+    // async code-execution callbacks see the correct state immediately.
+    const wasRunning = isGameRunningRef.current;
+    isGameRunningRef.current = false;
+
+    // Check strict true so mouse events from buttons aren't counted as natural ends
+    if (isNatural === true && wasRunning && onGameCompleteRef.current && !gameEndCallbackFiredRef.current) {
+      gameEndCallbackFiredRef.current = true;
+      const state = gameStateRef.current;
+      onGameCompleteRef.current({
+        meters: state.publicScore,
+        coins: state.coinsCollected,
+        mode: state.isAutoPlay ? "auto" : "manual",
+        difficulty: difficultyRef.current,
+      });
+    }
+    setGameState((prev) => {
+      const nextState = {
+        ...prev,
+        isRunning: false,
+        isAutoPlay: false,
+        isVisible: true,
+      };
+      gameStateRef.current = nextState;
+      return nextState;
+    });
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -545,19 +676,26 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
 
   const handleCodeError = useCallback(
     (errorMessage: string) => {
+      // Guard: discard errors that arrive after the game has already ended
+      // (e.g. async promise resolving from a previous run).
+      if (!isGameRunningRef.current) return;
       console.error(errorMessage);
       setCodeError(errorMessage);
       setGameState((prev) => ({
         ...prev,
         lives: Math.max(0, prev.lives - 1),
       }));
-      endGame();
+      endGame(true);
     },
     [endGame],
   );
 
   const executeUserCode = useCallback(() => {
     if (!userCode || !gameStateRef.current.isAutoPlay) return;
+
+    // Capture run ID so the async callback can self-discard if a new run started
+    // before the promise resolves (prevents spurious entries on quick restart).
+    const capturedRunId = runIdRef.current;
 
     try {
       const clonedGameState = { ...gameStateRef.current };
@@ -567,12 +705,17 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       codeRunner
         .executeCode(userCode, context)
         .then((executionResult) => {
+          if (runIdRef.current !== capturedRunId) return; // stale execution
           if (executionResult.result === "success") {
             if (executionResult.moveDirection === "left") {
               moveCarLeft();
             } else if (executionResult.moveDirection === "right") {
               moveCarRight();
             }
+            setGameState((prev) => ({
+              ...prev,
+              userData: executionResult.userData,
+            }));
           } else if (executionResult.result === "error") {
             if (executionResult.isTimeout) {
               handleCodeError(
@@ -588,6 +731,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           }
         })
         .catch((error) => {
+          if (runIdRef.current !== capturedRunId) return; // stale execution
           console.error("Error executing user code:", error);
           const errorMessage =
             error instanceof Error ? error.message : "Unknown error occurred";
@@ -613,15 +757,29 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       // Reset user code frame counter
       userCodeFrameCounterRef.current = 0;
 
+      // Advance run ID so any pending async executeUserCode callbacks from the
+      // previous run self-discard when they compare against the new ID.
+      runIdRef.current += 1;
+
+      // Reset game-end guards for this new run
+      gameEndCallbackFiredRef.current = false;
+      isGameRunningRef.current = true;
+
+
+
       // Clear any previous errors
       setCodeError(null);
 
       resetGameState();
-      setGameState((prev) => ({
-        ...prev,
-        isRunning: true,
-        isAutoPlay,
-      }));
+      setGameState((prev) => {
+        const nextState = {
+          ...prev,
+          isRunning: true,
+          isAutoPlay,
+        };
+        gameStateRef.current = nextState;
+        return nextState;
+      });
       lastTimeRef.current = performance.now();
     },
     [resetGameState, resetRandomGenerator],
@@ -636,7 +794,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       // Pick a base lane a random from the startLanes
       const baseLane =
         trail.startLanes[
-          Math.floor(randomRef.current() * trail.startLanes.length)
+        Math.floor(randomRef.current() * trail.startLanes.length)
         ];
       const baseLaneClamped = Math.max(0, Math.min(laneCount - 1, baseLane));
       const coins: Coin[] = trail.shape.map(
@@ -663,12 +821,12 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
 
   // Helper to update/move coins
   const updateCoins = useCallback(
-    (coins: Coin[], gameSpeed: number): Coin[] => {
+    (coins: Coin[], gameState: GameState): Coin[] => {
       return coins
-        .map((coin) => ({ ...coin, y: coin.y + gameSpeed * coin.movingSpeed }))
+        .map((coin) => ({ ...coin, y: coin.y + getEffectiveGameSpeed(gameState) * coin.movingSpeed }))
         .filter((coin) => coin.y < CANVAS_CONFIG.height);
     },
-    [],
+    [getEffectiveGameSpeed],
   );
 
   // Helper to check coin collision
@@ -709,11 +867,33 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
   const gameLoop = useCallback(
     (currentTime: number) => {
       if (!gameState.isRunning) return;
+      // Fresh-ref guard: catches stale RAF callbacks that slip through after endGame
+      if (!gameStateRef.current.isRunning) return;
 
+      // Calculate delta time for performance monitoring
+      const deltaTime = currentTime - lastTimeRef.current;
       lastTimeRef.current = currentTime;
+
+      // Update performance metrics and adjust speed if needed
+      const { avgFPS, newFrameTimes } = updatePerformanceMetrics(deltaTime, gameState.frameTimes);
+      let performanceAdjustments = null;
+      if (gameState.frameCount % PERFORMANCE_CONFIG.checkInterval === 0) {
+        performanceAdjustments = adjustGameSpeedForPerformance(avgFPS, gameState);
+      }
 
       setGameState((prev) => {
         const newState = { ...prev };
+
+        // Update performance metrics in game state
+        newState.currentFPS = avgFPS;
+        newState.frameTimes = newFrameTimes;
+
+        // Apply performance adjustments if any
+        if (performanceAdjustments) {
+          newState.adaptiveSpeedMultiplier = performanceAdjustments.adaptiveSpeedMultiplier;
+          newState.isLowPerformanceMode = performanceAdjustments.isLowPerformanceMode;
+        }
+
         // Update car position
         newState.carX += (newState.targetX - newState.carX) * 0.2;
 
@@ -722,7 +902,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           GAME_CONFIG.laneDashLength + GAME_CONFIG.laneDashGap;
         newState.roadLineOffset =
           (newState.roadLineOffset +
-            newState.gameSpeed * newState.roadSpeedMultiplier) %
+            getEffectiveGameSpeed(newState) * newState.roadSpeedMultiplier) %
           laneSegmentHeight;
 
         // Update frame count
@@ -753,10 +933,10 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           newState.nextBonusSpawn = newState.frameCount + newFrequency;
         }
 
-        // Update obstacles with consistent speed
+        // Update obstacles with consistent speed (including adaptive speed multiplier)
         newState.obstacles = updateObstacles(newState);
 
-        // Update bonuses with consistent speed
+        // Update bonuses with consistent speed (including adaptive speed multiplier)
         newState.bonuses = updateBonuses(newState);
 
         // Check collisions
@@ -781,8 +961,8 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
           }
         });
 
-        // Update score
-        newState.score += newState.gameSpeed;
+        // Update score (adjusted for adaptive speed to maintain fair scoring)
+        newState.score += getEffectiveGameSpeed(newState);
         newState.publicScore = newState.score / 100;
 
         // Update active bonuses
@@ -791,9 +971,11 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         // Update invincibility
         updateInvincibility();
 
-        // Check game over
+        // Check game over — do NOT call endGame here (side effect in updater
+        // causes React StrictMode to invoke it twice). Set ref and return;
+        // the check below the setGameState call handles the actual endGame.
         if (newState.lives <= 0) {
-          endGame();
+          gameStateRef.current = newState;
           return newState;
         }
 
@@ -808,13 +990,13 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
             COIN_CONFIG.minTrailFrequency +
             Math.floor(
               randomRef.current() *
-                (COIN_CONFIG.maxTrailFrequency - COIN_CONFIG.minTrailFrequency),
+              (COIN_CONFIG.maxTrailFrequency - COIN_CONFIG.minTrailFrequency),
             );
           newState.nextCoinTrailSpawn = newState.frameCount + nextFreq;
         }
 
         // Move coins
-        newState.coins = updateCoins(newState.coins, newState.gameSpeed);
+        newState.coins = updateCoins(newState.coins, newState);
 
         // Check coin collisions
         const { updatedCoins, collectedCount } = checkCoinCollisions(
@@ -829,12 +1011,19 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
         return newState;
       });
 
+      // End game if lives ran out (checked here, outside the updater, so React
+      // StrictMode's double-invocation of updaters doesn't fire it twice).
+      if (gameStateRef.current.lives <= 0) {
+        endGame(true);
+        return;
+      }
+
       // Execute user code if in auto mode (outside of state update to prevent timing issues)
       if (userCode && gameStateRef.current.isAutoPlay) {
         // Only execute user code every N frames to reduce performance impact
         if (
           gameStateRef.current.frameCount %
-            gameStateRef.current.executionFrequency ==
+          gameStateRef.current.executionFrequency ==
           0
         ) {
           executeUserCode();
@@ -865,6 +1054,9 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
       spawnCoinTrail,
       checkCoinCollisions,
       updateCoins,
+      updatePerformanceMetrics,
+      adjustGameSpeedForPerformance,
+      getEffectiveGameSpeed,
     ],
   );
 
@@ -882,6 +1074,7 @@ export const useGameLogic = (seed?: number, userCode?: string) => {
 
   useEffect(() => {
     setDifficulty(selectedDifficulty);
+    difficultyRef.current = selectedDifficulty;
   }, [selectedDifficulty]);
 
   return {
