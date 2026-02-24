@@ -11,15 +11,15 @@ export const DIFFICULTY_SETTINGS: Record<Difficulty, DifficultySettings> = {
     obstacleFrequency: 150,
   },
   normal: {
-    speed: 4,
+    speed: 3,
     obstacleFrequency: 90,
   },
   hard: {
-    speed: 6,
+    speed: 5,
     obstacleFrequency: 40,
   },
   insane: {
-    speed: 8,
+    speed: 6,
     obstacleFrequency: 20,
   },
 };
@@ -102,6 +102,7 @@ export const USER_CODE_CONFIG = {
   // Increase this number to reduce CPU usage but make AI less responsive
   // Decrease this number to make AI more responsive but use more CPU
   maxExecutionTime: 100, // Maximum execution time in milliseconds
+  autoRestartDelay: 2000, // Delay before auto-restarting the game in auto mode
 };
 
 export const FADE_OUT_DURATION = 300; // 300ms fade-out for cleared obstacles
@@ -111,8 +112,8 @@ export const DEFAULT_EDITOR_FILE_NAME = "~/personal/car-project/car-logic.ts";
 // Version tracking for default editor content
 export const DEFAULT_EDITOR_CONTENT_VERSION = "1.0.0";
 
-const GAP = 0;
-const SIZE = 64;
+const GAP = 40;
+const SIZE = 32;
 export const COIN_CONFIG = {
   width: SIZE,
   height: SIZE,
@@ -120,69 +121,91 @@ export const COIN_CONFIG = {
   maxTrailFrequency: 2000,
   movingSpeed: DEFAULT_COIN_MOVING_SPEED,
   trails: [
+    // {
+    //   name: "straight",
+    //   shape: [
+    //     { laneOffset: 0, yOffset: 0 },
+    //     { laneOffset: 0, yOffset: 1 },
+    //     { laneOffset: 0, yOffset: 2 },
+    //     { laneOffset: 0, yOffset: 3 },
+    //     { laneOffset: 0, yOffset: 4 },
+    //   ],
+    //   gap: GAP,
+    //   startLanes: [0, 1, 2, 3, 4],
+    // },
+    // {
+    //   name: "arcLeft",
+    //   shape: [
+    //     { laneOffset: 0, yOffset: 0 },
+    //     { laneOffset: 0, yOffset: 1 },
+    //     { laneOffset: 1, yOffset: 2 },
+    //     { laneOffset: 2, yOffset: 3 },
+    //     { laneOffset: 2, yOffset: 4 },
+    //   ],
+    //   gap: GAP,
+    //   startLanes: [2, 3, 4],
+    // },
+    // {
+    //   name: "arcRight",
+    //   shape: [
+    //     { laneOffset: 0, yOffset: 0 },
+    //     { laneOffset: 0, yOffset: 1 },
+    //     { laneOffset: -1, yOffset: 2 },
+    //     { laneOffset: -2, yOffset: 3 },
+    //     { laneOffset: -2, yOffset: 4 },
+    //   ],
+    //   gap: GAP,
+    //   startLanes: [0, 1, 2],
+    // },
+    // {
+    //   name: "zigzag",
+    //   shape: [
+    //     { laneOffset: 0, yOffset: 0 },
+    //     { laneOffset: 1, yOffset: 1 },
+    //     { laneOffset: 2, yOffset: 2 },
+    //     { laneOffset: 1, yOffset: 3 },
+    //     { laneOffset: 0, yOffset: 4 },
+    //   ],
+    //   gap: GAP,
+    //   startLanes: [1, 2, 3],
+    // },
+    // {
+    //   name: "threeLines",
+    //   shape: [
+    //     { laneOffset: 0, yOffset: 0 },
+    //     { laneOffset: 0, yOffset: 1 },
+    //     { laneOffset: 0, yOffset: 2 },
+    //     { laneOffset: 2, yOffset: 0 },
+    //     { laneOffset: 2, yOffset: 1 },
+    //     { laneOffset: 2, yOffset: 2 },
+    //     { laneOffset: -2, yOffset: 0 },
+    //     { laneOffset: -2, yOffset: 1 },
+    //     { laneOffset: -2, yOffset: 2 },
+    //   ],
+    //   gap: GAP,
+    //   startLanes: [2],
+    // },
     {
-      name: "straight",
+      name: "zigzagBig",
       shape: [
         { laneOffset: 0, yOffset: 0 },
         { laneOffset: 0, yOffset: 1 },
         { laneOffset: 0, yOffset: 2 },
-        { laneOffset: 0, yOffset: 3 },
-        { laneOffset: 0, yOffset: 4 },
-      ],
-      gap: GAP,
-      startLanes: [0, 1, 2, 3, 4],
-    },
-    {
-      name: "arcLeft",
-      shape: [
-        { laneOffset: 0, yOffset: 0 },
-        { laneOffset: 0, yOffset: 1 },
-        { laneOffset: 1, yOffset: 2 },
-        { laneOffset: 2, yOffset: 3 },
-        { laneOffset: 2, yOffset: 4 },
-      ],
-      gap: GAP,
-      startLanes: [2, 3, 4],
-    },
-    {
-      name: "arcRight",
-      shape: [
-        { laneOffset: 0, yOffset: 0 },
-        { laneOffset: 0, yOffset: 1 },
-        { laneOffset: -1, yOffset: 2 },
-        { laneOffset: -2, yOffset: 3 },
-        { laneOffset: -2, yOffset: 4 },
-      ],
-      gap: GAP,
-      startLanes: [0, 1, 2],
-    },
-    {
-      name: "zigzag",
-      shape: [
-        { laneOffset: 0, yOffset: 0 },
-        { laneOffset: 1, yOffset: 1 },
-        { laneOffset: 2, yOffset: 2 },
         { laneOffset: 1, yOffset: 3 },
-        { laneOffset: 0, yOffset: 4 },
+        { laneOffset: 1, yOffset: 4 },
+        { laneOffset: 1, yOffset: 5 },
+        { laneOffset: 2, yOffset: 6 },
+        { laneOffset: 2, yOffset: 7 },
+        { laneOffset: 2, yOffset: 8 },
+        { laneOffset: 3, yOffset: 9 },
+        { laneOffset: 3, yOffset: 10 },
+        { laneOffset: 3, yOffset: 11 },
+        { laneOffset: 4, yOffset: 12 },
+        { laneOffset: 4, yOffset: 13 },
+        { laneOffset: 4, yOffset: 14 },
       ],
       gap: GAP,
-      startLanes: [1, 2, 3],
-    },
-    {
-      name: "threeLines",
-      shape: [
-        { laneOffset: 0, yOffset: 0 },
-        { laneOffset: 0, yOffset: 1 },
-        { laneOffset: 0, yOffset: 2 },
-        { laneOffset: 2, yOffset: 0 },
-        { laneOffset: 2, yOffset: 1 },
-        { laneOffset: 2, yOffset: 2 },
-        { laneOffset: -2, yOffset: 0 },
-        { laneOffset: -2, yOffset: 1 },
-        { laneOffset: -2, yOffset: 2 },
-      ],
-      gap: GAP,
-      startLanes: [2],
+      startLanes: [0],
     },
   ],
 };

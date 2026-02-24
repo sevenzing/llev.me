@@ -1,13 +1,23 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useGameLogic } from "../hooks/useGameLogic";
+import type { GameCompleteData } from "../hooks/useGameLogic";
 import { GameCanvas } from "./GameCanvas";
 import { GameHeader } from "./GameHeader";
 import { GameAllControls } from "./GameAllControls";
+import { Leaderboard } from "./Leaderboard";
 import {
   CANVAS_CONFIG,
   DEFAULT_EDITOR_FILE_NAME,
+  USER_CODE_CONFIG,
 } from "../constants/gameConstants";
 import { loadUserCode, saveUserCode, shouldUpdateToNewVersion, getInitialCode, getSuperAICode } from "../utils/codePersistence";
+import {
+  loadLeaderboard,
+  saveLeaderboard,
+  clearLeaderboard,
+} from "../utils/leaderboardPersistence";
+import type { LeaderboardEntry } from "../utils/leaderboardPersistence";
+import { generateName } from "../utils/nameGenerator";
 import { getURLState, updateURLState } from "../utils/urlState";
 import styles from "../styles/Game.module.css";
 import { errorToast } from "./ErrorToast";
@@ -18,6 +28,7 @@ import { PerformanceIndicator } from "./PerformanceIndicator";
 const MIN_GAME_WIDTH = 450;
 const MIN_CODE_WIDTH = 530;
 const DEFAULT_GAME_WIDTH = 600;
+const LEADERBOARD_HIDDEN_KEY = "car-game:leaderboard:hidden";
 
 export const CarGame: React.FC = () => {
   // Initialize from URL state
@@ -31,6 +42,67 @@ export const CarGame: React.FC = () => {
   const [isInitialCode, setIsInitialCode] = useState(true);
   const [gamePaneWidth, setGamePaneWidth] = useState(DEFAULT_GAME_WIDTH);
   const dragging = useRef(false);
+  const [isAutoModeEnabled, setIsAutoModeEnabled] = useState(false);
+  const autoRestartTimeoutRef = useRef<number | null>(null);
+
+  // Leaderboard state
+  const [leaderboardEntries, setLeaderboardEntries] = useState<LeaderboardEntry[]>(() => loadLeaderboard());
+  const [leaderboardSortBy, setLeaderboardSortBy] = useState<"meters" | "coins">("meters");
+  const [isLeaderboardHidden, setIsLeaderboardHidden] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(LEADERBOARD_HIDDEN_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const handleGameComplete = useCallback((data: GameCompleteData) => {
+    const entry: LeaderboardEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: generateName(),
+      difficulty: data.difficulty,
+      meters: data.meters,
+      coins: data.coins,
+      mode: data.mode,
+      createdAt: Date.now(),
+    };
+    setLeaderboardEntries((prev) => {
+      const updated = [...prev, entry];
+      saveLeaderboard(updated);
+      return updated;
+    });
+  }, []);
+
+  const handleLeaderboardRename = useCallback((id: string, newName: string) => {
+    setLeaderboardEntries((prev) => {
+      const updated = prev.map((e) => (e.id === id ? { ...e, name: newName } : e));
+      saveLeaderboard(updated);
+      return updated;
+    });
+  }, []);
+
+  const handleLeaderboardDelete = useCallback((id: string) => {
+    setLeaderboardEntries((prev) => {
+      const updated = prev.filter((e) => e.id !== id);
+      saveLeaderboard(updated);
+      return updated;
+    });
+  }, []);
+
+  const handleLeaderboardClear = useCallback(() => {
+    clearLeaderboard();
+    setLeaderboardEntries([]);
+  }, []);
+
+  const handleToggleLeaderboardHidden = useCallback(() => {
+    setIsLeaderboardHidden((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(LEADERBOARD_HIDDEN_KEY, String(next));
+      } catch { }
+      return next;
+    });
+  }, []);
 
   const [secretClickCount, setSecretClickCount] = useState(0);
   const [lastSecretClickTime, setLastSecretClickTime] = useState(0);
@@ -149,7 +221,26 @@ export const CarGame: React.FC = () => {
     endGame,
     images,
     codeError,
-  } = useGameLogic(seed, userCode);
+  } = useGameLogic(seed, userCode, handleGameComplete);
+
+  useEffect(() => {
+    // If auto mode is enabled and game is not running, start after delay
+    if (isAutoModeEnabled && !gameState.isRunning && userCode.trim()) {
+      autoRestartTimeoutRef.current = window.setTimeout(() => {
+        if (!isSeedEnabled) {
+          setSeed(Math.floor(Math.random() * (2 ** 32 - 2 ** 31) + 2 ** 31));
+        }
+        startGame(true);
+      }, USER_CODE_CONFIG.autoRestartDelay || 2000);
+    }
+
+    return () => {
+      if (autoRestartTimeoutRef.current !== null) {
+        window.clearTimeout(autoRestartTimeoutRef.current);
+        autoRestartTimeoutRef.current = null;
+      }
+    };
+  }, [gameState.isRunning, isAutoModeEnabled, isSeedEnabled, startGame, userCode]);
 
   // Handle keyboard controls
   useEffect(() => {
@@ -268,16 +359,20 @@ export const CarGame: React.FC = () => {
       return;
     }
 
-    if (!isSeedEnabled) {
-      // Generate random seed when checkbox is unchecked
-      setSeed(Math.floor(Math.random() * (2 ** 32 - 2 ** 31) + 2 ** 31));
-    }
-
-    if (gameState.isRunning) {
-      console.log("Game is already running!");
+    if (isAutoModeEnabled) {
+      setIsAutoModeEnabled(false);
+      if (autoRestartTimeoutRef.current !== null) {
+        clearTimeout(autoRestartTimeoutRef.current);
+        autoRestartTimeoutRef.current = null;
+      }
     } else {
-      console.log("Starting game in auto mode with your code...");
-      startGame(true); // true = auto mode
+      setIsAutoModeEnabled(true);
+      if (!isSeedEnabled) {
+        setSeed(Math.floor(Math.random() * (2 ** 32 - 2 ** 31) + 2 ** 31));
+      }
+      if (!gameState.isRunning) {
+        startGame(true); // true = auto mode
+      }
     }
   };
 
@@ -317,13 +412,19 @@ export const CarGame: React.FC = () => {
       const style = document.createElement('style');
       style.id = 'twitch-transparency-styles';
       style.innerHTML = `
-        html, body, #root, .App, 
+        html, body, #root, .App,
         .${styles.carGame}, .${styles.splitContainer}, .${styles.leftPane} {
           background-color: transparent !important;
           background: transparent !important;
         }
         canvas {
           background-color: var(--road-color) !important;
+        }
+        :root {
+          --panel-bg: transparent !important;
+          --panel-bg-header: rgba(0, 0, 0, 0.15) !important;
+          --panel-bg-row-hover: rgba(255, 255, 255, 0.05) !important;
+          --panel-border: rgba(255, 255, 255, 0.1) !important;
         }
       `;
       document.head.appendChild(style);
@@ -371,6 +472,19 @@ export const CarGame: React.FC = () => {
       document.getElementById('twitch-color-styles')?.remove();
     };
   }, [initialURLState.background, initialURLState.mainColor, initialURLState.roadColor]);
+
+  const leaderboardPanel = (
+    <Leaderboard
+      entries={leaderboardEntries}
+      onRename={handleLeaderboardRename}
+      onDelete={handleLeaderboardDelete}
+      onClear={handleLeaderboardClear}
+      sortBy={leaderboardSortBy}
+      onSortChange={setLeaderboardSortBy}
+      hidden={isLeaderboardHidden}
+      onToggleHidden={handleToggleLeaderboardHidden}
+    />
+  );
 
   return (
     <div className={isCodeOpen ? styles.splitContainer : styles.carGame}>
@@ -451,11 +565,13 @@ export const CarGame: React.FC = () => {
               setSeed={handleSeedChange}
               userCode={userCode}
               handleRunCode={handleRunCode}
+              isAutoModeEnabled={isAutoModeEnabled}
             />
           </div>
         </>
       ) : (
         <>
+          {leaderboardPanel}
           {gameHeaderPlusCanvas}
           <GameAllControls
             gameState={gameState}
@@ -471,6 +587,7 @@ export const CarGame: React.FC = () => {
             setSeed={handleSeedChange}
             userCode={userCode}
             handleRunCode={handleRunCode}
+            isAutoModeEnabled={isAutoModeEnabled}
           />
         </>
       )}

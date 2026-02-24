@@ -14,6 +14,12 @@
   --secondary-color-hover: #582cab;
   --road-color: #444444;
 
+  /* Panel theming — override these in transparent/stream mode */
+  --panel-bg: #1e1e1e;
+  --panel-bg-header: #252525;
+  --panel-bg-row-hover: #272727;
+  --panel-border: #333333;
+
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
