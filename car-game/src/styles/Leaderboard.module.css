@@ -20,7 +20,8 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
   overflow: hidden;
 
-  background: var(--panel-bg, #1e1e1e);
+  /* background: var(--panel-bg, #1e1e1e); */
+  background: #1d1d1d;
   border: 1px solid var(--panel-border, #333333);
   font-family: "Fira Mono", "Consolas", "Menlo", monospace;
   font-size: 0.78rem;
@@ -302,7 +303,7 @@
 }
 
 .date {
-  color: #444;
+  color: #848484;
   font-size: 0.65rem;
   margin-left: auto;
   flex-shrink: 0;
