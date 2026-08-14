@@ -1,5 +1,5 @@
 export interface AchievementSeed {
-  number: string;
+  number: number;
   date: string;
   title: string;
   content: string | null;

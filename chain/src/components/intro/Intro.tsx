@@ -52,7 +52,7 @@ export function Intro() {
           // color="#f4f0ea"
           letterSpacing={2}
           ribbonWidth={72}
-          ribbonColor="#8c70fa"
+          ribbonColor="#ac86d2"
           pauseOnHover={false}
         />
       </div>

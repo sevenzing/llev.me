@@ -3,6 +3,7 @@
 import { useChain } from "@/lib/chain/useChain";
 import { BlockCard } from "./BlockCard";
 import TextType from "@/components/react-bits/TextType";
+import ShapeGrid from "@/components/react-bits/ShapeGrid";
 
 export function ChainOfAchievements() {
   const { blocks, mineBlock, resetBlock, isValid } = useChain({
@@ -12,6 +13,17 @@ export function ChainOfAchievements() {
 
   return (
     <section className="chain">
+      <div className="chain-grid">
+        <ShapeGrid
+          speed={0.1}
+          squareSize={85}
+          direction="diagonal"
+          borderColor="#ac86d2"
+          hoverFillColor="#c395f0"
+          shape="square"
+          hoverTrailAmount={0}
+        />
+      </div>
       <div className="chain-hero">
         <TextType
           as="h1"

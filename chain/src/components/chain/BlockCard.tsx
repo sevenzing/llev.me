@@ -5,7 +5,10 @@ import { Block } from "@/lib/chain/types";
 import { formatHash } from "@/lib/chain/sha256";
 import BorderGlow from "@/components/react-bits/BorderGlow";
 import Counter from "@/components/react-bits/Counter";
-import SpecularButton from "@/components/react-bits/SpecularButton";
+
+function formatBlockNumber(number: number): string {
+  return number.toString().padStart(2, "0");
+}
 
 interface Props {
   block: Block;
@@ -48,7 +51,7 @@ export function BlockCard({ block, valid, prevIsValid, onMine, onReset }: Props)
       <div className="chain-card-body">
         <div className="chain-card-head">
           <h2 className="chain-card-title">{block.title}</h2>
-          <span className="chain-card-number">block#{block.number}</span>
+          <span className="chain-card-number">block#{formatBlockNumber(block.number)}</span>
         </div>
 
         <Row label="date:">{block.date}</Row>
@@ -76,34 +79,13 @@ export function BlockCard({ block, valid, prevIsValid, onMine, onReset }: Props)
 
         <div className="chain-card-action">
           {block.mined && valid ? (
-            <SpecularButton
-              size="sm"
-              radius={12}
-              tint="#8c70fa"
-              tintOpacity={0.12}
-              textColor="#f4f0ea"
-              lineColor="#c4b5fd"
-              baseColor="#8c70fa"
-              autoAnimate
-              onClick={onReset}
-            >
+            <button type="button" className="chain-btn" onClick={onReset}>
               reset
-            </SpecularButton>
+            </button>
           ) : (
-            <SpecularButton
-              size="sm"
-              radius={12}
-              tint="#8c70fa"
-              tintOpacity={0.12}
-              textColor="#f4f0ea"
-              lineColor="#c4b5fd"
-              baseColor="#8c70fa"
-              autoAnimate
-              disabled={block.mining}
-              onClick={onMine}
-            >
+            <button type="button" className="chain-btn" onClick={onMine} disabled={block.mining}>
               {block.mining ? "mining…" : "mine"}
-            </SpecularButton>
+            </button>
           )}
         </div>
       </div>

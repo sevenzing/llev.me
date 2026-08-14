@@ -153,18 +153,29 @@ a {
 }
 
 .about-page {
+  position: relative;
   min-height: 100dvh;
   background: #07060c;
   color: #f4f0ea;
 }
 
+.chain-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
 .chain {
+  position: relative;
+  z-index: 1;
   max-width: 720px;
   margin: 0 auto;
   padding: 108px 20px 80px;
 }
 
 .chain-hero {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: center;
   min-height: 4.4em;
@@ -182,6 +193,8 @@ a {
 }
 
 .chain-list {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -280,10 +293,50 @@ a {
   justify-content: center;
 }
 
-.chain-card-action .specular-button {
-  min-width: 132px;
-  letter-spacing: 0.14em;
+.chain-btn {
+  appearance: none;
+  min-width: 128px;
+  padding: 10px 28px;
+  border: 1px solid rgba(244, 240, 234, 0.16);
+  border-radius: 999px;
+  background: rgba(244, 240, 234, 0.03);
+  color: rgba(244, 240, 234, 0.72);
+  font-size: 12px;
+  letter-spacing: 0.18em;
   text-transform: lowercase;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+
+.chain-btn:hover:not(:disabled) {
+  color: #f4f0ea;
+  border-color: #8c70fa;
+  background: rgba(140, 112, 250, 0.14);
+}
+
+.chain-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.chain-btn:disabled {
+  cursor: default;
+  color: #8c70fa;
+  border-color: rgba(140, 112, 250, 0.45);
+  animation: chainBtnPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes chainBtnPulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .chain-connector {
