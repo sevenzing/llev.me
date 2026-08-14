@@ -3,6 +3,7 @@ import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "@fontsource/major-mono-display";
 import "./globals.css";
+import { SiteMenu } from "@/components/SiteMenu";
 
 export const metadata: Metadata = {
   title: "Hello, it's Lev",
@@ -18,7 +19,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👋</text></svg>"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <SiteMenu />
+        {children}
+      </body>
     </html>
   );
 }

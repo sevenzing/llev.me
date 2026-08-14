@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import GradientWaves from "@/components/react-bits/GradientWaves";
 import TextLoop from "@/components/react-bits/TextLoop";
 import { useEffect, useState } from "react";
@@ -38,13 +37,7 @@ export function Intro() {
         />
       </div>
 
-      <div className="intro-vignette" />
-
-      <header className="intro-nav">
-        <Link href="/about" className="intro-nav-link">
-          about
-        </Link>
-      </header>
+      {/* <div className="intro-vignette" /> */}
 
       <div className="intro-hero">
         <TextLoop
@@ -63,21 +56,6 @@ export function Intro() {
           pauseOnHover={false}
         />
       </div>
-
-      <footer className="intro-footer">
-        <p className="intro-tag">links</p>
-        <nav className="intro-socials" aria-label="social">
-          <a href="https://github.com/sevenzing" target="_blank" rel="noreferrer">
-            github
-          </a>
-          <a href="https://linkedin.com/in/lymarenkolev/" target="_blank" rel="noreferrer">
-            linkedin
-          </a>
-          <a href="https://instagram.com/llevchiks/" target="_blank" rel="noreferrer">
-            instagram
-          </a>
-        </nav>
-      </footer>
     </main>
   );
 }

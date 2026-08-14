@@ -194,6 +194,36 @@ a {
   color: #1c1c1e;
 }
 
-.about-nav {
-  padding: 24px 28px 0;
+.site-menu .staggered-menu-header {
+  justify-content: flex-end;
+  padding: 24px 28px;
+}
+
+.site-menu .sm-toggle-textWrap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.site-menu .sm-icon {
+  width: 22px;
+  height: 16px;
+  flex-basis: 22px;
+}
+
+.site-menu .sm-panel-item {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  letter-spacing: 0;
+}
+
+.site-menu .sm-socials-title,
+.site-menu .sm-socials-link {
+  font-family: "IBM Plex Mono", monospace;
 }
