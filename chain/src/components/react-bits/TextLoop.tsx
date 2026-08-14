@@ -1,6 +1,6 @@
 "use client";
 
-import { CSSProperties, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 
 import './TextLoop.css';
@@ -31,46 +31,62 @@ export interface TextLoopProps {
 
 interface Metrics {
   length: number;
+  unitWidth: number;
   reps: number;
 }
 
 const VIEW_W = 1200;
 const VIEW_H = 520;
-const CX = VIEW_W / 2;
-const CY = VIEW_H / 2;
+const WAVE_PERIOD = 320;
 const EDGE_PAD = 6;
 
-const buildPath = (shape: TextLoopShape, curviness: number, ribbonWidth: number): string => {
+const buildPath = (
+  shape: TextLoopShape,
+  curviness: number,
+  ribbonWidth: number,
+  width: number,
+  height: number
+): string => {
   const c = Math.max(0, curviness);
-  const room = Math.max(20, CY - Math.max(0, ribbonWidth) / 2 - EDGE_PAD);
+  const cx = width / 2;
+  const cy = height / 2;
+  const room = Math.max(20, cy - Math.max(0, ribbonWidth) / 2 - EDGE_PAD);
 
   switch (shape) {
     case 'circle': {
       const r = Math.min(90 + c * 0.95, room);
-      return `M ${CX - r} ${CY} A ${r} ${r} 0 1 1 ${CX + r} ${CY} A ${r} ${r} 0 1 1 ${CX - r} ${CY} Z`;
+      return `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy} Z`;
     }
     case 'infinity': {
       const r = 150 + c * 1.4;
       const h = Math.min(60 + c * 0.95, room);
       return [
-        `M ${CX} ${CY}`,
-        `C ${CX + r * 0.55} ${CY - h} ${CX + r} ${CY - h} ${CX + r} ${CY}`,
-        `C ${CX + r} ${CY + h} ${CX + r * 0.55} ${CY + h} ${CX} ${CY}`,
-        `C ${CX - r * 0.55} ${CY - h} ${CX - r} ${CY - h} ${CX - r} ${CY}`,
-        `C ${CX - r} ${CY + h} ${CX - r * 0.55} ${CY + h} ${CX} ${CY}`,
+        `M ${cx} ${cy}`,
+        `C ${cx + r * 0.55} ${cy - h} ${cx + r} ${cy - h} ${cx + r} ${cy}`,
+        `C ${cx + r} ${cy + h} ${cx + r * 0.55} ${cy + h} ${cx} ${cy}`,
+        `C ${cx - r * 0.55} ${cy - h} ${cx - r} ${cy - h} ${cx - r} ${cy}`,
+        `C ${cx - r} ${cy + h} ${cx - r * 0.55} ${cy + h} ${cx} ${cy}`,
         'Z'
       ].join(' ');
     }
     case 'arch': {
       const rise = Math.min(120 + c * 1.1, room * 2);
-      return `M 120 ${CY + rise / 2} Q ${CX} ${CY - rise * 1.5} ${VIEW_W - 120} ${CY + rise / 2}`;
+      return `M 120 ${cy + rise / 2} Q ${cx} ${cy - rise * 1.5} ${width - 120} ${cy + rise / 2}`;
     }
     case 'line':
-      return `M -320 ${CY} L ${VIEW_W + 320} ${CY}`;
+      return `M ${-WAVE_PERIOD} ${cy} L ${width + WAVE_PERIOD} ${cy}`;
     case 'wave':
     default: {
       const a = Math.min(c * 2.2, room * 2);
-      return `M -320 ${CY} Q -160 ${CY - a} 0 ${CY} T 320 ${CY} T 640 ${CY} T 960 ${CY} T 1280 ${CY} T ${VIEW_W + 320} ${CY}`;
+      const start = -WAVE_PERIOD;
+      const end = width + WAVE_PERIOD;
+      let x = start + WAVE_PERIOD;
+      let d = `M ${start} ${cy} Q ${start + WAVE_PERIOD / 2} ${cy - a} ${x} ${cy}`;
+      while (x < end) {
+        x += WAVE_PERIOD;
+        d += ` T ${x} ${cy}`;
+      }
+      return d;
     }
   }
 };
@@ -101,12 +117,33 @@ const TextLoop = ({
   const headRef = useRef<SVGTextPathElement | null>(null);
   const tailRef = useRef<SVGTextPathElement | null>(null);
 
-  const [metrics, setMetrics] = useState<Metrics>({ length: 0, reps: 1 });
+  const [viewport, setViewport] = useState({ w: VIEW_W, h: VIEW_H });
+  const [metrics, setMetrics] = useState<Metrics>({ length: 0, unitWidth: 0, reps: 1 });
 
   const rawId = useId();
   const pathId = `text-loop-${rawId.replace(/:/g, '')}`;
 
-  const d = useMemo(() => path || buildPath(shape, curviness, ribbonWidth), [path, shape, curviness, ribbonWidth]);
+  const d = useMemo(
+    () => path || buildPath(shape, curviness, ribbonWidth, viewport.w, viewport.h),
+    [path, shape, curviness, ribbonWidth, viewport.w, viewport.h]
+  );
+
+  useLayoutEffect(() => {
+    const el = rootRef.current;
+    if (!el) return undefined;
+
+    const apply = (width: number) => {
+      const w = Math.max(1, Math.round(width));
+      setViewport(prev => (prev.w === w ? prev : { w, h: VIEW_H }));
+    };
+
+    apply(el.getBoundingClientRect().width);
+    const ro = new ResizeObserver(entries => {
+      apply(entries[0]?.contentRect.width ?? 0);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const unit = useMemo(() => {
     const base = uppercase ? String(text).toUpperCase() : String(text);
@@ -136,10 +173,16 @@ const TextLoop = ({
       } catch {
         return;
       }
-      if (!length) return;
+      if (!length || unitWidth <= 0) return;
 
-      const reps = unitWidth > 0 ? Math.max(1, Math.round(length / unitWidth)) : 1;
-      setMetrics(prev => (prev.length === length && prev.reps === reps ? prev : { length, reps }));
+      // Fill the visible path at natural glyph width. A second copy (tail)
+      // is offset by this cycle so the loop never runs out of text.
+      const reps = Math.max(1, Math.ceil(length / unitWidth));
+      setMetrics(prev =>
+        prev.length === length && prev.unitWidth === unitWidth && prev.reps === reps
+          ? prev
+          : { length, unitWidth, reps }
+      );
     };
 
     measure();
@@ -152,16 +195,16 @@ const TextLoop = ({
     };
   }, [d, unit, fontSize, fontWeight, letterSpacing]);
 
-  useEffect(() => {
-    const { length } = metrics;
+  useLayoutEffect(() => {
+    const { unitWidth, reps } = metrics;
     const head = headRef.current;
     const tail = tailRef.current;
-    if (!head || !tail || !length) return undefined;
+    const cycle = unitWidth * reps;
+    if (!head || !tail || !cycle) return undefined;
 
     const apply = (offset: number) => {
-      const partner = offset >= 0 ? offset - length : offset + length;
       head.setAttribute('startOffset', String(offset));
-      tail.setAttribute('startOffset', String(partner));
+      tail.setAttribute('startOffset', String(offset - cycle));
     };
 
     apply(0);
@@ -172,8 +215,8 @@ const TextLoop = ({
 
     const state = { offset: 0 };
     const tween = gsap.to(state, {
-      offset: direction === 'reverse' ? -length : length,
-      duration: length / speed,
+      offset: direction === 'reverse' ? -cycle : cycle,
+      duration: cycle / speed,
       ease: 'none',
       repeat: -1,
       onUpdate: () => apply(state.offset)
@@ -198,14 +241,14 @@ const TextLoop = ({
   }, [metrics, speed, direction, pauseOnHover]);
 
   const loopText = unit.repeat(metrics.reps);
-  const fitLength = metrics.length || undefined;
 
   return (
     <div ref={rootRef} className={`text-loop ${className}`.trim()} style={style}>
       <svg
         className="text-loop-svg"
-        viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+        viewBox={`0 0 ${viewport.w} ${viewport.h}`}
         preserveAspectRatio="xMidYMid meet"
+        style={{ width: "100%", height: viewport.h }}
         role="img"
         aria-label={text}
       >
@@ -225,13 +268,13 @@ const TextLoop = ({
         </text>
 
         <text className="text-loop-text" style={textStyle} fill={color} dominantBaseline="central" aria-hidden="true">
-          <textPath ref={headRef} href={`#${pathId}`} startOffset={0} textLength={fitLength} lengthAdjust="spacing">
+          <textPath ref={headRef} href={`#${pathId}`} startOffset={0}>
             {loopText}
           </textPath>
         </text>
 
         <text className="text-loop-text" style={textStyle} fill={color} dominantBaseline="central" aria-hidden="true">
-          <textPath ref={tailRef} href={`#${pathId}`} startOffset={0} textLength={fitLength} lengthAdjust="spacing">
+          <textPath ref={tailRef} href={`#${pathId}`} startOffset={0}>
             {loopText}
           </textPath>
         </text>
