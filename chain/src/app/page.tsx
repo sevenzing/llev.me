@@ -1,5 +1,5 @@
-import { ChainOfAchievements } from "@/components/chain/ChainOfAchievements";
+import { Intro } from "@/components/intro/Intro";
 
 export default function Page() {
-  return <ChainOfAchievements />;
+  return <Intro />;
 }

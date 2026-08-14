@@ -2,10 +2,11 @@
 
 import { Block } from "@/lib/chain/types";
 import { seedHashLike, truncHash } from "@/lib/chain/sha256";
-import DecryptedText from "@/components/react-bits/DecryptedText";
 import ClickSpark from "@/components/react-bits/ClickSpark";
 import ElectricBorder from "@/components/react-bits/ElectricBorder";
 import StarBorder from "@/components/react-bits/StarBorder";
+import { GlitchPeek } from "./GlitchPeek";
+import BorderGlow from "@/components/react-bits/BorderGlow";
 
 interface Props {
   block: Block;
@@ -19,7 +20,7 @@ interface Props {
   onDecrypt: () => void;
 }
 
-export function BlockCard({ block, prevHash, isGenesis, valid, justMined, broken, decryptGated, onMine, onDecrypt }: Props) {
+export function BlockCard({ block, prevHash, isGenesis, valid, justMined, broken, decryptGated, onMine }: Props) {
   const placeholderHash = truncHash(seedHashLike(block.number + block.title));
   const displayHash = block.mining ? truncHash(block.currentTry) || placeholderHash : block.mined ? truncHash(block.hash) : placeholderHash;
   const prevPlaceholder = prevHash ? truncHash(seedHashLike(prevHash)) : null;
@@ -58,30 +59,30 @@ export function BlockCard({ block, prevHash, isGenesis, valid, justMined, broken
               <span style={{ color: prevMismatch ? "#d97757" : "#5f5f5f", wordBreak: "break-all" }}>{prevDisplay}</span>
             </div>
             <div
-              onClick={onDecrypt}
               style={{
+                position: "relative",
                 marginBottom: 14,
-                padding: "10px 12px",
                 borderRadius: 10,
-                background: "#f7f7f5",
+                overflow: "hidden",
                 border: "1px solid #ececea",
-                cursor: decryptGated || block.decrypted ? "default" : "pointer",
                 opacity: decryptGated && !block.mined ? 0.5 : 1,
               }}
             >
-              <div style={{ fontSize: 11, color: "#a3a3a3", marginBottom: 4 }}>
-                {block.decrypted ? "decrypted" : decryptGated && !block.mined ? "[ mine this block to decrypt ]" : "[ click to decrypt ]"}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 8,
+                  left: 12,
+                  zIndex: 2,
+                  fontSize: 11,
+                  color: "rgba(255,255,255,0.45)",
+                  pointerEvents: "none",
+                  letterSpacing: 0.4,
+                }}
+              >
+                {decryptGated && !block.mined ? "[ mine this block to inspect ]" : "[ hover to inspect ]"}
               </div>
-              <DecryptedText
-                text={block.content || ""}
-                animateOn="click"
-                sequential
-                revealDirection="start"
-                speed={30}
-                characters="!<>-_\\/[]{}=+*^?#@$%01~"
-                className="decrypt-text"
-                encryptedClassName="decrypt-text-encrypted"
-              />
+              <GlitchPeek text={block.content || ""} locked={decryptGated && !block.mined} />
             </div>
           </>
         )}
@@ -126,12 +127,12 @@ export function BlockCard({ block, prevHash, isGenesis, valid, justMined, broken
   // wrap valid blocks in the animated ElectricBorder; everything else stays a plain card
   return valid ? (
     // <ElectricBorder color="#111111" speed={0.3} chaos={0.1} borderRadius={20}>
-      card
+
     // </ElectricBorder> 
 
-    // <StarBorder speed="5s">
-    //   {card}
-    // </StarBorder>
+    // <BorderGlow>
+      card
+    // </BorderGlow>
   ) : (
     card
   );
