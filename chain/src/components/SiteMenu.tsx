@@ -16,7 +16,6 @@ const socialItems = [
 
 export function SiteMenu() {
   const pathname = usePathname();
-  const onIntro = pathname === "/";
 
   return (
     <StaggeredMenu
@@ -30,7 +29,7 @@ export function SiteMenu() {
       displayItemNumbering
       accentColor="#8c70fa"
       colors={["#c4b5fd", "#8c70fa"]}
-      menuButtonColor={onIntro ? "#f4f0ea" : "#1c1c1e"}
+      menuButtonColor="#f4f0ea"
       openMenuButtonColor="#1c1c1e"
     />
   );

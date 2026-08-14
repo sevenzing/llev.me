@@ -1,62 +1,87 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ACHIEVEMENTS } from "./data";
-import { sha256Hex } from "./sha256";
+import { ACHIEVEMENTS, initialNonceFor } from "./data";
+import { DIFFICULTY, ZERO_HASH, blockPayloadBase, hashBlock, meetsDifficulty, sha256Hex } from "./sha256";
 import { Block, UseChainOptions } from "./types";
 
 const STORAGE_KEY = "llev_chain_v1";
 const BATCH_SIZE = 1200;
 
-function buildInitialBlocks(): Block[] {
-  return ACHIEVEMENTS.map((a) => ({
-    ...a,
-    hash: null,
-    nonce: null,
-    mined: false,
-    mining: false,
-    currentTry: "",
-    prevHashUsed: null,
-    decrypted: false,
-  }));
+export async function buildInitialBlocks(): Promise<Block[]> {
+  const blocks: Block[] = [];
+  for (const seed of ACHIEVEMENTS) {
+    const prevHash = blocks.length === 0 ? ZERO_HASH : blocks[blocks.length - 1].hash;
+    const nonce = initialNonceFor(seed);
+    const hash = await hashBlock({ ...seed, nonce }, prevHash);
+    blocks.push({
+      ...seed,
+      hash,
+      nonce,
+      prevHash,
+      mined: meetsDifficulty(hash),
+      mining: false,
+    });
+  }
+  return blocks;
+}
+
+export function prevHashOf(blocks: Block[], index: number): string {
+  return index === 0 ? ZERO_HASH : blocks[index - 1].hash;
+}
+
+async function recomputeFrom(blocks: Block[], fromIndex: number): Promise<Block[]> {
+  const next = blocks.map((b) => ({ ...b }));
+  for (let i = fromIndex; i < next.length; i++) {
+    const prevHash = prevHashOf(next, i);
+    const hash = await hashBlock(next[i], prevHash);
+    next[i] = {
+      ...next[i],
+      prevHash,
+      hash,
+      mined: meetsDifficulty(hash),
+    };
+  }
+  return next;
 }
 
 export function isBlockValid(blocks: Block[], i: number): boolean {
   const b = blocks[i];
-  if (!b.mined) return false;
-  if (i === 0) return true;
-  return b.prevHashUsed === blocks[i - 1].hash;
+  if (!b.mined || b.mining) return false;
+  return b.prevHash === prevHashOf(blocks, i) && meetsDifficulty(b.hash);
 }
 
 export function useChain(options: UseChainOptions = {}) {
-  const { persist = false, decryptGated = true, scalingDifficulty = false } = options;
-  const [blocks, setBlocks] = useState<Block[]>(buildInitialBlocks);
-  const [healing, setHealing] = useState(false);
-  const [justMinedIndex, setJustMinedIndex] = useState<number | null>(null);
-  const [celebrating, setCelebrating] = useState(false);
+  const { persist = false, scalingDifficulty = false } = options;
+  const [blocks, setBlocks] = useState<Block[]>([]);
+  const blocksRef = useRef(blocks);
   const miningRef = useRef<Set<number>>(new Set());
+  blocksRef.current = blocks;
 
   useEffect(() => {
-    if (!persist) return;
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-      if (Array.isArray(saved) && saved.length === ACHIEVEMENTS.length) {
-        setBlocks((cur) => cur.map((b, i) => ({ ...b, ...saved[i] })));
+    let cancelled = false;
+    (async () => {
+      let initial = await buildInitialBlocks();
+      if (persist) {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+          if (Array.isArray(saved) && saved.length === initial.length) {
+            initial = initial.map((b, i) => ({ ...b, ...saved[i] }));
+          }
+        } catch {}
       }
-    } catch {}
+      if (!cancelled) setBlocks(initial);
+    })();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // genesis auto-mines once on mount (it's pre-mined conceptually, but we still
-    // run it through the real hash function so the displayed hash is genuine)
-    setBlocks((cur) => {
-      if (cur[0].mined) return cur;
-      return cur;
-    });
-    if (!blocks[0].mined && !miningRef.current.has(0)) {
+    if (blocks.length > 0 && !blocks[0].mined && !miningRef.current.has(0)) {
       mineBlock(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [blocks.length]);
 
   const persistState = useCallback(
     (next: Block[]) => {
@@ -64,7 +89,7 @@ export function useChain(options: UseChainOptions = {}) {
       try {
         localStorage.setItem(
           STORAGE_KEY,
-          JSON.stringify(next.map((b) => ({ hash: b.hash, nonce: b.nonce, mined: b.mined, prevHashUsed: b.prevHashUsed, decrypted: b.decrypted })))
+          JSON.stringify(next.map((b) => ({ hash: b.hash, nonce: b.nonce, mined: b.mined, prevHash: b.prevHash })))
         );
       } catch {}
     },
@@ -77,98 +102,76 @@ export function useChain(options: UseChainOptions = {}) {
       miningRef.current.add(index);
       setBlocks((cur) => cur.map((b, i) => (i === index ? { ...b, mining: true } : b)));
 
-      setBlocks((snapshotSetter) => snapshotSetter); // no-op to keep hook shape stable
-      const current = await new Promise<Block[]>((resolve) => setBlocks((s) => (resolve(s), s)));
+      const current = blocksRef.current;
       const block = current[index];
-      const prevHash = index === 0 ? "GENESIS" : current[index - 1].hash;
-      const difficulty = scalingDifficulty ? "0".repeat(4 + Math.floor(index / 3)) : "0000";
-      const payloadBase = `${block.number}|${block.date}|${block.title}|${block.content || ""}|${prevHash}|`;
+      if (!block) {
+        miningRef.current.delete(index);
+        return;
+      }
+      const prevHash = prevHashOf(current, index);
+      const difficulty = scalingDifficulty ? "0".repeat(4 + Math.floor(index / 3)) : DIFFICULTY;
+      const payloadBase = blockPayloadBase(block, prevHash);
 
       let nonce = 0;
-      let lastHex = "";
+      let lastHex = block.hash;
       // eslint-disable-next-line no-constant-condition
       while (true) {
+        if (!miningRef.current.has(index)) {
+          setBlocks((cur) => cur.map((b, i) => (i === index ? { ...b, mining: false } : b)));
+          return;
+        }
         let found: { hex: string; nonce: number } | null = null;
-        for (let b = 0; b < BATCH_SIZE; b++) {
+        for (let n = 0; n < BATCH_SIZE; n++) {
           const hex = await sha256Hex(payloadBase + nonce);
           lastHex = hex;
-          if (hex.startsWith(difficulty)) {
+          if (meetsDifficulty(hex, difficulty)) {
             found = { hex, nonce };
             break;
           }
           nonce++;
         }
         if (found) {
-          setBlocks((cur) => {
-            const next = cur.map((b, i) =>
-              i === index ? { ...b, mining: false, mined: true, hash: found!.hex, nonce: found!.nonce, prevHashUsed: prevHash, currentTry: found!.hex } : b
-            );
-            persistState(next);
-            return next;
-          });
+          const patched = blocksRef.current.map((b, i) =>
+            i === index
+              ? { ...b, mining: false, mined: true, hash: found!.hex, nonce: found!.nonce, prevHash }
+              : b
+          );
+          const next = await recomputeFrom(patched, index + 1);
+          persistState(next);
+          setBlocks(next);
           miningRef.current.delete(index);
-          onMineSuccess(index);
           return;
         }
-        setBlocks((cur) => cur.map((b, i) => (i === index ? { ...b, currentTry: lastHex } : b)));
+        setBlocks((cur) => cur.map((b, i) => (i === index ? { ...b, hash: lastHex, nonce, prevHash } : b)));
         await new Promise((r) => requestAnimationFrame(r));
       }
     },
     [scalingDifficulty, persistState]
   );
 
-  const onMineSuccess = useCallback((index: number) => {
-    setJustMinedIndex(index);
-    setTimeout(() => setJustMinedIndex((cur) => (cur === index ? null : cur)), 1800);
-    setTimeout(() => {
-      setBlocks((cur) => {
-        if (cur.every((_, i) => isBlockValid(cur, i))) {
-          setCelebrating(true);
-          setTimeout(() => setCelebrating(false), 3000);
-        }
-        return cur;
-      });
-    }, 400);
-  }, []);
-
-  const healNetwork = useCallback(async () => {
-    setHealing(true);
-    for (let i = 1; i < ACHIEVEMENTS.length; i++) {
-      const stillInvalid = await new Promise<boolean>((resolve) => setBlocks((s) => (resolve(!isBlockValid(s, i)), s)));
-      if (stillInvalid) {
-        await mineBlock(i);
-        await new Promise((r) => setTimeout(r, 260));
-      }
-    }
-    setHealing(false);
-  }, [mineBlock]);
-
-  const decryptBlock = useCallback(
-    (index: number) => {
-      setBlocks((cur) => {
-        const b = cur[index];
-        if (index === 0 || b.decrypted || !b.content) return cur;
-        if (decryptGated && !isBlockValid(cur, index)) return cur;
-        const next = cur.map((blk, i) => (i === index ? { ...blk, decrypted: true } : blk));
-        persistState(next);
-        return next;
-      });
+  const resetBlock = useCallback(
+    async (index: number) => {
+      miningRef.current.delete(index);
+      const current = blocksRef.current;
+      const block = current[index];
+      if (!block) return;
+      const prevHash = prevHashOf(current, index);
+      const nonce = 0;
+      const hash = await hashBlock({ ...block, nonce }, prevHash);
+      const patched = current.map((b, i) =>
+        i === index ? { ...b, mining: false, mined: false, hash, nonce, prevHash } : b
+      );
+      const next = await recomputeFrom(patched, index + 1);
+      persistState(next);
+      setBlocks(next);
     },
-    [decryptGated, persistState]
+    [persistState]
   );
-
-  const validCount = blocks.reduce((n, _, i) => n + (isBlockValid(blocks, i) ? 1 : 0), 0);
 
   return {
     blocks,
-    validCount,
-    total: blocks.length,
-    healing,
-    celebrating,
-    justMinedIndex,
     mineBlock,
-    healNetwork,
-    decryptBlock,
+    resetBlock,
     isValid: (i: number) => isBlockValid(blocks, i),
   };
 }

@@ -1,3 +1,10 @@
+import { AchievementSeed } from "./types";
+
+/** Genesis previous hash — a zero hash. */
+export const ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+export const DIFFICULTY = "0000";
+
 export async function sha256Hex(input: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
   return Array.from(new Uint8Array(buf))
@@ -5,23 +12,25 @@ export async function sha256Hex(input: string): Promise<string> {
     .join("");
 }
 
-/** Deterministic, non-cryptographic hash used ONLY to render a stable placeholder
- * hash string for unmined blocks (so the UI never shows "not mined yet" text). */
-export function seedHashLike(seed: string): string {
-  let h1 = 0xdeadbeef;
-  let h2 = 0x41c6ce57;
-  for (let i = 0; i < seed.length; i++) {
-    const ch = seed.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = (h1 ^ (h1 >>> 16)) >>> 0;
-  h2 = (h2 ^ (h2 >>> 16)) >>> 0;
-  const hex = (h1.toString(16).padStart(8, "0") + h2.toString(16).padStart(8, "0")).repeat(2);
-  return hex.slice(0, 64);
+export function blockPayloadBase(block: AchievementSeed, prevHash: string): string {
+  return `${block.number}|${block.date}|${block.title}|${block.content ?? ""}|${prevHash}|`;
 }
 
-export function truncHash(hash: string | null): string {
-  if (!hash) return "";
-  return hash.slice(0, 14) + "…" + hash.slice(-8);
+export function blockPayload(block: AchievementSeed & { nonce: number }, prevHash: string): string {
+  return `${blockPayloadBase(block, prevHash)}${block.nonce}`;
+}
+
+export async function hashBlock(block: AchievementSeed & { nonce: number }, prevHash: string): Promise<string> {
+  return sha256Hex(blockPayload(block, prevHash));
+}
+
+export function formatHash(hash: string): string {
+  const prefixed = hash.startsWith("0x") ? hash : `0x${hash}`;
+  if (prefixed.length <= 18) return prefixed;
+  return `${prefixed.slice(0, 16)}…${prefixed.slice(-8)}`;
+}
+
+export function meetsDifficulty(hash: string, difficulty = DIFFICULTY): boolean {
+  const body = hash.startsWith("0x") ? hash.slice(2) : hash;
+  return body.startsWith(difficulty);
 }

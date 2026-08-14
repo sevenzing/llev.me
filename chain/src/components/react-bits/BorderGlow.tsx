@@ -1,4 +1,6 @@
-import { useRef, useCallback, useEffect, type ReactNode } from 'react';
+"use client";
+
+import { useRef, useCallback, useEffect, type ReactNode, type CSSProperties, type PointerEvent, type FC } from 'react';
 import './BorderGlow.css';
 
 interface BorderGlowProps {
@@ -68,7 +70,7 @@ function animateValue({ start = 0, end = 100, duration = 1000, delay = 0, ease =
   setTimeout(() => requestAnimationFrame(tick), delay);
 }
 
-const BorderGlow: React.FC<BorderGlowProps> = ({
+const BorderGlow: FC<BorderGlowProps> = ({
   children,
   className = '',
   edgeSensitivity = 30,
@@ -111,7 +113,7 @@ const BorderGlow: React.FC<BorderGlowProps> = ({
     return degrees;
   }, [getCenterOfElement]);
 
-  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerMove = useCallback((e: PointerEvent<HTMLDivElement>) => {
     const card = cardRef.current;
     if (!card) return;
 
@@ -163,7 +165,7 @@ const BorderGlow: React.FC<BorderGlowProps> = ({
         '--fill-opacity': fillOpacity,
         ...glowVars,
         ...buildGradientVars(colors),
-      } as React.CSSProperties}
+      } as CSSProperties}
     >
       <span className="edge-light" />
       <div className="border-glow-inner">
