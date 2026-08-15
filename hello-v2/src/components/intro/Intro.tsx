@@ -24,8 +24,8 @@ export function Intro() {
   const fullText = who.map((w) => hello + separatorWithSpace + w).join(separatorWithSpace);
 
   return (
-    <main className="intro">
-      <div className="intro-hero">
+    <main className="relative z-[1] h-dvh overflow-hidden text-cream pointer-events-none">
+      <div className="relative z-[2] flex h-dvh items-center pointer-events-none [&_.text-loop]:pointer-events-auto [&_.text-loop]:w-full">
         <TextLoop
           text={fullText}
           shape="wave"

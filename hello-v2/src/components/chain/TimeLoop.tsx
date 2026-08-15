@@ -4,7 +4,10 @@ import TextLoop from "@/components/react-bits/TextLoop";
 
 export function TimeLoop() {
   return (
-    <aside className="time-loop" aria-hidden>
+    <aside
+      className="pointer-events-none z-[1] hidden h-full w-40 overflow-visible min-[900px]:block [&_.text-loop]:h-full [&_.text-loop]:overflow-visible"
+      aria-hidden
+    >
       <TextLoop
         text="time"
         separator="✦"

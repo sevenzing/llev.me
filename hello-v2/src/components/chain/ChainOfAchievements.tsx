@@ -12,11 +12,11 @@ export function ChainOfAchievements() {
   });
 
   return (
-    <section className="chain">
-      <div className="chain-hero">
+    <section className="pointer-events-none relative z-[1] flex w-[min(420px,calc(100%-40px))] flex-[0_0_min(420px,calc(100%-40px))] flex-col items-center pb-20 pt-[108px]">
+      <div className="relative z-[1] mb-6 flex w-full justify-center text-center">
         <TextType
           as="h1"
-          className="chain-hero-type"
+          className="m-0 text-[1.4rem] font-normal tracking-[0.02em] text-cream"
           text={CHAIN_HERO_TEXTS}
           typingSpeed={50}
           deletingSpeed={30}
@@ -28,9 +28,9 @@ export function ChainOfAchievements() {
         />
       </div>
 
-      <div className="chain-list">
+      <div className="relative z-[1] flex w-full flex-col items-center">
         {blocks.map((block, i) => (
-          <div key={block.number} className="chain-item">
+          <div key={block.number} className="flex w-full flex-col items-center">
             <BlockCard
               block={block}
               valid={isValid(i)}
@@ -39,8 +39,16 @@ export function ChainOfAchievements() {
               onReset={() => resetBlock(i)}
             />
             {i < blocks.length - 1 && (
-              <div className="chain-connector" aria-hidden>
-                <span className={!isValid(i + 1) && blocks[i + 1].mined ? "is-broken" : isValid(i) ? "is-linked" : undefined} />
+              <div className="flex h-14 justify-center" aria-hidden>
+                <span
+                  className={`block h-full w-px ${
+                    !isValid(i + 1) && blocks[i + 1].mined
+                      ? "bg-warn"
+                      : isValid(i)
+                        ? "bg-grape"
+                        : "bg-cream/20"
+                  }`}
+                />
               </div>
             )}
           </div>

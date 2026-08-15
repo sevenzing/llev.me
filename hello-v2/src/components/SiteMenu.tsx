@@ -14,13 +14,24 @@ const socialItems = [
   { label: "Telegram", link: "https://t.me/llevchiks" },
 ];
 
+const menuClassName = [
+  "[&_.staggered-menu-header]:justify-end [&_.staggered-menu-header]:px-7 [&_.staggered-menu-header]:py-6",
+  "[&_.sm-toggle-textWrap]:sr-only",
+  "[&_.sm-icon]:h-6 [&_.sm-icon]:w-8 [&_.sm-icon]:basis-8 [&_.sm-icon-line]:h-[3px]",
+  "[&_.sm-panel-item]:font-mono [&_.sm-panel-item]:text-[clamp(2rem,6vw,3.4rem)] [&_.sm-panel-item]:tracking-normal",
+  "[&_.sm-socials-title]:font-mono [&_.sm-socials-link]:font-mono",
+  "max-[800px]:[&_.sm-panel-item]:pr-[1.6rem]",
+  "max-[800px]:[&_.sm-panel-list[data-numbering]_.sm-panel-item]:after:right-0",
+  "max-[800px]:[&_.sm-panel-list[data-numbering]_.sm-panel-item]:after:top-[0.12em]",
+].join(" ");
+
 export function SiteMenu() {
   const pathname = usePathname();
 
   return (
     <StaggeredMenu
       key={pathname}
-      className="site-menu"
+      className={menuClassName}
       isFixed
       position="right"
       items={items}

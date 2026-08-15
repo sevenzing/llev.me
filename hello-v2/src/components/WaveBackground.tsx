@@ -10,16 +10,16 @@ interface WaveBackgroundProps {
 
 export function WaveBackground({ sparksEnabled = false, mouseInteraction = false }: WaveBackgroundProps) {
   const waves = (
-    <div className="wave-background-waves">
+    <div className="h-full">
       <GradientWaves mouseInteraction={mouseInteraction} parallaxStrength={0.25} />
     </div>
   );
 
   return (
-    <div className="wave-background">
+    <div className="fixed inset-0 z-0">
       {sparksEnabled ? (
         <ClickSpark
-          className="wave-background-spark"
+          className="h-full [&_canvas]:z-[1]"
           sparkColor="#f4f0ea"
           sparkSize={12}
           sparkRadius={32}
