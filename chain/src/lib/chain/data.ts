@@ -13,7 +13,7 @@ export const ACHIEVEMENTS: AchievementSeed[] = [
   { number: 0, date: "2001 · jul", title: "genesis", content: "I was born" },
   {
     number: 1, date: "2018 · oct", title: "first smart contract",
-    content: "I wrote my first smart contract and deployed it with web3.py, it was so fun"
+    content: "I wrote my first smart contract and deployed it with web3.py. It was awesome"
   },
   { number: 2, date: "2019 · mar", title: "fintech", 
     content: "I won the russian fintech ethereum olympiad, NTI. worked with ethereum a lot during that" },

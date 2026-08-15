@@ -6,8 +6,13 @@ export default function AboutPage() {
   return (
     <div className="about-page">
       <WaveBackground />
-      <TimeLoop />
-      <ChainOfAchievements />
+      <div className="about-layout">
+        <div className="about-side">
+          <TimeLoop />
+        </div>
+        <ChainOfAchievements />
+        <div className="about-side" />
+      </div>
     </div>
   );
 }
