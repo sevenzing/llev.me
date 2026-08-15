@@ -1,5 +1,14 @@
 import { AchievementSeed } from "./types";
 
+export const CHAIN_HERO_TEXTS: string[] = [
+  "This is a blockchain",
+  "This is chain of events",
+  "This is my history in blocks",
+  "Yeah I like blockchain",
+] as const;
+
+
+
 export const ACHIEVEMENTS: AchievementSeed[] = [
   { number: 0, date: "2001 · jul", title: "genesis", content: "I was born" },
   {

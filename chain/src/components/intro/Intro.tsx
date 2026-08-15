@@ -1,8 +1,6 @@
 "use client";
 
-import GradientWaves from "@/components/react-bits/GradientWaves";
 import TextLoop from "@/components/react-bits/TextLoop";
-import ClickSpark from "@/components/react-bits/ClickSpark";
 import { useEffect, useState } from "react";
 
 function mapRange(value: number, inMin: number, inMax: number, outMin: number, outMax: number) {
@@ -22,50 +20,26 @@ export function Intro() {
   const hello = "Hello! I'm Lev";
   const separator = "✦";
   const separatorWithSpace = ` ${separator} `;
-  const who = [
-    "web3 dev",
-    "wave dev",
-    "wow dev",
-    "vibe dev",
-  ]
-  const fullText = who.map(w => hello + separatorWithSpace + w).join(separatorWithSpace);
+  const who = ["web3 dev", "wave dev", "wow dev", "vibe dev"];
+  const fullText = who.map((w) => hello + separatorWithSpace + w).join(separatorWithSpace);
+
   return (
     <main className="intro">
-      <ClickSpark
-        className="intro-spark"
-        sparkColor="#f4f0ea"
-        sparkSize={12}
-        sparkRadius={32}
-        sparkCount={10}
-        duration={480}
-      >
-        <div className="intro-waves">
-          <GradientWaves
-            mouseInteraction={true}
-            parallaxStrength={0.25}
-          />
-        </div>
-
-        {/* <div className="intro-vignette" /> */}
-
-        <div className="intro-hero">
-          <TextLoop
-            text={fullText}
-            shape="wave"
-            separator={separator}
-            curviness={curviness}
-            speed={72}
-            fontSize={36}
-            // letterSpacing={3}
-            uppercase={true}
-            // color="#f4f0ea"
-            letterSpacing={2}
-            ribbonWidth={72}
-            ribbonColor="#ac86d2"
-            pauseOnHover={false}
-          />
-        </div>
-      </ClickSpark>
+      <div className="intro-hero">
+        <TextLoop
+          text={fullText}
+          shape="wave"
+          separator={separator}
+          curviness={curviness}
+          speed={72}
+          fontSize={36}
+          uppercase={true}
+          letterSpacing={2}
+          ribbonWidth={72}
+          ribbonColor="#ac86d2"
+          pauseOnHover={false}
+        />
+      </div>
     </main>
   );
 }

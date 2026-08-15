@@ -11,7 +11,7 @@ const items = [
 const socialItems = [
   { label: "GitHub", link: "https://github.com/sevenzing" },
   { label: "LinkedIn", link: "https://linkedin.com/in/lymarenkolev/" },
-  { label: "Instagram", link: "https://instagram.com/llevchiks/" },
+  { label: "Telegram", link: "https://t.me/llevchiks" },
 ];
 
 export function SiteMenu() {
