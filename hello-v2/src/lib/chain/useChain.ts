@@ -48,6 +48,12 @@ export function isBlockValid(blocks: Block[], i: number): boolean {
   return b.prevHash === prevHashOf(blocks, i) && meetsDifficulty(b.hash);
 }
 
+function abortMiningAfter(mining: Set<number>, index: number) {
+  for (const i of [...mining]) {
+    if (i > index) mining.delete(i);
+  }
+}
+
 export function useChain() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const blocksRef = useRef(blocks);
@@ -83,8 +89,8 @@ export function useChain() {
       miningRef.current.delete(index);
       return;
     }
-    const prevHash = prevHashOf(current, index);
-    const payloadBase = blockPayloadBase(block, prevHash);
+    let prevHash = prevHashOf(current, index);
+    let payloadBase = blockPayloadBase(block, prevHash);
 
     let nonce = 0;
     let lastHex = block.hash;
@@ -105,14 +111,23 @@ export function useChain() {
         nonce++;
       }
       if (found) {
-        const patched = blocksRef.current.map((b, i) =>
-          i === index
-            ? { ...b, mining: false, mined: true, hash: found!.hex, nonce: found!.nonce, prevHash }
-            : b
-        );
-        const next = await recomputeFrom(patched, index + 1);
-        setBlocks(next);
+        const latestPrev = prevHashOf(blocksRef.current, index);
+        if (latestPrev !== prevHash) {
+          prevHash = latestPrev;
+          payloadBase = blockPayloadBase(block, prevHash);
+          nonce = 0;
+          continue;
+        }
+        abortMiningAfter(miningRef.current, index);
         miningRef.current.delete(index);
+        const patched = blocksRef.current.map((b, i) => {
+          if (i === index) {
+            return { ...b, mining: false, mined: true, hash: found.hex, nonce: found.nonce, prevHash };
+          }
+          if (i > index && b.mining) return { ...b, mining: false };
+          return b;
+        });
+        setBlocks(await recomputeFrom(patched, index + 1));
         return;
       }
       setBlocks((cur) => cur.map((b, i) => (i === index ? { ...b, hash: lastHex, nonce, prevHash } : b)));
@@ -122,15 +137,18 @@ export function useChain() {
 
   const resetBlock = useCallback(async (index: number) => {
     miningRef.current.delete(index);
+    abortMiningAfter(miningRef.current, index);
     const current = blocksRef.current;
     const block = current[index];
     if (!block) return;
     const prevHash = prevHashOf(current, index);
     const nonce = 0;
     const hash = await hashBlock({ ...block, nonce }, prevHash);
-    const patched = current.map((b, i) =>
-      i === index ? { ...b, mining: false, mined: false, hash, nonce, prevHash } : b
-    );
+    const patched = current.map((b, i) => {
+      if (i === index) return { ...b, mining: false, mined: false, hash, nonce, prevHash };
+      if (i > index && b.mining) return { ...b, mining: false };
+      return b;
+    });
     setBlocks(await recomputeFrom(patched, index + 1));
   }, []);
 

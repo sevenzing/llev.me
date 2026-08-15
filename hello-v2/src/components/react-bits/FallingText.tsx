@@ -156,23 +156,27 @@ const FallingText: React.FC<FallingTextProps> = ({
     Runner.run(runner, engine);
     Render.run(render);
 
+    let raf = 0;
+    let running = true;
     const updateLoop = () => {
+      if (!running) return;
       wordBodies.forEach(({ body, elem }) => {
         const { x, y } = body.position;
         elem.style.left = `${x}px`;
         elem.style.top = `${y}px`;
         elem.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`;
       });
-      Matter.Engine.update(engine);
-      requestAnimationFrame(updateLoop);
+      raf = requestAnimationFrame(updateLoop);
     };
-    updateLoop();
+    raf = requestAnimationFrame(updateLoop);
 
     return () => {
+      running = false;
+      cancelAnimationFrame(raf);
       Render.stop(render);
       Runner.stop(runner);
-      if (render.canvas && canvasContainerRef.current) {
-        canvasContainerRef.current.removeChild(render.canvas);
+      if (render.canvas?.parentNode) {
+        render.canvas.parentNode.removeChild(render.canvas);
       }
       World.clear(engine.world, false);
       Engine.clear(engine);
