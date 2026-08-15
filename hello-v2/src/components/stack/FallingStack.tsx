@@ -60,7 +60,7 @@ export function FallingStack() {
           </button>
 
           <p
-            className={`pointer-events-none absolute inset-0 z-0 flex items-center justify-center font-display text-[clamp(18px,5vw,28px)] tracking-[0.28em] text-cream/25 transition-opacity duration-500 ${
+            className={`pointer-events-none absolute inset-x-0 bottom-8 z-0 flex justify-center font-display text-[clamp(18px,5vw,28px)] tracking-[0.28em] text-cream/25 transition-opacity duration-500 ${
               started ? "opacity-0" : "opacity-100"
             }`}
           >

@@ -13,10 +13,10 @@ export function ChainOfAchievements() {
 
   return (
     <section className="pointer-events-none relative z-[1] flex w-[min(420px,calc(100%-40px))] flex-[0_0_min(420px,calc(100%-40px))] flex-col items-center pb-20 pt-[108px]">
-      <div className="relative z-[1] mb-6 flex w-full justify-center text-center">
+      <div className="relative z-[1] mb-6 w-full text-center">
         <TextType
           as="h1"
-          className="m-0 text-[1.4rem] font-normal tracking-[0.02em] text-cream"
+          className="m-0 !block min-h-[2.8em] w-full text-[1.4rem] font-normal leading-[1.4] tracking-[0.02em] text-cream"
           text={CHAIN_HERO_TEXTS}
           typingSpeed={50}
           deletingSpeed={30}
