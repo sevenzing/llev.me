@@ -5,7 +5,7 @@ import TextLoop from "@/components/react-bits/TextLoop";
 export function TimeLoop() {
   return (
     <aside
-      className="pointer-events-none z-[1] hidden h-full w-40 overflow-visible min-[900px]:block [&_.text-loop]:h-full [&_.text-loop]:overflow-visible"
+      className="pointer-events-none absolute inset-y-0 left-1/2 z-[1] hidden w-[15rem] -translate-x-1/2 overflow-clip [overflow-anchor:none] min-[900px]:block [&_.text-loop]:h-full"
       aria-hidden
     >
       <TextLoop

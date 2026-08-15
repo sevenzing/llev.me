@@ -68,7 +68,9 @@ export function useChain(options: UseChainOptions = {}) {
           }
         } catch {}
       }
-      if (!cancelled) setBlocks(initial);
+      if (!cancelled) {
+        setBlocks(initial);
+      }
     })();
     return () => {
       cancelled = true;
