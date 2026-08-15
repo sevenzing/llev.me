@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply overflow-x-clip overscroll-none;
+  }
+
+  body {
+    @apply m-0 min-h-full overflow-x-clip overscroll-none bg-ink font-mono text-[#1c1c1e];
+  }
+
+  button,
+  input {
+    font-family: inherit;
+  }
+
+  a {
+    color: inherit;
+  }
+}
