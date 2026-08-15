@@ -36,10 +36,18 @@ a {
 
 .intro {
   position: relative;
-  min-height: 100dvh;
+  height: 100dvh;
   overflow: hidden;
   color: #f4f0ea;
   background: #07060c;
+}
+
+.intro-spark {
+  height: 100%;
+}
+
+.intro-spark > canvas {
+  z-index: 4;
 }
 
 .intro-waves {
@@ -168,9 +176,13 @@ a {
 .chain {
   position: relative;
   z-index: 1;
-  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(420px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 108px 20px 80px;
+  padding: 108px 0 80px;
+  pointer-events: none;
 }
 
 .chain-hero {
@@ -178,9 +190,11 @@ a {
   z-index: 1;
   display: flex;
   justify-content: center;
+  width: 100%;
   min-height: 4.4em;
   margin-bottom: 56px;
   text-align: center;
+  pointer-events: none;
 }
 
 .chain-hero-type {
@@ -198,6 +212,7 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 .chain-item {
@@ -208,7 +223,8 @@ a {
 }
 
 .chain-card {
-  width: min(420px, 100%);
+  width: 100%;
+  pointer-events: auto;
 }
 
 .chain-card .border-glow-inner {
@@ -342,7 +358,6 @@ a {
 .chain-connector {
   display: flex;
   justify-content: center;
-  width: min(420px, 100%);
   height: 56px;
 }
 
@@ -379,15 +394,30 @@ a {
 }
 
 .site-menu .sm-icon {
-  width: 22px;
-  height: 16px;
-  flex-basis: 22px;
+  width: 32px;
+  height: 24px;
+  flex-basis: 32px;
+}
+
+.site-menu .sm-icon-line {
+  height: 3px;
 }
 
 .site-menu .sm-panel-item {
   font-family: "IBM Plex Mono", monospace;
   font-size: clamp(2rem, 6vw, 3.4rem);
   letter-spacing: 0;
+}
+
+@media (max-width: 800px) {
+  .site-menu .sm-panel-item {
+    padding-right: 1.6rem;
+  }
+
+  .site-menu .sm-panel-list[data-numbering] .sm-panel-item::after {
+    right: 0;
+    top: 0.12em;
+  }
 }
 
 .site-menu .sm-socials-title,

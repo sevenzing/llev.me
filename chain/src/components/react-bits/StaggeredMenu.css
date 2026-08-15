@@ -281,7 +281,7 @@
     color 0.25s;
   display: inline-block;
   text-decoration: none;
-  padding-right: 1.4em;
+  padding-right: 1.6em;
 }
 
 .staggered-menu-panel .sm-socials-list .sm-socials-link {
@@ -329,6 +329,7 @@
   pointer-events: none;
   user-select: none;
   opacity: var(--sm-num-opacity, 0);
+  padding-left: 0.2em;
 }
 
 @media (max-width: 1024px) {

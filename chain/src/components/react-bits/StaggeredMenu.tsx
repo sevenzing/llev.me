@@ -96,9 +96,9 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       if (preContainer) {
         gsap.set(preContainer, { xPercent: 0, opacity: 1 });
       }
-      gsap.set(plusH, { y: -6, rotate: 0, transformOrigin: '50% 50%' });
+      gsap.set(plusH, { y: -8, rotate: 0, transformOrigin: '50% 50%' });
       gsap.set(plusMid, { y: 0, opacity: 1, scaleX: 1, transformOrigin: '50% 50%' });
-      gsap.set(plusV, { y: 6, rotate: 0, transformOrigin: '50% 50%' });
+      gsap.set(plusV, { y: 8, rotate: 0, transformOrigin: '50% 50%' });
       gsap.set(icon, { rotate: 0, transformOrigin: '50% 50%' });
       gsap.set(textInner, { yPercent: 0 });
       if (toggleBtnRef.current) gsap.set(toggleBtnRef.current, { color: menuButtonColor });
@@ -286,9 +286,9 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     } else {
       spinTweenRef.current = gsap
         .timeline({ overwrite: 'auto' })
-        .to(top, { y: -6, rotate: 0, duration: 0.3, ease: 'power3.inOut' }, 0)
+        .to(top, { y: -8, rotate: 0, duration: 0.3, ease: 'power3.inOut' }, 0)
         .to(mid, { opacity: 1, scaleX: 1, duration: 0.2, ease: 'power2.out' }, 0)
-        .to(bot, { y: 6, rotate: 0, duration: 0.3, ease: 'power3.inOut' }, 0);
+        .to(bot, { y: 8, rotate: 0, duration: 0.3, ease: 'power3.inOut' }, 0);
     }
   }, []);
 
