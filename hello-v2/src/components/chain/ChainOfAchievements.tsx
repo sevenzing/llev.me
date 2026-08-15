@@ -6,10 +6,7 @@ import TextType from "@/components/react-bits/TextType";
 import { CHAIN_HERO_TEXTS } from "@/lib/chain/data";
 
 export function ChainOfAchievements() {
-  const { blocks, mineBlock, resetBlock, isValid } = useChain({
-    persist: false,
-    scalingDifficulty: false,
-  });
+  const { blocks, mineBlock, resetBlock, isValid } = useChain();
 
   return (
     <section className="pointer-events-none relative z-[1] flex w-[min(420px,calc(100%-40px))] flex-[0_0_min(420px,calc(100%-40px))] flex-col items-center pb-20 pt-[108px]">

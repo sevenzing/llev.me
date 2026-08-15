@@ -12,8 +12,3 @@ export interface Block extends AchievementSeed {
   mining: boolean;
   prevHash: string;
 }
-
-export interface UseChainOptions {
-  persist?: boolean;
-  scalingDifficulty?: boolean;
-}

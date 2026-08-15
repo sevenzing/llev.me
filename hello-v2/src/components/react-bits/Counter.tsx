@@ -50,15 +50,15 @@ interface DigitProps {
   digitStyle?: React.CSSProperties;
 }
 
-function Digit({ place, value, height, digitStyle }: DigitProps) {
-  if (place === '.') {
-    return (
-      <span className="counter-digit" style={{ height, ...digitStyle, width: 'fit-content' }}>
-        .
-      </span>
-    );
-  }
+function DecimalDigit({ height, digitStyle }: { height: number; digitStyle?: React.CSSProperties }) {
+  return (
+    <span className="counter-digit" style={{ height, ...digitStyle, width: 'fit-content' }}>
+      .
+    </span>
+  );
+}
 
+function AnimatedDigit({ place, value, height, digitStyle }: { place: number; value: number; height: number; digitStyle?: React.CSSProperties }) {
   const valueRoundedToPlace = getValueRoundedToPlace(value, place);
   const animatedValue = useSpring(valueRoundedToPlace);
 
@@ -73,6 +73,14 @@ function Digit({ place, value, height, digitStyle }: DigitProps) {
       ))}
     </span>
   );
+}
+
+function Digit({ place, value, height, digitStyle }: DigitProps) {
+  if (place === '.') {
+    return <DecimalDigit height={height} digitStyle={digitStyle} />;
+  }
+
+  return <AnimatedDigit place={place} value={value} height={height} digitStyle={digitStyle} />;
 }
 
 interface CounterProps {
