@@ -6,6 +6,7 @@ import StaggeredMenu from "@/components/react-bits/StaggeredMenu";
 const items = [
   { label: "Home", ariaLabel: "Home", link: "/" },
   { label: "About", ariaLabel: "About", link: "/about" },
+  { label: "Stack", ariaLabel: "Stack", link: "/stack" },
 ];
 
 const socialItems = [
