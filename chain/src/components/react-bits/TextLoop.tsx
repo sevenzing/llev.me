@@ -7,6 +7,7 @@ import './TextLoop.css';
 
 export type TextLoopShape = 'wave' | 'circle' | 'infinity' | 'arch' | 'line';
 export type TextLoopDirection = 'forward' | 'reverse';
+export type TextLoopOrientation = 'horizontal' | 'vertical';
 
 export interface TextLoopProps {
   text?: string;
@@ -14,6 +15,7 @@ export interface TextLoopProps {
   path?: string;
   speed?: number;
   direction?: TextLoopDirection;
+  orientation?: TextLoopOrientation;
   separator?: string;
   curviness?: number;
   fontSize?: number;
@@ -45,7 +47,8 @@ const buildPath = (
   curviness: number,
   ribbonWidth: number,
   width: number,
-  height: number
+  height: number,
+  orientation: TextLoopOrientation
 ): string => {
   const c = Math.max(0, curviness);
   const cx = width / 2;
@@ -74,10 +77,24 @@ const buildPath = (
       return `M 120 ${cy + rise / 2} Q ${cx} ${cy - rise * 1.5} ${width - 120} ${cy + rise / 2}`;
     }
     case 'line':
+      if (orientation === 'vertical') {
+        return `M ${cx} ${-WAVE_PERIOD} L ${cx} ${height + WAVE_PERIOD}`;
+      }
       return `M ${-WAVE_PERIOD} ${cy} L ${width + WAVE_PERIOD} ${cy}`;
     case 'wave':
     default: {
-      const a = Math.min(c * 2.2, room * 2);
+      const a = Math.max(0, c * 2.2);
+      if (orientation === 'vertical') {
+        const start = -WAVE_PERIOD;
+        const end = height + WAVE_PERIOD;
+        let y = start + WAVE_PERIOD;
+        let d = `M ${cx} ${start} Q ${cx - a} ${start + WAVE_PERIOD / 2} ${cx} ${y}`;
+        while (y < end) {
+          y += WAVE_PERIOD;
+          d += ` T ${cx} ${y}`;
+        }
+        return d;
+      }
       const start = -WAVE_PERIOD;
       const end = width + WAVE_PERIOD;
       let x = start + WAVE_PERIOD;
@@ -97,6 +114,7 @@ const TextLoop = ({
   path,
   speed = 90,
   direction = 'forward',
+  orientation = 'horizontal',
   separator = '✦',
   curviness = 90,
   fontSize = 46,
@@ -123,27 +141,38 @@ const TextLoop = ({
   const rawId = useId();
   const pathId = `text-loop-${rawId.replace(/:/g, '')}`;
 
+  const drawW = useMemo(() => {
+    if (orientation !== 'vertical' || shape !== 'wave') return viewport.w;
+    const amp = Math.max(0, curviness) * 2.2;
+    const stroke = ribbon ? ribbonWidth : 0;
+    return Math.max(viewport.w, Math.ceil(amp * 2 + stroke + EDGE_PAD * 2));
+  }, [orientation, shape, curviness, ribbon, ribbonWidth, viewport.w]);
+
   const d = useMemo(
-    () => path || buildPath(shape, curviness, ribbonWidth, viewport.w, viewport.h),
-    [path, shape, curviness, ribbonWidth, viewport.w, viewport.h]
+    () => path || buildPath(shape, curviness, ribbonWidth, drawW, viewport.h, orientation),
+    [path, shape, curviness, ribbonWidth, drawW, viewport.h, orientation]
   );
 
   useLayoutEffect(() => {
     const el = rootRef.current;
     if (!el) return undefined;
+    const vertical = orientation === 'vertical';
 
-    const apply = (width: number) => {
+    const apply = (width: number, height: number) => {
       const w = Math.max(1, Math.round(width));
-      setViewport(prev => (prev.w === w ? prev : { w, h: VIEW_H }));
+      const h = Math.max(1, Math.round(vertical ? height : VIEW_H));
+      setViewport(prev => (prev.w === w && prev.h === h ? prev : { w, h }));
     };
 
-    apply(el.getBoundingClientRect().width);
+    const rect = el.getBoundingClientRect();
+    apply(rect.width, rect.height);
     const ro = new ResizeObserver(entries => {
-      apply(entries[0]?.contentRect.width ?? 0);
+      const box = entries[0]?.contentRect;
+      apply(box?.width ?? 0, box?.height ?? 0);
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [orientation]);
 
   const unit = useMemo(() => {
     const base = uppercase ? String(text).toUpperCase() : String(text);
@@ -246,9 +275,13 @@ const TextLoop = ({
     <div ref={rootRef} className={`text-loop ${className}`.trim()} style={style}>
       <svg
         className="text-loop-svg"
-        viewBox={`0 0 ${viewport.w} ${viewport.h}`}
-        preserveAspectRatio="xMidYMid meet"
-        style={{ width: "100%", height: viewport.h }}
+        viewBox={`0 0 ${drawW} ${viewport.h}`}
+        preserveAspectRatio={orientation === 'vertical' ? 'xMidYMin meet' : 'xMidYMid meet'}
+        style={{
+          width: orientation === 'vertical' ? drawW : '100%',
+          height: orientation === 'vertical' ? '100%' : viewport.h,
+          marginLeft: orientation === 'vertical' ? (viewport.w - drawW) / 2 : undefined
+        }}
         role="img"
         aria-label={text}
       >
