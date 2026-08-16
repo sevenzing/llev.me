@@ -70,7 +70,7 @@ export function FallingStack() {
           <FallingText
             key={resetKey}
             trigger="click"
-            gravity={0.125}
+            gravity={0.25}
             backgroundColor="transparent"
             onStart={onStart}
             className="h-full !p-0 [&_.falling-text-target]:!flex [&_.falling-text-target]:h-full [&_.falling-text-target]:w-full [&_.falling-text-target]:flex-wrap [&_.falling-text-target]:content-start [&_.falling-text-target]:items-start [&_.falling-text-target]:justify-center [&_.falling-text-target]:gap-3 [&_.falling-text-target]:p-8 [&_.falling-text-target]:pt-16"
