@@ -10,7 +10,7 @@ function formatBlockNumber(number: number): string {
   return number.toString().padStart(2, "0");
 }
 
-interface Props {
+export interface BlockCardProps {
   block: Block;
   valid: boolean;
   prevIsValid: boolean;
@@ -46,7 +46,7 @@ function Row({
 const mineButtonClass =
   "min-w-[128px] appearance-none cursor-pointer rounded-full border border-cream/15 bg-cream/[0.03] px-7 py-2.5 text-xs lowercase tracking-[0.18em] text-cream/70 transition-[color,border-color,background-color,transform] duration-200 hover:enabled:border-grape hover:enabled:bg-grape/15 hover:enabled:text-cream active:enabled:scale-[0.97] disabled:cursor-default disabled:animate-mine-pulse disabled:border-grape/45 disabled:text-grape";
 
-export function BlockCard({ block, valid, prevIsValid, onMine, onReset }: Props) {
+export function BlockCard({ block, valid, prevIsValid, onMine, onReset }: BlockCardProps) {
   return (
     <BorderGlow
       className="w-full pointer-events-auto [&_.border-glow-inner]:overflow-visible"

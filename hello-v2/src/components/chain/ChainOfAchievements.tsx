@@ -1,7 +1,7 @@
 "use client";
 
 import { useChain } from "@/lib/chain/useChain";
-import { BlockCard } from "./BlockCard";
+import { MinedBlockCard } from "./MinedBlockCard";
 import TextType from "@/components/react-bits/TextType";
 import { CHAIN_HERO_TEXTS } from "@/lib/chain/data";
 
@@ -28,7 +28,7 @@ export function ChainOfAchievements() {
       <div className="relative z-[1] flex w-full flex-col items-center">
         {blocks.map((block, i) => (
           <div key={block.number} className="flex w-full flex-col items-center">
-            <BlockCard
+            <MinedBlockCard
               block={block}
               valid={isValid(i)}
               prevIsValid={i > 0 ? isValid(i - 1) : true}
