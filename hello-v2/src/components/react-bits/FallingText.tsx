@@ -130,11 +130,18 @@ const FallingText: React.FC<FallingTextProps> = ({
         y: 0
       });
       Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.05);
-      return { elem, body };
+      return { elem, body, width: rect.width, height: rect.height };
     });
 
-    wordBodies.forEach(({ elem, body }) => {
+    wordBodies.forEach(({ elem, body, width: elemWidth, height: elemHeight }) => {
       elem.style.position = 'absolute';
+      // Lock the box to the exact size the physics body was created with.
+      // Without this, Safari's auto/shrink-to-fit sizing for an absolutely
+      // positioned element (positioned via `left` alone, no explicit width)
+      // is unreliable and can shrink the element, especially near the
+      // container's right edge — Chrome doesn't have this issue.
+      elem.style.width = `${elemWidth}px`;
+      elem.style.height = `${elemHeight}px`;
       elem.style.left = `${body.position.x - body.bounds.max.x + body.bounds.min.x / 2}px`;
       elem.style.top = `${body.position.y - body.bounds.max.y + body.bounds.min.y / 2}px`;
       elem.style.transform = 'none';

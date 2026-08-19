@@ -198,7 +198,12 @@ const TextLoop = ({
       let unitWidth = 0;
       try {
         length = pathEl.getTotalLength();
-        unitWidth = measureEl.getComputedTextLength();
+        // getComputedTextLength() excludes letter-spacing on WebKit (Safari/iOS),
+        // while getBBox().width reflects the true rendered width in every engine.
+        // Take the max so we never underestimate and cause loop copies to overlap.
+        const computedLength = measureEl.getComputedTextLength();
+        const bboxWidth = measureEl.getBBox().width;
+        unitWidth = Math.max(computedLength, bboxWidth);
       } catch {
         return;
       }
@@ -207,6 +212,7 @@ const TextLoop = ({
       // Fill the visible path at natural glyph width. A second copy (tail)
       // is offset by this cycle so the loop never runs out of text.
       const reps = Math.max(1, Math.ceil(length / unitWidth));
+
       setMetrics(prev =>
         prev.length === length && prev.unitWidth === unitWidth && prev.reps === reps
           ? prev
@@ -300,15 +306,24 @@ const TextLoop = ({
           {unit}
         </text>
 
-        <text className="text-loop-text" style={textStyle} fill={color} dominantBaseline="central" aria-hidden="true">
+        {/*
+          Safari ignores `dominant-baseline` on <textPath> (long-standing WebKit
+          bug), always rendering at the alphabetic baseline. It also ignores a
+          `dy` shift set on the <text> ancestor of a <textPath> (a second,
+          separate WebKit bug) — Chrome applies it, Safari doesn't. Putting the
+          `dy` on a <tspan> nested inside the <textPath> is honored consistently
+          everywhere, so we use that to center the (all-caps, no descenders)
+          text on the ribbon in every browser.
+        */}
+        <text className="text-loop-text" style={textStyle} fill={color} aria-hidden="true">
           <textPath ref={headRef} href={`#${pathId}`} startOffset={0}>
-            {loopText}
+            <tspan dy="0.35em">{loopText}</tspan>
           </textPath>
         </text>
 
-        <text className="text-loop-text" style={textStyle} fill={color} dominantBaseline="central" aria-hidden="true">
+        <text className="text-loop-text" style={textStyle} fill={color} aria-hidden="true">
           <textPath ref={tailRef} href={`#${pathId}`} startOffset={0}>
-            {loopText}
+            <tspan dy="0.35em">{loopText}</tspan>
           </textPath>
         </text>
       </svg>

@@ -8,7 +8,7 @@ import { STACK_ITEMS, stackIconUrl, type StackItem } from "@/lib/stack/items";
 function Badge({ item }: { item: StackItem }) {
   return (
     <span
-      className="word relative z-[2] !inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-medium tracking-wide"
+      className="word relative z-[2] !inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-white/10 px-4 py-2 text-sm font-medium tracking-wide"
       style={{ background: item.bg, color: item.fg }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -70,7 +70,7 @@ export function FallingStack() {
           <FallingText
             key={resetKey}
             trigger="click"
-            gravity={0.25}
+            gravity={0.5}
             backgroundColor="transparent"
             onStart={onStart}
             className="h-full !p-0 [&_.falling-text-target]:!flex [&_.falling-text-target]:h-full [&_.falling-text-target]:w-full [&_.falling-text-target]:flex-wrap [&_.falling-text-target]:content-start [&_.falling-text-target]:items-start [&_.falling-text-target]:justify-center [&_.falling-text-target]:gap-3 [&_.falling-text-target]:p-8 [&_.falling-text-target]:pt-16"

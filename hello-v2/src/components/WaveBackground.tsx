@@ -19,7 +19,7 @@ export function WaveBackground({ sparksEnabled = false, mouseInteraction = false
     <div className="fixed inset-0 z-0">
       {sparksEnabled ? (
         <ClickSpark
-          className="h-full [&_canvas]:z-[1]"
+          className="click-spark h-full [&_canvas]:z-[1]"
           sparkColor="#f4f0ea"
           sparkSize={12}
           sparkRadius={32}
