@@ -96,6 +96,18 @@ export function ImpactDrop({
     if (!content) return;
     const shadowEl = shadowRef.current;
 
+    const prefersReducedMotion =
+      typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      // Respect the user's preference: skip the launch/fall/confetti motion
+      // entirely and settle straight into the resting visual state, while
+      // still firing onImpact so non-visual side effects (sound, etc.) work.
+      gsap.set(content, { y: 0, scale: 1, rotateX: 0 });
+      if (shadowEl) gsap.set(shadowEl, { scaleX: 1, opacity: 0.35 });
+      onImpact?.();
+      return;
+    }
+
     const burstConfetti = () => {
       if (!confetti) return;
       const dots = dotsRef.current?.querySelectorAll<HTMLSpanElement>(".impact-drop-dot");
