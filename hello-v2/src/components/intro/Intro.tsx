@@ -20,7 +20,7 @@ export function Intro() {
   const hello = "Hello! I'm Lev";
   const separator = "✦";
   const separatorWithSpace = ` ${separator} `;
-  const who = ["web3 dev"];
+  const who = ["web3 dev", "wave dev", "wow dev", "vibe dev"];;
   const fullText = who.map((w) => hello + separatorWithSpace + w).join(separatorWithSpace);
 
   return (
