@@ -46,6 +46,14 @@ const config: Config = {
           "60%": { transform: "scale(1.12) rotate(2deg)", opacity: "1" },
           "100%": { transform: "scale(1) rotate(0deg)", opacity: "1" },
         },
+        "modal-fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "modal-pop-in": {
+          "0%": { opacity: "0", transform: "scale(0.92) translateY(6px)" },
+          "100%": { opacity: "1", transform: "scale(1) translateY(0)" },
+        },
       },
       animation: {
         "mine-pulse": "mine-pulse 1.2s ease-in-out infinite",
@@ -54,6 +62,8 @@ const config: Config = {
         "pop-bounce": "pop-bounce 600ms cubic-bezier(0.34,1.56,0.64,1) forwards",
         "spark-fly": "spark-fly 700ms cubic-bezier(0.16,1,0.3,1) forwards",
         "check-pop": "check-pop 500ms cubic-bezier(0.34,1.56,0.64,1) forwards",
+        "modal-fade-in": "modal-fade-in 200ms ease-out forwards",
+        "modal-pop-in": "modal-pop-in 320ms cubic-bezier(0.16,1,0.3,1) forwards",
       },
     },
   },
