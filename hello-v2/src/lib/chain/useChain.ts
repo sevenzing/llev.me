@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ACHIEVEMENTS, initialNonceFor } from "./data";
-import { DIFFICULTY, ZERO_HASH, blockPayloadBase, hashBlock, meetsDifficulty, sha256Hex } from "./sha256";
+import { DIFFICULTY, ZERO_HASH, blockPayloadBase, hashBlock, meetsDifficulty, mineNonce } from "./sha256";
 import { Block } from "./types";
 
 const BATCH_SIZE = 1200;
@@ -27,6 +27,31 @@ export function prevHashOf(blocks: Block[], index: number): string {
   return index === 0 ? ZERO_HASH : blocks[index - 1].hash;
 }
 
+/**
+ * Headless equivalent of mining every block in order, front to back, using
+ * the same proof-of-work as the UI (`mineNonce`). No batching/cancellation
+ * needed since there's no UI to keep responsive — used by the
+ * `encode-reward` CLI to derive the reward key without the user having to
+ * mine the chain by hand or recompute it whenever achievement content changes.
+ */
+export async function mineFullChain(): Promise<Block[]> {
+  const blocks: Block[] = [];
+  for (const seed of ACHIEVEMENTS) {
+    const prevHash = blocks.length === 0 ? ZERO_HASH : blocks[blocks.length - 1].hash;
+    const payloadBase = blockPayloadBase(seed, prevHash);
+    const found = await mineNonce(payloadBase, DIFFICULTY);
+    if (!found) throw new Error(`mineFullChain: failed to mine block ${seed.number}`);
+    blocks.push({ ...seed, hash: found.hash, nonce: found.nonce, prevHash, mined: true, mining: false });
+  }
+  return blocks;
+}
+
+/** The reward key: sum of every block's nonce once the whole chain is mined. */
+export async function mineFullChainNonceSum(): Promise<number> {
+  const chain = await mineFullChain();
+  return chain.reduce((sum, b) => sum + b.nonce, 0);
+}
+
 async function recomputeFrom(blocks: Block[], fromIndex: number): Promise<Block[]> {
   const next = blocks.map((b) => ({ ...b }));
   for (let i = fromIndex; i < next.length; i++) {
@@ -48,6 +73,11 @@ export function isBlockValid(blocks: Block[], i: number): boolean {
   return b.prevHash === prevHashOf(blocks, i) && meetsDifficulty(b.hash);
 }
 
+/** True once every block in the chain has been mined. */
+export function checkAllBlocksMined(chain: Block[]): boolean {
+  return chain.length > 0 && chain.every((b) => b.mined);
+}
+
 function abortMiningAfter(mining: Set<number>, index: number) {
   for (const i of [...mining]) {
     if (i > index) mining.delete(i);
@@ -65,10 +95,34 @@ export function useChain() {
   const chainRef = useRef<Block[]>([]);
   const miningRef = useRef<Set<number>>(new Set());
   const writeLock = useRef(Promise.resolve());
+  const allMinedRef = useRef(false);
+
+  const [rewardOpen, setRewardOpen] = useState(false);
+  const [nonceSum, setNonceSum] = useState(0);
+
+  const showAllBlocksMinedRewards = useCallback((chain: Block[]) => {
+    const sum = chain.reduce((total, b) => total + b.nonce, 0);
+    // Needed to run `npm run encode-reward` and produce real reward content.
+    console.log("[reward] all blocks mined, key (sum of nonces):", sum);
+    setNonceSum(sum);
+    setRewardOpen(true);
+  }, []);
 
   const publish = (next: Block[]) => {
     chainRef.current = next;
     setBlocks(next);
+  };
+
+  /** Call after a chain state settles (post-recompute) to fire the easter egg. */
+  const syncRewardState = (chain: Block[]) => {
+    if (checkAllBlocksMined(chain)) {
+      if (!allMinedRef.current) {
+        allMinedRef.current = true;
+        showAllBlocksMinedRewards(chain);
+      }
+    } else {
+      allMinedRef.current = false;
+    }
   };
 
   useEffect(() => {
@@ -104,55 +158,51 @@ export function useChain() {
     let prevHash = prevHashOf(chainRef.current, index);
     let payloadBase = blockPayloadBase(block, prevHash);
 
-    let nonce = 0;
-    let lastHex = block.hash;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      if (!miningRef.current.has(index)) {
+      const found = await mineNonce(payloadBase, DIFFICULTY, {
+        batchSize: BATCH_SIZE,
+        isCancelled: () => !miningRef.current.has(index),
+        onBatch: async (nonce, lastHash) => {
+          setBlocks((cur) => cur.map((b, i) => (i === index ? { ...b, hash: lastHash, nonce, prevHash } : b)));
+          await new Promise((r) => requestAnimationFrame(r));
+        },
+      });
+
+      if (!found) {
         setBlocks((cur) => cur.map((b, i) => (i === index ? { ...b, mining: false } : b)));
         chainRef.current = chainRef.current.map((b, i) => (i === index ? { ...b, mining: false } : b));
         return;
       }
-      let found: { hex: string; nonce: number } | null = null;
-      for (let n = 0; n < BATCH_SIZE; n++) {
-        const hex = await sha256Hex(payloadBase + nonce);
-        lastHex = hex;
-        if (meetsDifficulty(hex, DIFFICULTY)) {
-          found = { hex, nonce };
-          break;
+
+      let stale = false;
+      await withLock(writeLock, async () => {
+        if (!miningRef.current.has(index)) return;
+        const latestPrev = prevHashOf(chainRef.current, index);
+        if (latestPrev !== prevHash) {
+          stale = true;
+          prevHash = latestPrev;
+          payloadBase = blockPayloadBase(block, prevHash);
+          return;
         }
-        nonce++;
-      }
-      if (found) {
-        let stale = false;
-        await withLock(writeLock, async () => {
-          if (!miningRef.current.has(index)) return;
-          const latestPrev = prevHashOf(chainRef.current, index);
-          if (latestPrev !== prevHash) {
-            stale = true;
-            prevHash = latestPrev;
-            payloadBase = blockPayloadBase(block, prevHash);
-            nonce = 0;
-            return;
+        abortMiningAfter(miningRef.current, index);
+        miningRef.current.delete(index);
+        const patched = chainRef.current.map((b, i) => {
+          if (i === index) {
+            return { ...b, mining: false, mined: true, hash: found.hash, nonce: found.nonce, prevHash };
           }
-          abortMiningAfter(miningRef.current, index);
-          miningRef.current.delete(index);
-          const patched = chainRef.current.map((b, i) => {
-            if (i === index) {
-              return { ...b, mining: false, mined: true, hash: found!.hex, nonce: found!.nonce, prevHash };
-            }
-            if (i > index && b.mining) return { ...b, mining: false };
-            return b;
-          });
-          publish(patched);
-          publish(await recomputeFrom(patched, index + 1));
+          if (i > index && b.mining) return { ...b, mining: false };
+          return b;
         });
-        if (stale) continue;
-        return;
-      }
-      setBlocks((cur) => cur.map((b, i) => (i === index ? { ...b, hash: lastHex, nonce, prevHash } : b)));
-      await new Promise((r) => requestAnimationFrame(r));
+        publish(patched);
+        const final = await recomputeFrom(patched, index + 1);
+        publish(final);
+        syncRewardState(final);
+      });
+      if (stale) continue;
+      return;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const resetBlock = useCallback(async (index: number) => {
@@ -171,8 +221,11 @@ export function useChain() {
         return b;
       });
       publish(patched);
-      publish(await recomputeFrom(patched, index + 1));
+      const final = await recomputeFrom(patched, index + 1);
+      publish(final);
+      syncRewardState(final);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
@@ -180,5 +233,8 @@ export function useChain() {
     mineBlock,
     resetBlock,
     isValid: (i: number) => isBlockValid(blocks, i),
+    rewardOpen,
+    nonceSum,
+    closeReward: () => setRewardOpen(false),
   };
 }

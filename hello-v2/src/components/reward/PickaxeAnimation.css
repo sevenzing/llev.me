@@ -1,0 +1,211 @@
+.pickaxe-anim {
+  overflow: visible;
+  --pickaxe-duration: 2s;
+}
+
+/* =========================================================
+   2-hit choreography per loop (2.0s default):
+   Hit 1: windup 0-30%, snap strike 30-40%, rebound 40-46%
+   Hit 2: windup 56-68%, snap strike 68-76%, rebound 76-83%
+   Recovery: 83-100% back to rest
+   ========================================================= */
+
+.pickaxe-anim-arm {
+  animation: pickaxeAnimStrike var(--pickaxe-duration) infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: 20px 48px;
+}
+
+@keyframes pickaxeAnimStrike {
+  0% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-25deg);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.2);
+  }
+  40% {
+    transform: rotate(40deg);
+    animation-timing-function: cubic-bezier(0.1, 0.9, 0.2, 1);
+  }
+  46% {
+    transform: rotate(32deg);
+    animation-timing-function: ease-in-out;
+  }
+  56% {
+    transform: rotate(-10deg);
+    animation-timing-function: ease-in;
+  }
+  68% {
+    transform: rotate(-28deg);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.2);
+  }
+  76% {
+    transform: rotate(41deg);
+    animation-timing-function: cubic-bezier(0.1, 0.9, 0.2, 1);
+  }
+  83% {
+    transform: rotate(33deg);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.pickaxe-anim-rock {
+  animation: pickaxeAnimRockImpact var(--pickaxe-duration) infinite ease-out;
+  transform-origin: 48px 52px;
+}
+
+@keyframes pickaxeAnimRockImpact {
+  0%, 39% {
+    transform: scale(1, 1);
+    stroke: #8c70fa;
+  }
+  40% {
+    transform: scale(1.15, 0.85);
+    stroke: #ffffff;
+  }
+  44% {
+    transform: scale(0.96, 1.04);
+    stroke: #c084fc;
+  }
+  50%, 75% {
+    transform: scale(1, 1);
+    stroke: #8c70fa;
+  }
+  76% {
+    transform: scale(1.18, 0.82);
+    stroke: #ffffff;
+  }
+  80% {
+    transform: scale(0.95, 1.05);
+    stroke: #c084fc;
+  }
+  88%, 100% {
+    transform: scale(1, 1);
+    stroke: #8c70fa;
+  }
+}
+
+.pickaxe-anim-crack {
+  animation: pickaxeAnimCrackFlash var(--pickaxe-duration) infinite ease-out;
+}
+
+@keyframes pickaxeAnimCrackFlash {
+  0%, 39% {
+    opacity: 0;
+    stroke-dashoffset: 14;
+  }
+  40% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+    stroke: #ffffff;
+  }
+  47% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+    stroke: #38bdf8;
+  }
+  75% {
+    opacity: 0;
+    stroke-dashoffset: 14;
+  }
+  76% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+    stroke: #ffffff;
+  }
+  83% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+    stroke: #38bdf8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Five micro-particles bursting from the impact point on each hit. */
+.pickaxe-anim-spark-1 { animation: pickaxeAnimSpark1 var(--pickaxe-duration) infinite linear; }
+.pickaxe-anim-spark-2 { animation: pickaxeAnimSpark2 var(--pickaxe-duration) infinite linear; }
+.pickaxe-anim-spark-3 { animation: pickaxeAnimSpark3 var(--pickaxe-duration) infinite linear; }
+.pickaxe-anim-spark-4 { animation: pickaxeAnimSpark4 var(--pickaxe-duration) infinite linear; }
+.pickaxe-anim-spark-5 { animation: pickaxeAnimSpark5 var(--pickaxe-duration) infinite linear; }
+
+@keyframes pickaxeAnimSpark1 {
+  0%, 39% { transform: translate(0, 0) scale(0); opacity: 0; }
+  40% { transform: translate(0, 0) scale(1); opacity: 1; }
+  48% { transform: translate(-14px, -18px) scale(0); opacity: 0; }
+  75% { transform: translate(0, 0) scale(0); opacity: 0; }
+  76% { transform: translate(0, 0) scale(1.1); opacity: 1; }
+  84% { transform: translate(-15px, -19px) scale(0); opacity: 0; }
+  100% { transform: translate(0, 0) scale(0); opacity: 0; }
+}
+
+@keyframes pickaxeAnimSpark2 {
+  0%, 39% { transform: translate(0, 0) scale(0); opacity: 0; }
+  40% { transform: translate(0, 0) scale(1); opacity: 1; }
+  49% { transform: translate(-8px, -23px) scale(0); opacity: 0; }
+  75% { transform: translate(0, 0) scale(0); opacity: 0; }
+  76% { transform: translate(0, 0) scale(1.1); opacity: 1; }
+  85% { transform: translate(-7px, -24px) scale(0); opacity: 0; }
+  100% { transform: translate(0, 0) scale(0); opacity: 0; }
+}
+
+@keyframes pickaxeAnimSpark3 {
+  0%, 39% { transform: translate(0, 0) scale(0); opacity: 0; }
+  40% { transform: translate(0, 0) scale(1); opacity: 1; }
+  47% { transform: translate(6px, -20px) scale(0); opacity: 0; }
+  75% { transform: translate(0, 0) scale(0); opacity: 0; }
+  76% { transform: translate(0, 0) scale(1); opacity: 1; }
+  83% { transform: translate(8px, -21px) scale(0); opacity: 0; }
+  100% { transform: translate(0, 0) scale(0); opacity: 0; }
+}
+
+@keyframes pickaxeAnimSpark4 {
+  0%, 39% { transform: translate(0, 0) scale(0); opacity: 0; }
+  40% { transform: translate(0, 0) scale(1); opacity: 1; }
+  50% { transform: translate(-18px, -9px) scale(0); opacity: 0; }
+  75% { transform: translate(0, 0) scale(0); opacity: 0; }
+  76% { transform: translate(0, 0) scale(1); opacity: 1; }
+  86% { transform: translate(-20px, -7px) scale(0); opacity: 0; }
+  100% { transform: translate(0, 0) scale(0); opacity: 0; }
+}
+
+@keyframes pickaxeAnimSpark5 {
+  0%, 39% { transform: translate(0, 0) scale(0); opacity: 0; }
+  40% { transform: translate(0, 0) scale(1); opacity: 1; }
+  48% { transform: translate(14px, -11px) scale(0); opacity: 0; }
+  75% { transform: translate(0, 0) scale(0); opacity: 0; }
+  76% { transform: translate(0, 0) scale(1); opacity: 1; }
+  84% { transform: translate(16px, -9px) scale(0); opacity: 0; }
+  100% { transform: translate(0, 0) scale(0); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pickaxe-anim-arm {
+    animation: none !important;
+    transform: rotate(40deg) !important;
+    transform-origin: 20px 48px !important;
+  }
+  .pickaxe-anim-rock {
+    animation: none !important;
+    transform: scale(1.1, 0.9) !important;
+    stroke: #c084fc !important;
+  }
+  .pickaxe-anim-crack {
+    animation: none !important;
+    opacity: 0.8 !important;
+    stroke-dashoffset: 0 !important;
+  }
+  .pickaxe-anim-spark-1,
+  .pickaxe-anim-spark-2,
+  .pickaxe-anim-spark-3,
+  .pickaxe-anim-spark-4,
+  .pickaxe-anim-spark-5 {
+    animation: none !important;
+    opacity: 0.4 !important;
+    transform: scale(0.6) !important;
+  }
+}

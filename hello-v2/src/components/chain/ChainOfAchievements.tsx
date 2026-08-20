@@ -4,9 +4,10 @@ import { useChain } from "@/lib/chain/useChain";
 import { MinedBlockCard } from "./MinedBlockCard";
 import TextType from "@/components/react-bits/TextType";
 import { CHAIN_HERO_TEXTS } from "@/lib/chain/data";
+import { AllBlocksMinedModal } from "@/components/reward/AllBlocksMinedModal";
 
 export function ChainOfAchievements() {
-  const { blocks, mineBlock, resetBlock, isValid } = useChain();
+  const { blocks, mineBlock, resetBlock, isValid, rewardOpen, nonceSum, closeReward } = useChain();
 
   return (
     <section className="pointer-events-none relative z-[1] flex w-[min(420px,calc(100%-40px))] flex-[0_0_min(420px,calc(100%-40px))] flex-col items-center pb-20 pt-[108px]">
@@ -51,6 +52,8 @@ export function ChainOfAchievements() {
           </div>
         ))}
       </div>
+
+      <AllBlocksMinedModal open={rewardOpen} nonceSum={nonceSum} onClose={closeReward} />
     </section>
   );
 }
