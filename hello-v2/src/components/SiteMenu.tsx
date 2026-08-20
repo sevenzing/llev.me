@@ -36,6 +36,7 @@ export function SiteMenu() {
       isFixed
       position="right"
       items={items}
+      activeLink={pathname}
       socialItems={socialItems}
       displaySocials
       displayItemNumbering

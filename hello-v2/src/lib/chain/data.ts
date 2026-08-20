@@ -3,7 +3,7 @@ import { AchievementSeed } from "./types";
 export const CHAIN_HERO_TEXTS: string[] = [
   "This is a blockchain",
   "Like a chain of events",
-  "Like my history for nerds",
+  "Like a history but for nerds",
   "Yep I like blockchains",
 ];
 

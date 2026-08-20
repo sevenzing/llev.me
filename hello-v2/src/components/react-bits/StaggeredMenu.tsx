@@ -19,6 +19,7 @@ export interface StaggeredMenuProps {
   position?: 'left' | 'right';
   colors?: string[];
   items?: StaggeredMenuItem[];
+  activeLink?: string;
   socialItems?: StaggeredMenuSocialItem[];
   displaySocials?: boolean;
   displayItemNumbering?: boolean;
@@ -38,6 +39,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   position = 'right',
   colors = ['#B497CF', '#5227FF'],
   items = [],
+  activeLink,
   socialItems = [],
   displaySocials = true,
   displayItemNumbering = true,
@@ -455,13 +457,23 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         <div className="sm-panel-inner">
           <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering || undefined}>
             {items && items.length ? (
-              items.map((it, idx) => (
-                <li className="sm-panel-itemWrap" key={it.label + idx}>
-                  <a className="sm-panel-item" href={it.link} aria-label={it.ariaLabel} data-index={idx + 1}>
-                    <span className="sm-panel-itemLabel">{it.label}</span>
-                  </a>
-                </li>
-              ))
+              items.map((it, idx) => {
+                const isActive = activeLink === it.link;
+                return (
+                  <li className="sm-panel-itemWrap" key={it.label + idx}>
+                    <a
+                      className="sm-panel-item"
+                      href={it.link}
+                      aria-label={it.ariaLabel}
+                      aria-current={isActive ? 'page' : undefined}
+                      data-active={isActive || undefined}
+                      data-index={idx + 1}
+                    >
+                      <span className="sm-panel-itemLabel">{it.label}</span>
+                    </a>
+                  </li>
+                );
+              })
             ) : (
               <li className="sm-panel-itemWrap" aria-hidden="true">
                 <span className="sm-panel-item">

@@ -20,12 +20,12 @@ export function Intro() {
   const hello = "Hello! I'm Lev";
   const separator = "✦";
   const separatorWithSpace = ` ${separator} `;
-  const who = ["web3 dev", "wave dev", "wow dev", "vibe dev"];
+  const who = ["web3 dev"];
   const fullText = who.map((w) => hello + separatorWithSpace + w).join(separatorWithSpace);
 
   return (
     <main className="relative z-[1] h-dvh overflow-hidden text-cream pointer-events-none">
-      <div className="relative z-[2] flex h-dvh items-center pointer-events-none [&_.text-loop]:pointer-events-auto [&_.text-loop]:w-full">
+      <div className="relative z-[2] flex h-dvh items-center pointer-events-none [&_.text-loop]:w-full">
         <TextLoop
           text={fullText}
           shape="wave"

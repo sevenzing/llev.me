@@ -185,6 +185,7 @@
 .sm-socials {
   margin-top: auto;
   padding-top: 2rem;
+  margin-bottom: 4rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -310,6 +311,15 @@
 
 .sm-panel-item:hover {
   color: var(--sm-accent, #5227ff);
+}
+
+.sm-panel-item[data-active] {
+  color: var(--sm-accent, #5227ff);
+  opacity: 0.65;
+}
+
+.sm-panel-item[data-active]:hover {
+  opacity: 1;
 }
 
 .sm-panel-list[data-numbering] {
